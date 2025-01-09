@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
 
@@ -26,6 +27,7 @@ class RegistrationFragment : Fragment() {
     private lateinit var username: EditText
     private lateinit var password: EditText
     private lateinit var confirmPassword: EditText
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,7 +36,7 @@ class RegistrationFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.fragment_registrationscreen, container, false)
 
         auth = Firebase.auth
-
+        db = FirebaseFirestore.getInstance()
         email = rootView.findViewById(R.id.email_edit_text)
         username = rootView.findViewById(R.id.username_edit_text)
         password = rootView.findViewById(R.id.password_edit_text)
@@ -84,6 +86,7 @@ class RegistrationFragment : Fragment() {
                         if (updateTask.isSuccessful) {
                             displayMessage(view, getString(R.string.registration_successful))
                             Log.i("Registration", "User registered with username: $usernameText")
+                            registerDetailsToDatabase(usernameText)
 
 
                             val intent = Intent(requireActivity(), MainActivity::class.java)
@@ -99,6 +102,27 @@ class RegistrationFragment : Fragment() {
                     Log.e("Registration", "Error: ${task.exception?.message}")
                 }
             }
+    }
+
+    private fun registerDetailsToDatabase(usernameText: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val testData = hashMapOf(
+                "name" to usernameText,
+                "registrationTime" to System.currentTimeMillis()
+            )
+            db.collection("users")
+                .document(userId)
+                .set(testData)
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Document added with userId: $userId")
+                }
+                .addOnFailureListener { e ->
+                    Log.w("Firestore", "Error adding document", e)
+                }
+        } else {
+            Log.e("Firestore", "No authenticated user found")
+        }
     }
 
     private fun displayMessage(view: View, msgTxt: String) {
