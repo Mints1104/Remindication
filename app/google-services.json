@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "955997320600",
+    "project_id": "mhealth-20fdd",
+    "storage_bucket": "mhealth-20fdd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955997320600:android:d30d0459f49f5de840e7ed",
+        "android_client_info": {
+          "package_name": "com.mints.mobilehealthapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAToz1DKjynS58uH1pNoI7f2DNJ54tztmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
