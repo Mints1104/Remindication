@@ -23,18 +23,41 @@
             android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/medication_time"
+            android:id="@+id/medication_dosage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textSize="14sp"/>
 
         <TextView
-            android:id="@+id/medication_frequency"
+            android:id="@+id/medication_side_effects"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/medication_precautions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/medication_interactions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/medication_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:visibility="gone" />
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

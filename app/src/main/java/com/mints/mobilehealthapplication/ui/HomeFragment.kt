@@ -1,112 +1,113 @@
 package com.mints.mobilehealthapplication.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
-import com.mints.mobilehealthapplication.data.Medication
-import com.mints.mobilehealthapplication.recyclerviews.MedicationsAdapter
+import com.mints.mobilehealthapplication.data.HomeViewModel
+import com.mints.mobilehealthapplication.data.MedicationInfo
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class HomeFragment : Fragment() {
 
-    private lateinit var db: FirebaseFirestore
-
+    private val viewModel: HomeViewModel by viewModels()
     private lateinit var recyclerView: RecyclerView
     private lateinit var nextMedicationName: TextView
     private lateinit var nextMedicationTime: TextView
-    private lateinit var medicationsAdapter: MedicationsAdapter
-
-    private lateinit var auth: FirebaseAuth
+    private lateinit var loadingIndicator: View
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView = inflater.inflate(R.layout.fragment_home, container, false)
-        auth = Firebase.auth
-        db = FirebaseFirestore.getInstance()
-        val currentUser = auth.currentUser
-        recyclerView = rootView.findViewById(R.id.medications_recycler_view)
-        nextMedicationName = rootView.findViewById(R.id.next_medication_name)
-        nextMedicationTime = rootView.findViewById(R.id.next_medication_time)
+        return inflater.inflate(R.layout.fragment_home, container, false)
+    }
 
-        setupRecyclerView()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Initialize views
+        recyclerView = view.findViewById(R.id.medications_recycler_view)
+        nextMedicationName = view.findViewById(R.id.next_medication_name)
+        nextMedicationTime = view.findViewById(R.id.next_medication_time)
+        loadingIndicator = view.findViewById(R.id.loading_indicator)
+
+        setupFAB()
+        setupViewModel()
+
+    }
+
+    private fun setupViewModel() {
+        viewModel.searchResult.observe(viewLifecycleOwner) { result ->
+            loadingIndicator.visibility = View.GONE
+
+            result.onSuccess { message ->
+                displayMessage(requireView(), message)
+            }.onFailure { exception ->
+                displayMessage(requireView(), "Error: ${exception.message}")
+            }
+        }
+    }
+
+
+
+
+
+    private fun setupFAB() {
         val fab = requireActivity().findViewById<FloatingActionButton>(R.id.add_medication_fab)
         fab.setOnClickListener {
             showAddMedicationDialog()
         }
-
-        // Load initial data
-        loadMedications()
-        updateNextMedicationCard()
-
-
-
-
-
-        return rootView
     }
 
-    private fun setupRecyclerView() {
-        medicationsAdapter = MedicationsAdapter(emptyList()) { medication ->
-            // Handle medication item click
-            showMedicationDetails(medication)
-        }
+    private fun updateNextMedicationCard(medication: MedicationInfo?) {
+        // Your logic for updating the next medication card
+    }
 
-        recyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = medicationsAdapter
-        }
+    private fun showMedicationDetails(medication: MedicationInfo) {
+        // For now, just show details in a Snackbar
     }
-    private fun loadMedications() {
-        // TODO: Load medications from your data source (Room database, etc.)
-        // For now, we'll use dummy data
-        val dummyMedications = listOf(
-            Medication("Aspirin", "08:00 AM", "Daily"),
-            Medication("Vitamin D", "09:00 AM", "Daily"),
-            Medication("Ibuprofen", "02:00 PM", "As needed")
-        )
-        medicationsAdapter.updateMedications(dummyMedications)
-    }
-    private fun updateNextMedicationCard() {
-        // TODO: Calculate and display the next medication due
-        // For now, we'll use dummy data
-        nextMedicationName.text = "Aspirin"
-        nextMedicationTime.text = "Next dose: Today at 08:00 AM"
-    }
+
 
     private fun showAddMedicationDialog() {
-        // TODO: Implement add medication dialog
-        // This would typically launch a dialog or navigate to an add medication screen
+        val editText = EditText(requireContext()).apply {
+            hint = "Enter medication name"
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Search Medication")
+            .setView(editText)
+            .setPositiveButton("Search") { _, _ ->
+                loadingIndicator.visibility = View.VISIBLE
+                viewModel.searchMedication(editText.text.toString())
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
-    private fun showMedicationDetails(medication: Medication) {
-        // TODO: Implement medication details view
-        // This would typically navigate to a detail screen for the selected medication
+    private fun displayMessage(view: View, message: String) {
+        Snackbar.make(view, message, Snackbar.LENGTH_LONG).apply {
+            setAction("Dismiss") { dismiss() }
+            show()
+        }
     }
-
 
     override fun onResume() {
         super.onResume()
-        Log.d("LoginFragment","In Onresume...")
     }
 
-    private fun displayMessage(view: View, msgTxt: String) {
-        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
-    }
+
 }
