@@ -1,0 +1,43 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment"> <!-- Start with LoginFragment -->
+
+    <!-- Login Fragment -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.mints.mobilehealthapplication.ui.LoginFragment"
+        tools:layout="@layout/fragment_loginscreen">
+
+        <!-- Define the action to navigate to HomeFragment -->
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+
+        <!-- Define the action to navigate to UserInfoFragment (Registration) -->
+        <action
+            android:id="@+id/action_loginFragment_to_userInfoFragment"
+            app:destination="@id/userInfoFragment" />
+    </fragment>
+
+    <!-- Home Fragment -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.mints.mobilehealthapplication.ui.HomeFragment"
+        tools:layout="@layout/fragment_home" />
+
+    <!-- Fragment 1: UserInfoFragment (Registration) -->
+    <fragment
+        android:id="@+id/userInfoFragment"
+        android:name="com.mints.mobilehealthapplication.ui.UserInfoFragment"
+        tools:layout="@layout/fragment_registration">
+
+        <!-- Define the action to navigate to Fragment 2 -->
+        <action
+            android:id="@+id/action_userInfoFragment_to_healthInfoFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+
+
+</navigation>

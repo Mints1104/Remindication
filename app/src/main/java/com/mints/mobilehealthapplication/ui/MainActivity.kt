@@ -1,13 +1,15 @@
 package com.mints.mobilehealthapplication.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,30 +19,54 @@ import com.mints.mobilehealthapplication.R
 class MainActivity : AppCompatActivity() {
     private lateinit var mToolbar: MaterialToolbar
     private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var floatingActionButton: FloatingActionButton
+    private lateinit var navController: NavController
     private lateinit var db: FirebaseFirestore
-
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        bottomNavigation = findViewById(R.id.bottom_navigation)
+
+        // Initialize Firebase
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
 
-        val currentUser = auth.currentUser
+        // Bind UI elements
         mToolbar = findViewById(R.id.main_toolbar)
+        bottomNavigation = findViewById(R.id.bottom_navigation)
+        floatingActionButton = findViewById(R.id.add_medication_fab)
+
+        // Set up NavController
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+        // Set up Toolbar with NavController
+        setSupportActionBar(mToolbar)
+//        val appBarConfiguration = AppBarConfiguration(
+//            setOf(R.id.homeFragment, R.id.profileFragment) // Add your top-level destinations here
+//        )
+//        setupActionBarWithNavController(navController, appBarConfiguration)
+
+        // Set up BottomNavigationView with NavController
+        bottomNavigation.setupWithNavController(navController)
+
+        // Set up FloatingActionButton (optional)
+        floatingActionButton.setOnClickListener {
+            // Handle FAB click (e.g., navigate to a specific fragment)
+        }
+
+        // Check authentication state
+        val currentUser = auth.currentUser
         if (currentUser != null) {
-            loadFragment(HomeFragment())
+            // User is logged in
             showAppBarAndBottomNav()
-            val userId = auth.currentUser!!.uid
-
-            retrieveUserInfo(userId)
-
+            retrieveUserInfo(currentUser.uid)
+            navController.navigate(R.id.homeFragment) // Navigate to home fragment
         } else {
-            loadFragment(LoginFragment())
+            // User is not logged in
             hideAppBarAndBottomNav()
-
+            navController.navigate(R.id.loginFragment) // Navigate to login fragment
         }
     }
 
@@ -59,21 +85,13 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        if (!isFinishing) {
-            val transaction = supportFragmentManager.beginTransaction()
-
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-            if (currentFragment != fragment) {
-                transaction.replace(R.id.fragment_container, fragment)
-                transaction.addToBackStack(fragment.tag)
-                transaction.commit()
-            }
-        }
+    fun showFAB() {
+        floatingActionButton.isVisible = true
     }
 
-
-
+    fun hideFAB() {
+        floatingActionButton.isVisible = false
+    }
 
     private fun hideAppBarAndBottomNav() {
         mToolbar.isVisible = false
@@ -85,4 +103,7 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation.isVisible = true
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
+    }
 }

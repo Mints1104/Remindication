@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -26,8 +27,9 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView = inflater.inflate(R.layout.fragment_loginscreen, container, false)
 
+        val rootView = inflater.inflate(R.layout.fragment_loginscreen, container, false)
+        (requireActivity() as MainActivity).hideFAB()
         val signUpText: TextView = rootView.findViewById(R.id.new_user_text)
         val forgotPasswordText: TextView = rootView.findViewById(R.id.forgot_user_password_text)
         val loginButton: Button = rootView.findViewById(R.id.login_button)
@@ -40,19 +42,14 @@ class LoginFragment : Fragment() {
 
         forgotPasswordText.setOnClickListener {
 
-            val transaction = requireActivity().supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.fragment_container, ResetPasswordFragment())
-            transaction.addToBackStack(null)
-            transaction.commit()
+
         }
 
         loginButton.setOnClickListener { view -> loginClick(view) }
 
         signUpText.setOnClickListener {
-            val transaction = requireActivity().supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.fragment_container, RegistrationFragment())
-            transaction.addToBackStack(null)
-            transaction.commit()
+            findNavController().navigate(R.id.action_loginFragment_to_userInfoFragment)
+
         }
 
         return rootView

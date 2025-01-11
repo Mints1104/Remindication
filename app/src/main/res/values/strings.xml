@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MobileHealthApplication</string>
+    <string name="app_name">Remindication</string>
     <string name="title_notifications">Notifications</string>
     <string name="log_xml">Log Out</string>
     <string name="profile_xml">Profile</string>
@@ -50,6 +50,20 @@
     <string name="user_email_desc">Email address of current user</string>
     <string name="user_join_date_desc">Join date of current user</string>
     <string name="login_button_description">Log in here</string>
-    <string name="mobile_health">Mobile Health</string>
+    <string name="mobile_health"> Remindication </string>
+    <string name="continueSignUp">Continue</string>
+    <string name="first_name_hint">First Name</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="dob_hint">Date of Birth</string>
+    <string name="phone_number_hint">Phone\n</string>
+    <string name="timezone_hint">Timezone</string>
+    <string name="medication_name_hint">Medication Name</string>
+    <string name="dosage_hint">Dosage (e.g., 1 tablet, 500mg)</string>
+    <string name="frequency_hint">Frequency (e.g., daily, twice a day)</string>
+    <string name="reminder_time_hint">Reminder Time</string>
+    <string name="skip_for_now">Skip for now</string>
+    <string name="step_3_of_3">Step 3 of 3</string>
+    <string name="complete_registration">Complete Registration</string>
+
 
 </resources>
