@@ -64,6 +64,11 @@
     <string name="skip_for_now">Skip for now</string>
     <string name="step_3_of_3">Step 3 of 3</string>
     <string name="complete_registration">Complete Registration</string>
+    <string name="step_1_of_3">Step 1 of 3</string>
+    <string name="step_2_of_3">Step 2 of 3</string>
+    <string name="go_back">Go back</string>
+    <string name="next_medication">Next Medication</string>
+    <string name="add_medication_here">Add medication</string>
 
 
 </resources>

@@ -24,6 +24,9 @@ class UserInfoFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_registration, container, false)
 
+        val mainActivity = requireActivity() as MainActivity
+        mainActivity.hideAppBarAndBottomNav()
+
         // Initialize ViewModel
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 

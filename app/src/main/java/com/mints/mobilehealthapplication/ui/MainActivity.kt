@@ -2,6 +2,9 @@ package com.mints.mobilehealthapplication.ui
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
@@ -51,22 +54,43 @@ class MainActivity : AppCompatActivity() {
         // Set up BottomNavigationView with NavController
         bottomNavigation.setupWithNavController(navController)
 
-        // Set up FloatingActionButton (optional)
         floatingActionButton.setOnClickListener {
-            // Handle FAB click (e.g., navigate to a specific fragment)
         }
 
         // Check authentication state
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            // User is logged in
-            showAppBarAndBottomNav()
-            retrieveUserInfo(currentUser.uid)
-            navController.navigate(R.id.homeFragment) // Navigate to home fragment
+            if (navController.currentDestination?.id != R.id.homeFragment) {
+                navController.navigate(R.id.homeFragment)
+            }
         } else {
-            // User is not logged in
-            hideAppBarAndBottomNav()
-            navController.navigate(R.id.loginFragment) // Navigate to login fragment
+            if (navController.currentDestination?.id != R.id.loginFragment) {
+                navController.navigate(R.id.loginFragment)
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the Toolbar
+        menuInflater.inflate(R.menu.top_app_bar, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.settings_tab -> {
+                Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            R.id.action_logout -> {
+                Toast.makeText(this, "Logout clicked", Toast.LENGTH_SHORT).show()
+                auth.signOut()
+                navController.navigate(R.id.loginFragment)
+
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -93,12 +117,12 @@ class MainActivity : AppCompatActivity() {
         floatingActionButton.isVisible = false
     }
 
-    private fun hideAppBarAndBottomNav() {
+    fun hideAppBarAndBottomNav() {
         mToolbar.isVisible = false
         bottomNavigation.isVisible = false
     }
 
-    private fun showAppBarAndBottomNav() {
+     fun showAppBarAndBottomNav() {
         mToolbar.isVisible = true
         bottomNavigation.isVisible = true
     }

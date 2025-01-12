@@ -1,7 +1,6 @@
 package com.mints.mobilehealthapplication.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,16 +9,12 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.HomeViewModel
 import com.mints.mobilehealthapplication.data.MedicationInfo
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class HomeFragment : Fragment() {
 
@@ -44,7 +39,9 @@ class HomeFragment : Fragment() {
         nextMedicationName = view.findViewById(R.id.next_medication_name)
         nextMedicationTime = view.findViewById(R.id.next_medication_time)
         loadingIndicator = view.findViewById(R.id.loading_indicator)
-
+        val mainActivity = requireActivity() as MainActivity
+        mainActivity.showAppBarAndBottomNav()
+        mainActivity.showFAB()
         setupFAB()
         setupViewModel()
 

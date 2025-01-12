@@ -1,5 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.MobileHealthApplication" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- Base application theme with Dynamic Colors -->
+    <style name="Theme.MobileHealthApplication" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
         <!-- Material 3 colors -->
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
@@ -38,6 +39,9 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
 
+        <!-- Set overflow menu icon color to white -->
+        <item name="android:textColorSecondary">@color/white</item>
+
         <!-- Component styles -->
         <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
         <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigation</item>
@@ -51,7 +55,6 @@
     </style>
 
     <style name="Widget.App.BottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView">
-        <item name="backgroundTint">@color/test</item>
         <item name="itemIconTint">@color/md_theme_onSurfaceVariant</item>
         <item name="itemTextColor">@color/md_theme_onSurfaceVariant</item>
     </style>

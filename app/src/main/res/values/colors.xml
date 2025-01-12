@@ -148,7 +148,7 @@
     <color name="md_theme_surfaceContainer_highContrast">#EDEDF4</color>
     <color name="md_theme_surfaceContainerHigh_highContrast">#E7E8EE</color>
     <color name="md_theme_surfaceContainerHighest_highContrast">#E2E2E9</color>
-    <color name="test">#191c20</color>
+    <color name="current_app_background_dark">#191c20</color>
     <color name="secondary_button">#565F71</color>
     <color name="soft_lavender">#B39CD0</color>
     <color name="darker_green_primary_button">#00796B</color>

@@ -33,7 +33,8 @@ class LoginFragment : Fragment() {
         val signUpText: TextView = rootView.findViewById(R.id.new_user_text)
         val forgotPasswordText: TextView = rootView.findViewById(R.id.forgot_user_password_text)
         val loginButton: Button = rootView.findViewById(R.id.login_button)
-
+        val mainActivity = requireActivity() as MainActivity
+        mainActivity.hideAppBarAndBottomNav()
         Log.d("LoginFragment","This is the login fragment.")
         email = rootView.findViewById(R.id.email_edit_text)
         password = rootView.findViewById(R.id.password_edit_text)

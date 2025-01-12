@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp"
-    android:background="@color/test"
+    android:background="?attr/colorSurface"
     tools:ignore="VisualLintBounds">
 
     <!-- Main content container -->
@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/mobile_health"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="50sp"
             android:textStyle="bold"
             android:layout_gravity="center"
@@ -151,7 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/step_3_of_3"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginBottom="8dp" />
 
         <!-- Progress Bar -->
