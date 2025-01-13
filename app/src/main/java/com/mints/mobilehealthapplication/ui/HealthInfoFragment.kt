@@ -45,13 +45,14 @@ class HealthInfoFragment : Fragment() {
 
         // Hide the app bar and bottom navigation for a cleaner registration process
         val mainActivity = requireActivity() as MainActivity
-        mainActivity.hideAppBarAndBottomNav()
 
         // Bind UI elements for first name, last name, and date of birth
         val firstNameEditText = view.findViewById<EditText>(R.id.first_name_edit_text)
         val lastNameEditText = view.findViewById<EditText>(R.id.last_name_edit_text)
         val dobEditText = view.findViewById<EditText>(R.id.dob_edit_text)
         val continueButton = view.findViewById<Button>(R.id.continue_button)
+
+
 
         // Set the default date to 18 years ago as the earliest acceptable age
         val calendar = Calendar.getInstance()

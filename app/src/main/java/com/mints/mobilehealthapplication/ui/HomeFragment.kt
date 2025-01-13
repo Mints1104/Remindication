@@ -40,7 +40,8 @@ class HomeFragment : Fragment() {
         nextMedicationTime = view.findViewById(R.id.next_medication_time)
         loadingIndicator = view.findViewById(R.id.loading_indicator)
         val mainActivity = requireActivity() as MainActivity
-        mainActivity.showAppBarAndBottomNav()
+        mainActivity.showAppBar()
+        mainActivity.showBottomNav()
         mainActivity.showFAB()
         setupFAB()
         setupViewModel()

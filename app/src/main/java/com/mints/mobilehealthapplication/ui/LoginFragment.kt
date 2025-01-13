@@ -34,7 +34,9 @@ class LoginFragment : Fragment() {
         val forgotPasswordText: TextView = rootView.findViewById(R.id.forgot_user_password_text)
         val loginButton: Button = rootView.findViewById(R.id.login_button)
         val mainActivity = requireActivity() as MainActivity
-        mainActivity.hideAppBarAndBottomNav()
+        mainActivity.hideAppBar()
+        mainActivity.hideBottomNav()
+
         Log.d("LoginFragment","This is the login fragment.")
         email = rootView.findViewById(R.id.email_edit_text)
         password = rootView.findViewById(R.id.password_edit_text)
@@ -43,6 +45,7 @@ class LoginFragment : Fragment() {
 
         forgotPasswordText.setOnClickListener {
 
+            findNavController().navigate(R.id.action_loginFragment_to_resetPasswordFragment)
 
         }
 

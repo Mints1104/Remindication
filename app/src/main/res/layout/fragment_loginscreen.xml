@@ -71,9 +71,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/log_in"
-            android:backgroundTint="@color/darker_green_primary_button"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginTop="32dp"/>
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:padding="16dp" />
 
         <!-- New User? Link -->
         <com.google.android.material.textview.MaterialTextView

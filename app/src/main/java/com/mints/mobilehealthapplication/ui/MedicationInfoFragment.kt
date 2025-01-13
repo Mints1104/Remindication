@@ -44,7 +44,6 @@ class MedicationInfoFragment : Fragment() {
 
         // Hide app bar and bottom navigation for a cleaner registration process
         val mainActivity = requireActivity() as MainActivity
-        mainActivity.hideAppBarAndBottomNav()
 
         // Bind UI elements to local variables for easier access
         val medicationNameEditText = view.findViewById<EditText>(R.id.medication_name_edit_text)

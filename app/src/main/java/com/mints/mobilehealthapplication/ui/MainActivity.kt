@@ -46,15 +46,28 @@ class MainActivity : AppCompatActivity() {
 
         // Set up Toolbar with NavController
         setSupportActionBar(mToolbar)
-//        val appBarConfiguration = AppBarConfiguration(
-//            setOf(R.id.homeFragment, R.id.profileFragment) // Add your top-level destinations here
-//        )
-//        setupActionBarWithNavController(navController, appBarConfiguration)
 
         // Set up BottomNavigationView with NavController
         bottomNavigation.setupWithNavController(navController)
 
+        // Set up FAB click listener
         floatingActionButton.setOnClickListener {
+            // Handle FAB click
+        }
+
+        // Observe destination changes to update the Toolbar dynamically
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.homeFragment -> {
+                    updateToolbar(showBackArrow = false, showMenu = true, title = getString(R.string.app_name))
+                }
+                R.id.userInfoFragment -> {
+                    updateToolbar(showBackArrow = false, showMenu = false, title = getString(R.string.app_name))
+                }
+                R.id.healthInfoFragment, R.id.medicationInfoFragment -> {
+                    updateToolbar(showBackArrow = true, showMenu = false, title = getString(R.string.app_name))
+                }
+            }
         }
 
         // Check authentication state
@@ -70,6 +83,34 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Updates the Toolbar based on the current fragment's requirements.
+     *
+     * @param showBackArrow Whether to show the back arrow.
+     * @param showMenu Whether to show the menu (settings and logout).
+     * @param title The title to display in the Toolbar.
+     */
+    fun updateToolbar(showBackArrow: Boolean, showMenu: Boolean, title: String) {
+        mToolbar.title = title
+
+        // Show or hide the back arrow
+        if (showBackArrow) {
+            mToolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
+            mToolbar.setNavigationOnClickListener {
+                onBackPressed()
+            }
+        } else {
+            mToolbar.navigationIcon = null
+        }
+
+        // Show or hide the menu
+        if (showMenu) {
+            mToolbar.inflateMenu(R.menu.top_app_bar)
+        } else {
+            mToolbar.menu.clear()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the Toolbar
         menuInflater.inflate(R.menu.top_app_bar, menu)
@@ -82,12 +123,10 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
                 true
             }
-
             R.id.action_logout -> {
                 Toast.makeText(this, "Logout clicked", Toast.LENGTH_SHORT).show()
                 auth.signOut()
                 navController.navigate(R.id.action_homeFragment_to_loginFragment)
-
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -117,14 +156,20 @@ class MainActivity : AppCompatActivity() {
         floatingActionButton.isVisible = false
     }
 
-    fun hideAppBarAndBottomNav() {
+    fun hideAppBar() {
         mToolbar.isVisible = false
-        bottomNavigation.isVisible = false
     }
 
-     fun showAppBarAndBottomNav() {
+    fun showAppBar() {
         mToolbar.isVisible = true
+    }
+
+    fun showBottomNav() {
         bottomNavigation.isVisible = true
+    }
+
+    fun hideBottomNav() {
+        bottomNavigation.isVisible = false
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -13,7 +13,7 @@
     <string name="already_have_account">Already have an account? Sign in</string>
     <string name="sign_up">Sign Up</string>
     <string name="email_hint2">Email</string>
-    <string name="email_hint">Email\n</string>
+    <string name="email_hint">Email</string>
     <string name="confirm_password_hint">Confirm Password</string>
     <string name="settings_page">Settings</string>
     <string name="notification_tv">Notifications</string>
@@ -55,7 +55,7 @@
     <string name="first_name_hint">First Name</string>
     <string name="last_name_hint">Last Name</string>
     <string name="dob_hint">Date of Birth</string>
-    <string name="phone_number_hint">Phone\n</string>
+    <string name="phone_number_hint">Phone</string>
     <string name="timezone_hint">Timezone</string>
     <string name="medication_name_hint">Medication Name</string>
     <string name="dosage_hint">Dosage (e.g., 1 tablet, 500mg)</string>
@@ -69,6 +69,7 @@
     <string name="go_back">Go back</string>
     <string name="next_medication">Next Medication</string>
     <string name="add_medication_here">Add medication</string>
+    <string name="return_to_previous_page">Return to previous page</string>
 
 
 </resources>

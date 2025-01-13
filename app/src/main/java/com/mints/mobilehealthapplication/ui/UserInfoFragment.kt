@@ -34,7 +34,7 @@ class UserInfoFragment : Fragment() {
 
         // Hide the app bar and bottom navigation on this fragment's view
         val mainActivity = requireActivity() as MainActivity
-        mainActivity.hideAppBarAndBottomNav()
+        mainActivity.showAppBar()
 
         // Initialize ViewModel for managing the registration data
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
@@ -45,6 +45,10 @@ class UserInfoFragment : Fragment() {
         val passwordEditText = view.findViewById<EditText>(R.id.password_edit_text)
         val confirmPasswordEditText = view.findViewById<EditText>(R.id.confirm_password_edit_text)
         val alreadyHaveAccountTextView = view.findViewById<TextView>(R.id.already_have_account_text)
+        emailEditText.setText(viewModel.registrationData.value.email)
+        phoneEditText.setText(viewModel.registrationData.value.phoneNumber)
+        passwordEditText.setText(viewModel.registrationData.value.password)
+        confirmPasswordEditText.setText(viewModel.registrationData.value.password)
 
         alreadyHaveAccountTextView.setOnClickListener {
             findNavController().navigate(R.id.action_userInfoFragment_to_loginFragment)

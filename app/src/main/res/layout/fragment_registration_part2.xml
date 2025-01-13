@@ -21,17 +21,7 @@
         app:layout_constraintBottom_toTopOf="@id/registration_footer"
         app:layout_constraintVertical_bias="0.2">
 
-        <!-- App Title -->
-        <TextView
-            android:id="@+id/app_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/mobile_health"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="50sp"
-            android:textStyle="bold"
-            android:layout_gravity="center"
-            android:layout_marginBottom="32dp"/>
+
 
         <!-- First Name Field -->
         <com.google.android.material.textfield.TextInputLayout
@@ -95,22 +85,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/continueSignUp"
-            android:backgroundTint="@color/darker_green_primary_button"
             android:textColor="@android:color/white"
             android:layout_marginTop="32dp"/>
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/already_have_account_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="48dp"
-            android:paddingTop="10sp"
-            android:text="@string/go_back"
-            android:textColor="?attr/colorOnSurface"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
+
 
     </LinearLayout>
 
