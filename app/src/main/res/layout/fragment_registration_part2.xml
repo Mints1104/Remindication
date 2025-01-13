@@ -45,10 +45,8 @@
                 android:id="@+id/first_name_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:imeOptions="actionNext"
                 android:inputType="textCapWords"
-                android:textColor="@color/black"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -66,10 +64,8 @@
                 android:id="@+id/last_name_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:imeOptions="actionNext"
                 android:inputType="textCapWords"
-                android:textColor="@color/black"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -87,11 +83,9 @@
                 android:id="@+id/dob_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:inputType="none"
                 android:focusable="true"
                 android:clickable="true"
-                android:textColor="@color/black"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
         </com.google.android.material.textfield.TextInputLayout>

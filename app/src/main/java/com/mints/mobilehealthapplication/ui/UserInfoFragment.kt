@@ -14,68 +14,84 @@ import androidx.navigation.fragment.findNavController
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 
+/**
+ * Fragment responsible for handling the user information screen during the registration process.
+ * Validates and collects user email, phone, and password inputs.
+ */
 class UserInfoFragment : Fragment() {
 
     private lateinit var viewModel: RegistrationViewModel
 
+    /**
+     * Called to inflate the fragment's view and initialize the necessary components.
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_registration, container, false)
 
+        // Hide the app bar and bottom navigation on this fragment's view
         val mainActivity = requireActivity() as MainActivity
         mainActivity.hideAppBarAndBottomNav()
 
-        // Initialize ViewModel
+        // Initialize ViewModel for managing the registration data
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
-        // Bind UI elements
+        // Bind UI elements to local variables
         val emailEditText = view.findViewById<EditText>(R.id.email_edit_text)
         val phoneEditText = view.findViewById<EditText>(R.id.phone_edit_text)
         val passwordEditText = view.findViewById<EditText>(R.id.password_edit_text)
         val confirmPasswordEditText = view.findViewById<EditText>(R.id.confirm_password_edit_text)
 
-        // Save data to ViewModel
+        // Set up listener for the continue button
         val continueButton = view.findViewById<Button>(R.id.continue_button)
         continueButton.setOnClickListener {
-            // Get input values
+            // Get the user input values from the EditText fields
             val email = emailEditText.text.toString()
             val phone = phoneEditText.text.toString()
             val password = passwordEditText.text.toString()
             val confirmPassword = confirmPasswordEditText.text.toString()
 
-            // Validate inputs
+            // Validate the input fields
             if (email.isEmpty() || phone.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                // Show a message if any field is empty
                 Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            // Validate email format using a regex pattern
             if (!isValidEmail(email)) {
                 Toast.makeText(requireContext(), "Please enter a valid email address", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            // Ensure that the password and confirmation match
             if (password != confirmPassword) {
                 Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Update ViewModel
+            // Update the ViewModel with the collected registration data
             viewModel.updateRegistrationData {
                 this.email = email
                 this.phoneNumber = phone
                 this.password = password
             }
 
-            // Navigate to the next fragment
+            // Navigate to the next fragment (health information screen)
             findNavController().navigate(R.id.action_userInfoFragment_to_healthInfoFragment)
         }
 
         return view
     }
 
-    // Function to validate email format
+    /**
+     * Helper function to validate the email format using a regex pattern.
+     *
+     * @param email The email address to be validated
+     * @return true if the email format is valid, false otherwise
+     */
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }

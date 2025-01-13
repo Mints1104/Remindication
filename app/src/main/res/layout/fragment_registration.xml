@@ -44,7 +44,7 @@
                 android:inputType="textEmailAddress"
                 android:paddingStart="40dp"
                 android:paddingEnd="10dp"
-                android:textColor="@color/black" />
+                />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Phone Number Input -->
@@ -62,7 +62,7 @@
                 android:inputType="phone"
                 android:paddingStart="40dp"
                 android:paddingEnd="10dp"
-                android:textColor="@color/black" />
+                />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Password Input -->
@@ -79,6 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
+
                 android:paddingStart="40dp"
                 android:paddingEnd="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -108,7 +109,6 @@
             android:layout_height="wrap_content"
             android:text="@string/continueSignUp"
             android:backgroundTint="@color/darker_green_primary_button"
-            android:textColor="@android:color/white"
             android:layout_marginTop="32dp"/>
 
         <!-- Already Have an Account? Link -->

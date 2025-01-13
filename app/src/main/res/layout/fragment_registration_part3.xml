@@ -42,10 +42,8 @@
                 android:id="@+id/medication_name_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:imeOptions="actionNext"
                 android:inputType="text"
-                android:textColor="@color/black"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -63,10 +61,8 @@
                 android:id="@+id/dosage_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:imeOptions="actionNext"
                 android:inputType="number"
-                android:textColor="@color/black"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -84,10 +80,8 @@
                 android:id="@+id/frequency_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:imeOptions="actionNext"
                 android:inputType="text"
-                android:textColor="@color/black"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -105,11 +99,9 @@
                 android:id="@+id/reminder_time_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:inputType="none"
                 android:focusable="true"
                 android:clickable="true"
-                android:textColor="@color/black"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
         </com.google.android.material.textfield.TextInputLayout>
