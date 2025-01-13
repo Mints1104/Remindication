@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -43,6 +44,12 @@ class UserInfoFragment : Fragment() {
         val phoneEditText = view.findViewById<EditText>(R.id.phone_edit_text)
         val passwordEditText = view.findViewById<EditText>(R.id.password_edit_text)
         val confirmPasswordEditText = view.findViewById<EditText>(R.id.confirm_password_edit_text)
+        val alreadyHaveAccountTextView = view.findViewById<TextView>(R.id.already_have_account_text)
+
+        alreadyHaveAccountTextView.setOnClickListener {
+            findNavController().navigate(R.id.action_userInfoFragment_to_loginFragment)
+
+        }
 
         // Set up listener for the continue button
         val continueButton = view.findViewById<Button>(R.id.continue_button)

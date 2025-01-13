@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             R.id.action_logout -> {
                 Toast.makeText(this, "Logout clicked", Toast.LENGTH_SHORT).show()
                 auth.signOut()
-                navController.navigate(R.id.loginFragment)
+                navController.navigate(R.id.action_homeFragment_to_loginFragment)
 
                 true
             }

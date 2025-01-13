@@ -13,19 +13,44 @@
         <!-- Define the action to navigate to HomeFragment -->
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right" />
 
         <!-- Define the action to navigate to UserInfoFragment (Registration) -->
         <action
             android:id="@+id/action_loginFragment_to_userInfoFragment"
-            app:destination="@id/userInfoFragment" />
+            app:destination="@id/userInfoFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <!-- Home Fragment -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.mints.mobilehealthapplication.ui.HomeFragment"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_homeFragment_to_loginFragment"
+            app:destination="@+id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+
+
+
+
+    </fragment>
+
 
     <!-- Fragment 1: UserInfoFragment (Registration) -->
     <fragment
@@ -36,9 +61,22 @@
         <!-- Define the action to navigate to Fragment 2 -->
         <action
             android:id="@+id/action_userInfoFragment_to_healthInfoFragment"
-            app:destination="@id/healthInfoFragment" />
+            app:destination="@id/healthInfoFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_userInfoFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
+    <!-- Fragment 2: HealthInfoFragment -->
     <fragment
         android:id="@+id/healthInfoFragment"
         android:name="com.mints.mobilehealthapplication.ui.HealthInfoFragment"
@@ -47,7 +85,11 @@
         <!-- Define the action to navigate to MedicationInfoFragment -->
         <action
             android:id="@+id/action_healthInfoFragment_to_medicationInfoFragment"
-            app:destination="@id/medicationInfoFragment" />
+            app:destination="@id/medicationInfoFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <!-- Fragment 3: MedicationInfoFragment (Registration) -->
@@ -59,9 +101,10 @@
         <!-- Define the action to navigate to HomeFragment -->
         <action
             android:id="@+id/action_medicationInfoFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
-
-
-
 </navigation>
