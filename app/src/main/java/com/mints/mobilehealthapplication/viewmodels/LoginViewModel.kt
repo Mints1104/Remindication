@@ -1,29 +1,25 @@
 package com.mints.mobilehealthapplication.viewmodels
 
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mints.mobilehealthapplication.data.FirebaseRepository
 import kotlinx.coroutines.launch
 
-class ResetPasswordViewModel : ViewModel() {
+class LoginViewModel : ViewModel() {
 
     /**
-     * Sends a password reset email using the FireStoreRepository.
-     * @param email The email address to send the reset email to.
+     * Attempts to log in a user with the provided email and password.
+     * @param email The user's email.
+     * @param password The user's password.
      * @param onResult A callback function that receives a Pair<Boolean, String>:
      *                 - Boolean: Indicates success (true) or failure (false).
      *                 - String: Contains a success message or error message.
      */
-    fun sendPasswordResetEmail(email: String, onResult: (Boolean, String) -> Unit) {
+    fun login(email: String, password: String, onResult: (Boolean, String) -> Unit) {
         viewModelScope.launch {
-            try {
-                val result = FirebaseRepository.sendPasswordResetEmail(email)
-                onResult(result.first, result.second)
-            } catch (e: Exception) {
-                onResult(false, e.message ?: "An error occurred")
-            }
+            val result = FirebaseRepository.login(email, password)
+            onResult(result.first, result.second)
         }
     }
-
-
 }

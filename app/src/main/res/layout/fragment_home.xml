@@ -24,7 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/next_medication"
-
+                android:textColor="?attr/colorOnSurface"
                 android:textStyle="bold"
                 android:textSize="18sp"/>
 
@@ -32,6 +32,8 @@
                 android:id="@+id/next_medication_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="?attr/colorOnSurface"
+
                 android:layout_marginTop="8dp"
                 android:textSize="16sp"/>
 
@@ -40,6 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="14sp"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

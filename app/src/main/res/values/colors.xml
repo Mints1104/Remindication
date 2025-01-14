@@ -39,6 +39,7 @@
     <color name="md_theme_onPrimaryFixed">#001B3E</color>
     <color name="md_theme_primaryFixedDim">#AAC7FF</color>
     <color name="md_theme_onPrimaryFixedVariant">#284777</color>
+    <color name="md_theme_surfaceContainerLow_darkContrast">#222222</color>
     <color name="md_theme_secondaryFixed">#DAE2F9</color>
     <color name="md_theme_onSecondaryFixed">#131C2B</color>
     <color name="md_theme_secondaryFixedDim">#BEC6DC</color>
@@ -153,6 +154,10 @@
     <color name="soft_lavender">#B39CD0</color>
     <color name="darker_green_primary_button">#00796B</color>
     <color name="light_blue_card">#E0F7EF</color>
+    <color name="card_view_background_dark">#22262a</color>
+    <color name="primary_color_dark">#455A64</color>
+
+
 
 
 </resources>

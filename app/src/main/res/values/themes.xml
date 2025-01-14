@@ -86,7 +86,15 @@
 
     <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar">
         <item name="android:background">?attr/colorSurface</item>
+        <item name="android:backgroundTint">?attr/colorSurface</item>
         <item name="titleTextColor">?attr/colorOnSurface</item>
+        <item name="subtitleTextColor">?attr/colorOnSurfaceVariant</item>
+        <item name="navigationIconTint">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="OverflowMenuTheme" parent="ThemeOverlay.Material3">
+        <item name="popupMenuBackground">@color/md_theme_surface</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="subtitleTextColor">?attr/colorOnSurfaceVariant</item>
         <item name="navigationIconTint">?attr/colorOnSurface</item>
     </style>

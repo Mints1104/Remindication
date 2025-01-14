@@ -45,12 +45,12 @@
         <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer_mediumContrast</item>
         <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh_mediumContrast</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest_mediumContrast</item>
-
         <!-- Additional colors -->
         <item name="colorOutline">@color/md_theme_outline_mediumContrast</item>
         <item name="colorOutlineVariant">@color/md_theme_outlineVariant_mediumContrast</item>
         <item name="colorSurfaceBright">@color/md_theme_surfaceBright_mediumContrast</item>
         <item name="colorSurfaceDim">@color/md_theme_surfaceDim_mediumContrast</item>
+        <item name="cardBackgroundColor">@color/card_view_background_dark</item>
 
         <!-- System bars -->
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -69,7 +69,9 @@
     <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Elevated">
         <item name="cardElevation">2dp</item>
         <item name="cardCornerRadius">12dp</item>
-        <item name="cardBackgroundColor">?attr/colorSurfaceContainerHigh</item>
+        <item name="backgroundTint">@color/black</item>
+        <item name="cardBackgroundColor">@color/card_view_background_dark</item>
+
     </style>
 
     <style name="Widget.App.BottomNavigation" parent="Widget.Material3.BottomNavigationView">
@@ -80,7 +82,7 @@
     </style>
 
     <style name="Widget.App.BottomNavigation.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">?attr/colorSecondaryContainer</item>
+        <item name="android:color">@color/primary_color_dark</item>
     </style>
 
     <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar">
@@ -88,6 +90,17 @@
         <item name="titleTextColor">?attr/colorOnSurface</item>
         <item name="subtitleTextColor">?attr/colorOnSurfaceVariant</item>
         <item name="navigationIconTint">?attr/colorOnSurface</item>
+        <item name="android:backgroundTint">?attr/colorSurface</item>
+
+    </style>
+
+    <style name="OverflowMenuTheme" parent="ThemeOverlay.Material3">
+        <item name="popupMenuBackground">@color/current_app_background_dark</item>
+        <item name="titleTextColor">?attr/colorOnSurface</item>
+        <item name="subtitleTextColor">?attr/colorOnSurfaceVariant</item>
+        <item name="navigationIconTint">?attr/colorOnSurface</item>
+
+
     </style>
 
     <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
