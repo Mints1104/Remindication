@@ -123,10 +123,17 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
                 true
             }
+
             R.id.action_logout -> {
                 Toast.makeText(this, "Logout clicked", Toast.LENGTH_SHORT).show()
                 auth.signOut()
                 navController.navigate(R.id.action_homeFragment_to_loginFragment)
+                true
+            }
+
+            R.id.streaks -> {
+                val addStreakBottomSheet = StreakBottomSheetFragment()
+                addStreakBottomSheet.show(supportFragmentManager, "StreakBottomSheetFragment")
                 true
             }
             else -> super.onOptionsItemSelected(item)

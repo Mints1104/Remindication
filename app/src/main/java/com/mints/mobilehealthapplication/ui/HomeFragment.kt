@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
@@ -67,7 +65,8 @@ class HomeFragment : Fragment() {
     private fun setupFAB() {
         val fab = requireActivity().findViewById<FloatingActionButton>(R.id.add_medication_fab)
         fab.setOnClickListener {
-            showAddMedicationDialog()
+            val addMedicationBottomSheet = AddMedicationBottomSheet()
+            addMedicationBottomSheet.show(parentFragmentManager, "AddMedicationBottomSheet")
         }
     }
 
@@ -80,21 +79,7 @@ class HomeFragment : Fragment() {
     }
 
 
-    private fun showAddMedicationDialog() {
-        val editText = EditText(requireContext()).apply {
-            hint = "Enter medication name"
-        }
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Search Medication")
-            .setView(editText)
-            .setPositiveButton("Search") { _, _ ->
-                loadingIndicator.visibility = View.VISIBLE
-                viewModel.searchMedication(editText.text.toString())
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
 
     private fun displayMessage(view: View, message: String) {
         Snackbar.make(view, message, Snackbar.LENGTH_LONG).apply {

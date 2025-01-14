@@ -9,8 +9,18 @@ data class UserData(
     val emergencyContact: EmergencyContact = EmergencyContact(),
     val timezone: String = "",
     val healthInfo: HealthInfo = HealthInfo()
+
 )
 
+data class UserMedication(
+    val medicationList: List<Medication>
+)
+
+data class Medication(
+    val name: String ="",
+    val dosage: String ="",
+    val time: String= ""
+)
 
 data class EmergencyContact(
     val name: String = "",

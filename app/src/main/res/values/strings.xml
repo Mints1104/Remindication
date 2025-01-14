@@ -70,6 +70,14 @@
     <string name="next_medication">Next Medication</string>
     <string name="add_medication_here">Add medication</string>
     <string name="return_to_previous_page">Return to previous page</string>
+    <string name="home_page_txt">Home</string>
+    <string name="streaks_xml">streaks</string>
+    <string name="current_streak_loading">Loading…</string>
+    <string name="current_streak_d">Current streak: %d</string>
+    <string name="your_daily_streak">Your Streak</string>
+    <string name="add_medication_txt">Add Medication</string>
+    <string name="home_tab">Home</string>
+    <string name="statistics_tab">Statistics</string>
 
 
 </resources>

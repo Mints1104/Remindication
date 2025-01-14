@@ -2,12 +2,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+    <item
+        android:id="@+id/streaks"
+        android:icon="@drawable/fire_white_icon"
+        android:title="@string/streaks_xml"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/settings_tab"
-        android:icon="@drawable/settings_white"
-        android:title="Test"
-        android:tint="@android:color/white"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="@string/home_page_txt"
 
         app:showAsAction="ifRoom" />
 
