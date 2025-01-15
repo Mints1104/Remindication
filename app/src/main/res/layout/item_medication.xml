@@ -9,55 +9,41 @@
     app:cardElevation="2dp"
     app:cardCornerRadius="8dp">
 
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/medication_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
+            android:text="Medication Name"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/medication_dosage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="14sp"/>
+            android:text="Dosage"
+            android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/medication_side_effects"
+            android:id="@+id/medication_frequency"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="14sp"/>
+            android:text="Frequency"
+            android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/medication_precautions"
-            android:layout_width="match_parent"
+            android:id="@+id/medication_time"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="14sp"
-            android:visibility="gone" />
-        <TextView
-            android:id="@+id/medication_interactions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="14sp"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/medication_category"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="14sp"
-            android:visibility="gone" />
+            android:text="Time"
+            android:textSize="16sp" />
     </LinearLayout>
+
 
 </com.google.android.material.card.MaterialCardView>

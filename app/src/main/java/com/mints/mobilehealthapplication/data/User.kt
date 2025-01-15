@@ -1,5 +1,7 @@
 package com.mints.mobilehealthapplication.data
 
+import com.google.firebase.Timestamp
+
 data class UserData(
     val uid: String = "",
     val email: String = "",
@@ -17,9 +19,12 @@ data class UserMedication(
 )
 
 data class Medication(
-    val name: String ="",
-    val dosage: String ="",
-    val time: String= ""
+    val name: String,
+    val dosage: String,
+    val frequency: String,
+    val time: String,
+    val notes: String,
+    val createdAt: Timestamp = Timestamp.now()
 )
 
 data class EmergencyContact(
