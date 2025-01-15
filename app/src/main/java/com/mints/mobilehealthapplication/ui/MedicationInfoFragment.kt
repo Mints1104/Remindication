@@ -42,8 +42,6 @@ class MedicationInfoFragment : Fragment() {
         // Initialize ViewModel for shared data and state management
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
-        // Hide app bar and bottom navigation for a cleaner registration process
-        val mainActivity = requireActivity() as MainActivity
 
         // Bind UI elements to local variables for easier access
         val medicationNameEditText = view.findViewById<EditText>(R.id.medication_name_edit_text)

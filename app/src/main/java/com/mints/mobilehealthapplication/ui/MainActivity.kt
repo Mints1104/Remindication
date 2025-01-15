@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
      * @param showMenu Whether to show the menu (settings and logout).
      * @param title The title to display in the Toolbar.
      */
-    fun updateToolbar(showBackArrow: Boolean, showMenu: Boolean, title: String) {
+    private fun updateToolbar(showBackArrow: Boolean, showMenu: Boolean, title: String) {
         mToolbar.title = title
 
         // Show or hide the back arrow

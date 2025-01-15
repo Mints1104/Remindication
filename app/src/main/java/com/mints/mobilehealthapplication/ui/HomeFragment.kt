@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -74,12 +73,12 @@ class HomeFragment : Fragment() {
         recyclerView.adapter = adapter
 
         // Observe the medications LiveData from the ViewModel
-        viewModel.medications.observe(viewLifecycleOwner, Observer { medications ->
+        viewModel.medications.observe(viewLifecycleOwner) { medications ->
             // Update the adapter's list when the data changes
             medications?.let {
                 adapter.updateMedicationList(it)
             }
-        })
+        }
     }
 
 
@@ -110,10 +109,6 @@ class HomeFragment : Fragment() {
             setAction("Dismiss") { dismiss() }
             show()
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
 
