@@ -2,6 +2,7 @@ package com.mints.mobilehealthapplication.ui
 
 import android.R
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,12 +29,15 @@ class AddMedicationFragment : Fragment() {
         _binding = FragmentAddMedicationBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        Log.d("AddMedicationFragment", "onCreateView called")
+
         val mainActivity = activity as MainActivity
         mainActivity.hideFAB()
         mainActivity.hideBottomNav()
 
         // Initialize ViewModel
         viewModel = ViewModelProvider(this)[MedicationViewModel::class.java]
+        Log.d("AddMedicationFragment", "ViewModel initialized")
 
         // Set up UI elements
         val medicationNameEditText = binding.medicationNameEditText
@@ -43,39 +47,64 @@ class AddMedicationFragment : Fragment() {
         val adapter = ArrayAdapter(requireContext(), R.layout.simple_spinner_item, frequencyOptions)
         adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
         frequencySpinner.adapter = adapter
+        Log.d("AddMedicationFragment", "Frequency spinner initialized with options: $frequencyOptions")
 
         val timePicker = binding.timePicker
         val notesEditText = binding.notesEditText
 
         // Set up save button click listener
         binding.saveMedicationButton.setOnClickListener {
+            Log.d("AddMedicationFragment", "Save button clicked")
+
             val medicationName = medicationNameEditText.text.toString().trim()
             val dosage = dosageEditText.text.toString().trim()
-             val frequency = frequencySpinner.selectedItem.toString()
+            val frequency = frequencySpinner.selectedItem.toString()
             val time = "${timePicker.hour}:${timePicker.minute}"
             val notes = notesEditText.text.toString().trim()
 
+            Log.d("AddMedicationFragment", "Medication details entered:")
+            Log.d("AddMedicationFragment", "Name: $medicationName")
+            Log.d("AddMedicationFragment", "Dosage: $dosage")
+            Log.d("AddMedicationFragment", "Frequency: $frequency")
+            Log.d("AddMedicationFragment", "Time: $time")
+            Log.d("AddMedicationFragment", "Notes: $notes")
+
             if (medicationName.isEmpty() || dosage.isEmpty()) {
+                Log.d("AddMedicationFragment", "Validation failed: Name or dosage is empty")
                 Toast.makeText(context, "Name and dosage are required", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val medication = Medication(medicationName, dosage, frequency, time, notes)
-            viewModel.saveMedication(FirebaseAuth.getInstance().uid ?: "", medication)
+            Log.d("AddMedicationFragment", "Medication object created: $medication")
+
+            val uid = FirebaseAuth.getInstance().uid ?: ""
+            Log.d("AddMedicationFragment", "Current user UID: $uid")
+
+            if (uid.isEmpty()) {
+                Log.e("AddMedicationFragment", "User is not authenticated")
+                Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            viewModel.saveMedication(uid, medication)
         }
 
         // Observe save result LiveData
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             if (success) {
+                Log.d("AddMedicationFragment", "Medication saved successfully")
                 Toast.makeText(context, "Medication saved successfully", Toast.LENGTH_SHORT).show()
                 findNavController().navigateUp()
             } else {
+                Log.e("AddMedicationFragment", "Failed to save medication")
                 Toast.makeText(context, "Failed to save medication", Toast.LENGTH_SHORT).show()
             }
         }
 
         // Set up cancel button click listener
         binding.closeAddMedicationView.setOnClickListener {
+            Log.d("AddMedicationFragment", "Cancel button clicked")
             findNavController().navigateUp()
         }
 
@@ -84,6 +113,7 @@ class AddMedicationFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        Log.d("AddMedicationFragment", "onDestroyView called")
         _binding = null
     }
 }

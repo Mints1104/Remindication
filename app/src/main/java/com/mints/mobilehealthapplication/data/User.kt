@@ -19,11 +19,11 @@ data class UserMedication(
 )
 
 data class Medication(
-    val name: String,
-    val dosage: String,
-    val frequency: String,
-    val time: String,
-    val notes: String,
+    val name: String = "",
+    val dosage: String = "",
+    val frequency: String = "",
+    val time: String = "",
+    val notes: String = "",
     val createdAt: Timestamp = Timestamp.now()
 )
 

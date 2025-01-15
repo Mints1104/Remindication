@@ -1,5 +1,6 @@
 package com.mints.mobilehealthapplication.data
 
+import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
@@ -44,6 +45,10 @@ object FireStoreRepository {
 
     suspend fun saveMedication(uid: String, medication: Medication): Boolean {
         return try {
+            Log.d("FireStoreRepository", "Saving medication for user: $uid")
+            Log.d("FireStoreRepository", "Medication details: $medication")
+
+            // Create a hashmap for the medication data
             val medicationData = hashMapOf(
                 "name" to medication.name,
                 "dosage" to medication.dosage,
@@ -52,44 +57,56 @@ object FireStoreRepository {
                 "notes" to medication.notes,
                 "createdAt" to FieldValue.serverTimestamp()
             )
-            db.collection("users").document(uid).collection("medications")
-                .add(medicationData).await()
+
+            Log.d("FireStoreRepository", "Medication data to save: $medicationData")
+
+            // Save the medication data to Firestore
+            val documentReference = db.collection("users")
+                .document(uid)
+                .collection("medications")
+                .add(medicationData)
+                .await()
+
+            Log.d("FireStoreRepository", "Medication saved successfully with ID: ${documentReference.id}")
             true
         } catch (e: Exception) {
+            Log.e("FireStoreRepository", "Error saving medication: ${e.message}", e)
             false
         }
+
     }
 
-    suspend fun getMedications(uid: String): List<Medication>? {
+    suspend fun getMedications(uid: String): List<Medication> {
         return try {
-            // Initialize the list to store medications
-            val medicationList = mutableListOf<Medication>()
+            Log.d("FireStoreRepository", "Fetching medications for user: $uid")
 
-            // Get medications from Firestore
-            val snapshot = db.collection("users").document(uid).collection("medications").get().await()
+            // Perform the Firestore query
+            val snapshot = db.collection("users")
+                .document(uid)
+                .collection("medications")
+                .get()
+                .await()
 
-            // Loop through documents and map them to Medication objects
-            for (document in snapshot.documents) {
-                val medication = document.getTimestamp("createdAt")?.let {
-                    Medication(
-                        name = document.getString("name") ?: "",
-                        dosage = document.getString("dosage") ?: "",
-                        frequency = document.getString("frequency") ?: "",
-                        time = document.getString("time") ?: "",
-                        notes = document.getString("notes") ?: "",
-                        createdAt = it
-                    )
-                }
-                if (medication != null) {
-                    medicationList.add(medication)
-                }
+            Log.d("FireStoreRepository", "Query path: users/$uid/medications")
+            Log.d("FireStoreRepository", "Number of documents fetched: ${snapshot.documents.size}")
+
+            // Log each document's data
+            snapshot.documents.forEach { document ->
+                Log.d("FireStoreRepository", "Document ID: ${document.id}, Data: ${document.data}")
             }
 
-            medicationList // Return the list of medications
+            // Map documents to Medication objects
+            val medications = snapshot.documents.mapNotNull { document ->
+                val medication = document.toObject(Medication::class.java)
+                Log.d("FireStoreRepository", "Mapped medication: ${medication?.name}")
+                medication
+            }
 
+            Log.d("FireStoreRepository", "Successfully mapped ${medications.size} medications")
+            medications
         } catch (e: Exception) {
-            e.printStackTrace()  // Log error for debugging
-            null  // Return null in case of error
+            Log.e("FireStoreRepository", "Error fetching medications: ${e.message}", e)
+            emptyList()
         }
     }
 
