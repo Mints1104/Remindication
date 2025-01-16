@@ -8,10 +8,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 
@@ -67,19 +67,20 @@ class UserInfoFragment : Fragment() {
             // Validate the input fields
             if (email.isEmpty() || phone.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 // Show a message if any field is empty
-                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                displayMessage(requireView(),getString(R.string.fill_in_all_fields))
                 return@setOnClickListener
             }
 
             // Validate email format using a regex pattern
             if (!isValidEmail(email)) {
-                Toast.makeText(requireContext(), "Please enter a valid email address", Toast.LENGTH_SHORT).show()
+                displayMessage(requireView(),getString(R.string.please_enter_a_valid_email_address))
                 return@setOnClickListener
             }
 
             // Ensure that the password and confirmation match
             if (password != confirmPassword) {
-                Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
+                displayMessage(requireView(),getString(R.string.passwords_do_not_match))
+
                 return@setOnClickListener
             }
 
@@ -95,6 +96,10 @@ class UserInfoFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun displayMessage(view: View, msgTxt: String) {
+        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
     }
 
     /**

@@ -44,27 +44,27 @@ object FireStoreRepository {
         }
     }
 
-    suspend fun saveMedication(uid: String, medication: Medication): Boolean {
-        return try {
-            val medicationData = hashMapOf(
-                "name" to medication.name,
-                "dosage" to medication.dosage,
-                "frequency" to medication.frequency,
-                "time" to medication.time,
-                "notes" to medication.notes,
-                "createdAt" to FieldValue.serverTimestamp()
-            )
-            val documentReference = db.collection("users")
-                .document(uid)
-                .collection("medications")
-                .add(medicationData)
-                .await()
-            medication.id = documentReference.id
-            true
-        } catch (e: Exception) {
-            false
+        suspend fun saveMedication(uid: String, medication: Medication): Boolean {
+            return try {
+                val medicationData = hashMapOf(
+                    "name" to medication.name,
+                    "dosage" to medication.dosage,
+                    "frequency" to medication.frequency,
+                    "time" to medication.time,
+                    "notes" to medication.notes,
+                    "createdAt" to FieldValue.serverTimestamp()
+                )
+                val documentReference = db.collection("users")
+                    .document(uid)
+                    .collection("medications")
+                    .add(medicationData)
+                    .await()
+                medication.id = documentReference.id
+                true
+            } catch (e: Exception) {
+                false
+            }
         }
-    }
 
     suspend fun getMedications(uid: String): List<Medication> {
         return db.collection("users")

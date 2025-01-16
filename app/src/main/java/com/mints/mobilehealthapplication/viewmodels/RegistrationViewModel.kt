@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 /**
  * ViewModel to handle user registration process, including authentication and saving data to Firestore.
@@ -52,6 +57,36 @@ class RegistrationViewModel : ViewModel() {
         data object Loading : RegistrationState() // State when registration is in progress
         data class Error(val message: String) : RegistrationState() // State for error with a message
         data object Success : RegistrationState() // State for successful registration
+    }
+
+    fun isAgeValid(dobString: String): Boolean {
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.UK)
+        var dob: Date? = null
+        try {
+            dob = dateFormat.parse(dobString)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+            return false
+        }
+
+        if (dob == null) return false
+
+        val dobCalendar = Calendar.getInstance()
+        dobCalendar.time = dob
+
+        val currentCalendar = Calendar.getInstance()
+
+        val yearDiff = currentCalendar.get(Calendar.YEAR) - dobCalendar.get(Calendar.YEAR)
+        val monthDiff = currentCalendar.get(Calendar.MONTH) - dobCalendar.get(Calendar.MONTH)
+        val dayDiff = currentCalendar.get(Calendar.DAY_OF_MONTH) - dobCalendar.get(Calendar.DAY_OF_MONTH)
+
+        val age = if (monthDiff < 0 || (monthDiff == 0 && dayDiff < 0)) {
+            yearDiff - 1
+        } else {
+            yearDiff
+        }
+
+        return age >= 18
     }
 
     /**

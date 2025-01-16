@@ -52,6 +52,7 @@
         <item name="colorOutlineVariant">@color/md_theme_outlineVariant</item>
         <item name="colorSurfaceBright">@color/md_theme_surfaceBright</item>
         <item name="colorSurfaceDim">@color/md_theme_surfaceDim</item>
+        <item name="materialCalendarTheme">@style/ThemeOverlay.App.DatePicker</item>
 
         <!-- System bars -->
         <item name="android:statusBarColor">@color/md_theme_surfaceContainer</item>
@@ -90,6 +91,13 @@
         <item name="titleTextColor">?attr/colorOnSurface</item>
         <item name="subtitleTextColor">?attr/colorOnSurfaceVariant</item>
         <item name="navigationIconTint">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="ThemeOverlay.App.DatePicker" parent="@style/ThemeOverlay.Material3.MaterialCalendar">
+        <item name="android:windowBackground">@color/current_app_background_dark</item>
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
+        <item name="colorSurface">@color/current_app_background_dark</item>
     </style>
 
     <style name="OverflowMenuTheme" parent="ThemeOverlay.Material3">

@@ -82,6 +82,12 @@
     <string name="save_medication">Save Medication</string>
     <string name="frequency">Frequency</string>
     <string name="dosage">Dosage</string>
+    <string name="fill_in_all_fields_p3">Please fill in all fields or skip this step</string>
+    <string name="fill_in_all_fields">Please fill in all fields</string>
+    <string name="failed_to_save_medication">Failed to save medication</string>
+    <string name="user_not_authenticated">User not authenticated</string>
+    <string name="name_and_dosage_required">Name and dosage are required</string>
+    <string name="medication_saved_successfully">Medication saved successfully</string>
 
 
 </resources>

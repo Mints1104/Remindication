@@ -68,18 +68,27 @@
             android:id="@+id/frequency_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/frequency_hint"
+
+            android:hint="Enter frequency"
             android:layout_marginTop="16dp"
             app:startIconDrawable="@drawable/baseline_schedule_24">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/frequency_edit_text"
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionNext"
-                android:inputType="text"
-                android:paddingStart="40dp"
-                android:paddingEnd="40dp" />
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/frequency_chip_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.Material3.ChipGroup"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    android:padding="8dp"/>
+
+            </HorizontalScrollView>
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Reminder Time -->

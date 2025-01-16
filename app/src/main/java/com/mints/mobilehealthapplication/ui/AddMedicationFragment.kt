@@ -1,17 +1,17 @@
 package com.mints.mobilehealthapplication.ui
 
-import android.R
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationBinding
 import com.mints.mobilehealthapplication.viewmodels.MedicationViewModel
@@ -44,8 +44,8 @@ class AddMedicationFragment : Fragment() {
         val dosageEditText = binding.dosageEditText
         val frequencySpinner = binding.frequencySpinner
         val frequencyOptions = listOf("Once a day", "Twice a day", "Three times a day", "As needed")
-        val adapter = ArrayAdapter(requireContext(), R.layout.simple_spinner_item, frequencyOptions)
-        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, frequencyOptions)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         frequencySpinner.adapter = adapter
         Log.d("AddMedicationFragment", "Frequency spinner initialized with options: $frequencyOptions")
 
@@ -72,7 +72,7 @@ class AddMedicationFragment : Fragment() {
 
             if (medicationName.isEmpty() || dosage.isEmpty()) {
                 Log.d("AddMedicationFragment", "Validation failed: Name or dosage is empty")
-                Toast.makeText(context, "Name and dosage are required", Toast.LENGTH_SHORT).show()
+                displayMessage(requireView(),getString(R.string.name_and_dosage_required))
                 return@setOnClickListener
             }
 
@@ -90,7 +90,7 @@ class AddMedicationFragment : Fragment() {
 
             if (uid.isEmpty()) {
                 Log.e("AddMedicationFragment", "User is not authenticated")
-                Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+                displayMessage(requireView(),getString(R.string.user_not_authenticated))
                 return@setOnClickListener
             }
 
@@ -101,11 +101,11 @@ class AddMedicationFragment : Fragment() {
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             if (success) {
                 Log.d("AddMedicationFragment", "Medication saved successfully")
-                Toast.makeText(context, "Medication saved successfully", Toast.LENGTH_SHORT).show()
+                displayMessage(requireView(),getString(R.string.medication_saved_successfully))
                 findNavController().navigateUp()
             } else {
                 Log.e("AddMedicationFragment", "Failed to save medication")
-                Toast.makeText(context, "Failed to save medication", Toast.LENGTH_SHORT).show()
+                displayMessage(requireView(),getString(R.string.failed_to_save_medication))
             }
         }
 
@@ -116,6 +116,10 @@ class AddMedicationFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun displayMessage(view: View, msgTxt: String) {
+        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
