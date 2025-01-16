@@ -46,6 +46,10 @@ class HealthInfoFragment : Fragment() {
 
         setupDatePicker(dobEditText)
 
+        firstNameEditText.setText(viewModel.registrationData.value.firstName)
+        lastNameEditText.setText(viewModel.registrationData.value.lastName)
+        dobEditText.setText(viewModel.registrationData.value.dateOfBirth)
+
         continueButton.setOnClickListener {
             val firstName = firstNameEditText.text.toString()
             val lastName = lastNameEditText.text.toString()
@@ -137,7 +141,11 @@ class HealthInfoFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        datePicker?.dismiss()
+        datePicker?.let { picker ->
+            if (picker.isAdded) {
+                picker.dismiss()
+            }
+        }
         datePicker = null
     }
 }

@@ -88,6 +88,7 @@
     <string name="user_not_authenticated">User not authenticated</string>
     <string name="name_and_dosage_required">Name and dosage are required</string>
     <string name="medication_saved_successfully">Medication saved successfully</string>
+    <string name="enter_frequency">Enter frequency</string>
 
 
 </resources>

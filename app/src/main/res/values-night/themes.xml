@@ -9,6 +9,7 @@
         <item name="colorOnPrimaryFixed">@color/md_theme_onPrimaryFixed</item>
         <item name="colorPrimaryFixedDim">@color/md_theme_primaryFixedDim</item>
         <item name="colorOnPrimaryFixedVariant">@color/md_theme_onPrimaryFixedVariant</item>
+        <item name="chipStyle">@style/Widget.App.Chip</item>
 
         <item name="colorSecondary">@color/md_theme_secondaryFixed</item>
         <item name="colorOnSecondary">@color/md_theme_onSecondaryFixed</item>
@@ -109,6 +110,14 @@
         <item name="navigationIconTint">?attr/colorOnSurface</item>
 
 
+    </style>
+
+
+    <style name="Widget.App.Chip" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/current_app_background_dark</item>
+        <item name="chipStrokeWidth">2dp</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="shapeAppearanceOverlay">@null</item>
     </style>
 
     <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
