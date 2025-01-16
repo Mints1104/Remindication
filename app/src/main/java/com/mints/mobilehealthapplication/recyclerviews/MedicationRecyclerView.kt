@@ -5,9 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
+import com.mints.mobilehealthapplication.data.MedicationDiffCallback
 
 class MedicationRecyclerView(private var medications: List<Medication>)
     : RecyclerView.Adapter<MedicationRecyclerView.MedicationViewHolder>() {
@@ -17,6 +19,7 @@ class MedicationRecyclerView(private var medications: List<Medication>)
         val dosageTextView: TextView = view.findViewById(R.id.medication_dosage)
         val frequencyTextView: TextView = view.findViewById(R.id.medication_frequency)
         val timeTextView: TextView = view.findViewById(R.id.medication_time)
+        val medicationId: TextView = view.findViewById(R.id.medication_id)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MedicationViewHolder {
@@ -28,10 +31,14 @@ class MedicationRecyclerView(private var medications: List<Medication>)
     override fun onBindViewHolder(holder: MedicationViewHolder, position: Int) {
         val medication = medications[position]
         Log.d("MedicationRecyclerView", "Binding medication: ${medication.name}")
+        Log.d("MedicationRecyclerView", "Binding medication: ${medication.id}")
+
+
         holder.nameTextView.text = medication.name
         holder.dosageTextView.text = medication.dosage
         holder.frequencyTextView.text = medication.frequency
         holder.timeTextView.text = medication.time
+        holder.medicationId.text = medication.id
     }
 
     override fun getItemCount(): Int {
@@ -40,8 +47,10 @@ class MedicationRecyclerView(private var medications: List<Medication>)
     }
 
     fun updateMedicationList(newMedications: List<Medication>) {
-        Log.d("MedicationRecyclerView", "Updating medication list with ${newMedications.size} items")
+        val diffCallback = MedicationDiffCallback(medications, newMedications)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
         medications = newMedications
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
+
 }

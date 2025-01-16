@@ -61,6 +61,7 @@ class AddMedicationFragment : Fragment() {
             val frequency = frequencySpinner.selectedItem.toString()
             val time = "${timePicker.hour}:${timePicker.minute}"
             val notes = notesEditText.text.toString().trim()
+            val id = ""
 
             Log.d("AddMedicationFragment", "Medication details entered:")
             Log.d("AddMedicationFragment", "Name: $medicationName")
@@ -75,7 +76,13 @@ class AddMedicationFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val medication = Medication(medicationName, dosage, frequency, time, notes)
+            val medication = Medication(
+                name = medicationName,
+                dosage = dosage,
+                frequency = frequency,
+                time = time,
+                notes = notes
+            )
             Log.d("AddMedicationFragment", "Medication object created: $medication")
 
             val uid = FirebaseAuth.getInstance().uid ?: ""

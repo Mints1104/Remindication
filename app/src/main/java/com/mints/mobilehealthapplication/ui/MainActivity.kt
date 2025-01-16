@@ -1,7 +1,6 @@
 package com.mints.mobilehealthapplication.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -26,95 +25,150 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
+    private var shouldShowMenu = false
+
+    // Tracks current toolbar menu to prevent duplicate inflation
+    private var currentMenu: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Firebase
+        initializeFirebase()
+        bindUIElements()
+        setupNavigation()
+        checkAuthenticationState()
+    }
+
+    private fun initializeFirebase() {
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
+    }
 
-        // Bind UI elements
+    private fun bindUIElements() {
         mToolbar = findViewById(R.id.main_toolbar)
         bottomNavigation = findViewById(R.id.bottom_navigation)
         floatingActionButton = findViewById(R.id.add_medication_fab)
 
-        // Set up NavController
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-
-        // Set up Toolbar with NavController
         setSupportActionBar(mToolbar)
 
-        // Set up BottomNavigationView with NavController
-        bottomNavigation.setupWithNavController(navController)
-
-        // Set up FAB click listener
         floatingActionButton.setOnClickListener {
             // Handle FAB click
         }
+    }
 
-        // Observe destination changes to update the Toolbar dynamically
+    private fun setupNavigation() {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+        bottomNavigation.setupWithNavController(navController)
+
+        // Update UI elements whenever navigation destination changes
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.homeFragment -> {
-                    updateToolbar(showBackArrow = false, showMenu = true, title = getString(R.string.app_name))
-                }
-                R.id.userInfoFragment -> {
-                    updateToolbar(showBackArrow = false, showMenu = false, title = getString(R.string.app_name))
-                }
-                R.id.healthInfoFragment, R.id.medicationInfoFragment -> {
-                    updateToolbar(showBackArrow = true, showMenu = false, title = getString(R.string.app_name))
-                }
-            }
-        }
-
-        // Check authentication state
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            if (navController.currentDestination?.id != R.id.homeFragment) {
-                navController.navigate(R.id.homeFragment)
-            }
-        } else {
-            if (navController.currentDestination?.id != R.id.loginFragment) {
-                navController.navigate(R.id.loginFragment)
-            }
+            updateUIForDestination(destination.id)
         }
     }
 
-    /**
-     * Updates the Toolbar based on the current fragment's requirements.
-     *
-     * @param showBackArrow Whether to show the back arrow.
-     * @param showMenu Whether to show the menu (settings and logout).
-     * @param title The title to display in the Toolbar.
-     */
-    private fun updateToolbar(showBackArrow: Boolean, showMenu: Boolean, title: String) {
+    private fun updateUIForDestination(destinationId: Int) {
+        when (destinationId) {
+            // Main dashboard with full navigation
+            R.id.homeFragment -> {
+                showAllUI()
+                updateToolbar(
+                    showBackArrow = false,
+                    menuResId = R.menu.top_app_bar,
+                    title = getString(R.string.app_name)
+                )
+                invalidateOptionsMenu()  // Force menu refresh
+
+            }
+            // Profile view without additional navigation
+            R.id.userInfoFragment -> {
+                hideFAB()
+                hideBottomNav()
+                updateToolbar(
+                    showBackArrow = false,
+                    menuResId = null,
+                    title = getString(R.string.app_name)
+                )
+            }
+            // Detail views with back navigation
+            R.id.healthInfoFragment, R.id.medicationInfoFragment -> {
+                hideFAB()
+                hideBottomNav()
+                updateToolbar(
+                    showBackArrow = true,
+                    menuResId = null,
+                    title = getString(R.string.app_name)
+                )
+            }
+            // Authentication view without navigation elements
+            R.id.loginFragment, R.id.resetPasswordFragment -> {
+                hideAllUI()
+            }
+
+            R.id.addMedicationFragment -> {
+                // Choose UI state:
+                showAllUI() // or hideAllUI() or mix of show/hide methods
+                updateToolbar(
+                    showBackArrow = true,
+                    menuResId =   null,
+                    title = getString(R.string.app_name)
+                )
+            }
+
+            // Template for new fragments
+            /*
+            R.id.newFragment -> {
+                // Choose UI state:
+                showAllUI() // or hideAllUI() or mix of show/hide methods
+                updateToolbar(
+                    showBackArrow = true/false,
+                    menuResId = R.menu.your_menu or null,
+                    title = "Your Title"
+                )
+            }
+            */
+        }
+    }
+
+    private fun showAllUI() {
+        showAppBar()
+        showBottomNav()
+        showFAB()
+    }
+
+    private fun hideAllUI() {
+        hideAppBar()
+        hideBottomNav()
+        hideFAB()
+    }
+
+    private fun updateToolbar(showBackArrow: Boolean, menuResId: Int?, title: String) {
         mToolbar.title = title
 
-        // Show or hide the back arrow
+        // Configure back navigation
         if (showBackArrow) {
             mToolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
-            mToolbar.setNavigationOnClickListener {
-                onBackPressed()
-            }
+            mToolbar.setNavigationOnClickListener { onBackPressed() }
         } else {
             mToolbar.navigationIcon = null
         }
 
-        // Show or hide the menu
-        if (showMenu) {
-            mToolbar.inflateMenu(R.menu.top_app_bar)
-        } else {
-            mToolbar.menu.clear()
-        }
+        // Store the menu resource ID for later use
+        currentMenu = menuResId
+        shouldShowMenu = menuResId != null
+
+        // Force menu recreation
+        invalidateOptionsMenu()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the Toolbar
-        menuInflater.inflate(R.menu.top_app_bar, menu)
-        return true
+    private fun checkAuthenticationState() {
+        val currentUser = auth.currentUser
+        if (currentUser == null && navController.currentDestination?.id != R.id.loginFragment) {
+            navController.navigate(R.id.loginFragment)
+        } else if (currentUser != null && navController.currentDestination?.id != R.id.homeFragment) {
+            navController.navigate(R.id.homeFragment)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -123,14 +177,11 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
                 true
             }
-
             R.id.action_logout -> {
-                Toast.makeText(this, "Logout clicked", Toast.LENGTH_SHORT).show()
                 auth.signOut()
                 navController.navigate(R.id.action_homeFragment_to_loginFragment)
                 true
             }
-
             R.id.streaks -> {
                 val addStreakBottomSheet = StreakBottomSheetFragment()
                 addStreakBottomSheet.show(supportFragmentManager, "StreakBottomSheetFragment")
@@ -140,44 +191,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun retrieveUserInfo(userId: String) {
-        db.collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    Log.d("Firestore", "Document ID: ${document.id}, Data: ${document.data}")
-                } else {
-                    Log.d("Firestore", "No such document")
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Error reading document", e)
-            }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Only inflate the menu if it should be shown
+        if (shouldShowMenu && currentMenu != null) {
+            menuInflater.inflate(currentMenu!!, menu)
+            return true
+        }
+        return false
     }
 
-    fun showFAB() {
-        floatingActionButton.isVisible = true
-    }
-
-    fun hideFAB() {
-        floatingActionButton.isVisible = false
-    }
-
-    fun hideAppBar() {
-        mToolbar.isVisible = false
-    }
-
-    fun showAppBar() {
-        mToolbar.isVisible = true
-    }
-
-    fun showBottomNav() {
-        bottomNavigation.isVisible = true
-    }
-
-    fun hideBottomNav() {
-        bottomNavigation.isVisible = false
-    }
+    // UI visibility control methods
+    fun showFAB() { floatingActionButton.isVisible = true }
+    fun hideFAB() { floatingActionButton.isVisible = false }
+    fun hideAppBar() { mToolbar.isVisible = false }
+    fun showAppBar() { mToolbar.isVisible = true }
+    fun showBottomNav() { bottomNavigation.isVisible = true }
+    fun hideBottomNav() { bottomNavigation.isVisible = false }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()

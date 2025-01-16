@@ -19,6 +19,7 @@ data class UserMedication(
 )
 
 data class Medication(
+    var id: String? = null,
     val name: String = "",
     val dosage: String = "",
     val frequency: String = "",

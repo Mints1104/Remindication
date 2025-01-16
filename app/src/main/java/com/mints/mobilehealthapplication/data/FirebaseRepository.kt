@@ -33,4 +33,7 @@ object FirebaseRepository {
             Pair(false, e.message ?: "Login failed.")
         }
     }
+
+  fun getCurrentUser() = auth.currentUser
+
 }

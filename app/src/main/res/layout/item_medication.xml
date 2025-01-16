@@ -24,6 +24,13 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/medication_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Id:"
+            android:textSize="16sp" />
+
+        <TextView
             android:id="@+id/medication_dosage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
