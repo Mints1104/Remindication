@@ -2,9 +2,13 @@ package com.mints.mobilehealthapplication.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.data.FireStoreRepository
+import com.mints.mobilehealthapplication.data.Medication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -12,27 +16,25 @@ import kotlinx.coroutines.tasks.await
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 /**
- * ViewModel to handle user registration process, including authentication and saving data to Firestore.
+ * ViewModel responsible for managing the registration process including user data and medication information.
+ * Handles user authentication, data validation, and storage in Firebase.
  */
 class RegistrationViewModel : ViewModel() {
     private val auth = Firebase.auth
 
-    // MutableStateFlow for holding user registration data
+    // Encapsulated MutableStateFlows
     private val _registrationData = MutableStateFlow(RegistrationData())
-    // Exposed as StateFlow for observing changes
     val registrationData = _registrationData.asStateFlow()
 
-    // MutableStateFlow for tracking the current registration state
     private val _registrationState = MutableStateFlow<RegistrationState>(RegistrationState.Initial)
-    // Exposed as StateFlow for observing changes in registration state
     val registrationState = _registrationState.asStateFlow()
 
     /**
-     * Data class holding user registration details.
+     * Data class containing all registration-related information.
+     * Uses nullable types for optional medication fields.
      */
     data class RegistrationData(
         var email: String = "",
@@ -41,100 +43,159 @@ class RegistrationViewModel : ViewModel() {
         var lastName: String = "",
         var dateOfBirth: String = "",
         var phoneNumber: String = "",
+        // Medication fields are optional during registration
         var medicationName: String = "",
         var dosage: String = "",
         var frequency: String = "",
         var reminderTime: String = "",
-        var theme: String = "Light", // Default theme
-        var enableNotifications: Boolean = true // Default notification preference
+        var theme: String = "Light",
+        var enableNotifications: Boolean = true
     )
 
     /**
-     * Sealed class representing different states of the registration process.
+     * Sealed class representing all possible states during the registration process.
+     * Provides type-safe state handling.
      */
     sealed class RegistrationState {
-        data object Initial : RegistrationState() // Initial state before any action is taken
-        data object Loading : RegistrationState() // State when registration is in progress
-        data class Error(val message: String) : RegistrationState() // State for error with a message
-        data object Success : RegistrationState() // State for successful registration
+        data object Initial : RegistrationState()
+        data object Loading : RegistrationState()
+        data class Error(val message: String, val type: ErrorType = ErrorType.GENERAL) : RegistrationState()
+        data class Success(val userId: String) : RegistrationState()
     }
 
+    /**
+     * Enum class representing different types of registration errors.
+     * Used for more specific error handling in the UI.
+     */
+    enum class ErrorType {
+        EMAIL_EXISTS,
+        WEAK_PASSWORD,
+        INVALID_EMAIL,
+        AGE_RESTRICTION,
+        GENERAL
+    }
+
+    /**
+     * Validates if the user meets the minimum age requirement (18 years).
+     * Uses device's locale for date parsing.
+     */
     fun isAgeValid(dobString: String): Boolean {
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.UK)
-        var dob: Date? = null
-        try {
-            dob = dateFormat.parse(dobString)
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val dob = try {
+            dateFormat.parse(dobString)
         } catch (e: ParseException) {
             e.printStackTrace()
             return false
-        }
+        } ?: return false
 
-        if (dob == null) return false
-
-        val dobCalendar = Calendar.getInstance()
-        dobCalendar.time = dob
-
+        val dobCalendar = Calendar.getInstance().apply { time = dob }
         val currentCalendar = Calendar.getInstance()
 
-        val yearDiff = currentCalendar.get(Calendar.YEAR) - dobCalendar.get(Calendar.YEAR)
-        val monthDiff = currentCalendar.get(Calendar.MONTH) - dobCalendar.get(Calendar.MONTH)
-        val dayDiff = currentCalendar.get(Calendar.DAY_OF_MONTH) - dobCalendar.get(Calendar.DAY_OF_MONTH)
-
-        val age = if (monthDiff < 0 || (monthDiff == 0 && dayDiff < 0)) {
-            yearDiff - 1
-        } else {
-            yearDiff
-        }
+        // Calculate age considering month and day
+        val age = currentCalendar.get(Calendar.YEAR) - dobCalendar.get(Calendar.YEAR) -
+                if (currentCalendar.get(Calendar.MONTH) < dobCalendar.get(Calendar.MONTH) ||
+                    (currentCalendar.get(Calendar.MONTH) == dobCalendar.get(Calendar.MONTH) &&
+                            currentCalendar.get(Calendar.DAY_OF_MONTH) < dobCalendar.get(Calendar.DAY_OF_MONTH))) {
+                    1
+                } else {
+                    0
+                }
 
         return age >= 18
     }
 
     /**
-     * Function to register a new user with Firebase Authentication and save additional data to Firestore.
+     * Handles the complete registration process including user creation and data storage.
+     * Executes in a coroutine scope and handles various Firebase exceptions.
      */
     fun registerUser() = viewModelScope.launch {
         _registrationState.value = RegistrationState.Loading
 
-        val data = _registrationData.value
-
         try {
-            // Step 1: Create user with Firebase Authentication
-            val authResult = auth.createUserWithEmailAndPassword(data.email, data.password).await()
+            // Validate age before proceeding
+            if (!isAgeValid(_registrationData.value.dateOfBirth)) {
+                _registrationState.value = RegistrationState.Error(
+                    "You must be 18 or older to register",
+                    ErrorType.AGE_RESTRICTION
+                )
+                return@launch
+            }
+
+            // Create Firebase user
+            val authResult = auth.createUserWithEmailAndPassword(
+                _registrationData.value.email,
+                _registrationData.value.password
+            ).await()
+
             val user = authResult.user
-
             if (user != null) {
-                // Step 2: Save user data to Firestore using the repository
-                val isSaved = FireStoreRepository.saveUserData(user.uid, data)
+                // Save user data
+                val userData = _registrationData.value
+                val isSaved = FireStoreRepository.saveUserData(user.uid, userData)
 
-                if (isSaved) {
-                    _registrationState.value = RegistrationState.Success
-                } else {
-                    _registrationState.value = RegistrationState.Error("Failed to save user data")
+                if (!isSaved) {
+                    _registrationState.value = RegistrationState.Error(
+                        "Unable to save your information. Please try again.",
+                        ErrorType.GENERAL
+                    )
+                    return@launch
                 }
+
+                // Save medication if provided
+                if (userData.medicationName.isNotEmpty()) {
+                    val medication = Medication(
+                        name = userData.medicationName,
+                        dosage = userData.dosage,
+                        frequency = userData.frequency,
+                        time = userData.reminderTime
+                    )
+
+                    val isMedicationSaved = FireStoreRepository.saveMedication(user.uid, medication)
+                    if (!isMedicationSaved) {
+                        _registrationState.value = RegistrationState.Error(
+                            "Your account was created but medication details couldn't be saved. " +
+                                    "You can add them later from your profile.",
+                            ErrorType.GENERAL
+                        )
+                        return@launch
+                    }
+                }
+
+                _registrationState.value = RegistrationState.Success(user.uid)
             } else {
-                _registrationState.value = RegistrationState.Error("User creation failed")
+                _registrationState.value = RegistrationState.Error(
+                    "Unable to create your account. Please try again.",
+                    ErrorType.GENERAL
+                )
             }
         } catch (e: Exception) {
-            _registrationState.value = RegistrationState.Error(e.message ?: "Registration failed")
+            val (message, type) = when (e) {
+                is FirebaseAuthUserCollisionException -> Pair(
+                    "This email is already registered. Please use a different email or try logging in.",
+                    ErrorType.EMAIL_EXISTS
+                )
+                is FirebaseAuthWeakPasswordException -> Pair(
+                    "Please use a stronger password with at least 6 characters.",
+                    ErrorType.WEAK_PASSWORD
+                )
+                is FirebaseAuthInvalidCredentialsException -> Pair(
+                    "Please enter a valid email address.",
+                    ErrorType.INVALID_EMAIL
+                )
+                else -> Pair(
+                    e.message ?: "Registration failed. Please try again.",
+                    ErrorType.GENERAL
+                )
+            }
+            _registrationState.value = RegistrationState.Error(message, type)
         }
     }
 
     /**
-     * Function to save additional user data (such as name, medication info, etc.) to Firestore.
-     *
-     * @param uid The unique user ID generated by Firebase Authentication
-     * @param data The registration data to be saved to Firestore
-     */
-
-
-    /**
-     * Function to update the registration data by applying a provided update function.
-     * This allows for modifying only specific fields of the registration data.
-     *
-     * @param update The update function to modify the RegistrationData
+     * Updates registration data in a thread-safe way using the provided update function.
+     * @param update lambda function to modify registration data
      */
     fun updateRegistrationData(update: RegistrationData.() -> Unit) {
-        // Apply the update to the current registration data
-        _registrationData.value = _registrationData.value.apply(update)
+        _registrationData.value = _registrationData.value.copy().apply(update)
     }
 }

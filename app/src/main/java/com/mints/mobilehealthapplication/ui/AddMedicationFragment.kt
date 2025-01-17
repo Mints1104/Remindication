@@ -1,26 +1,50 @@
 package com.mints.mobilehealthapplication.ui
 
+import android.app.TimePickerDialog
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationBinding
 import com.mints.mobilehealthapplication.viewmodels.MedicationViewModel
+import java.util.Calendar
+import java.util.Locale
 
 class AddMedicationFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: MedicationViewModel
+    private var customFrequencyDialog: AlertDialog? = null
+    private var timePickerDialog: TimePickerDialog? = null
+
+    private var selectedFrequency: String? = null
+    private val standardFrequencies = listOf(
+        "Once daily",
+        "Twice daily",
+        "Three times daily",
+        "Four times daily",
+        "Every morning",
+        "Every evening",
+        "Every night before bed",
+        "As needed",
+        "Weekly",
+        "Monthly"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,6 +54,7 @@ class AddMedicationFragment : Fragment() {
         val view = binding.root
 
         Log.d("AddMedicationFragment", "onCreateView called")
+        val frequencyChipGroup = view.findViewById<ChipGroup>(R.id.frequency_chip_group)
 
         val mainActivity = activity as MainActivity
         mainActivity.hideFAB()
@@ -42,14 +67,11 @@ class AddMedicationFragment : Fragment() {
         // Set up UI elements
         val medicationNameEditText = binding.medicationNameEditText
         val dosageEditText = binding.dosageEditText
-        val frequencySpinner = binding.frequencySpinner
-        val frequencyOptions = listOf("Once a day", "Twice a day", "Three times a day", "As needed")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, frequencyOptions)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        frequencySpinner.adapter = adapter
-        Log.d("AddMedicationFragment", "Frequency spinner initialized with options: $frequencyOptions")
+        setupFrequencyChips(frequencyChipGroup)
+        val reminderTimeEditText = binding.reminderTimeEditText
 
-        val timePicker = binding.timePicker
+        setupTimePicker(reminderTimeEditText)
+
         val notesEditText = binding.notesEditText
 
         // Set up save button click listener
@@ -58,16 +80,17 @@ class AddMedicationFragment : Fragment() {
 
             val medicationName = medicationNameEditText.text.toString().trim()
             val dosage = dosageEditText.text.toString().trim()
-            val frequency = frequencySpinner.selectedItem.toString()
-            val time = "${timePicker.hour}:${timePicker.minute}"
+            val reminderTime = reminderTimeEditText.text.toString()
+
+
             val notes = notesEditText.text.toString().trim()
-            val id = ""
+
 
             Log.d("AddMedicationFragment", "Medication details entered:")
             Log.d("AddMedicationFragment", "Name: $medicationName")
             Log.d("AddMedicationFragment", "Dosage: $dosage")
-            Log.d("AddMedicationFragment", "Frequency: $frequency")
-            Log.d("AddMedicationFragment", "Time: $time")
+            Log.d("AddMedicationFragment", "Frequency: $selectedFrequency")
+            Log.d("AddMedicationFragment", "Time: $reminderTime")
             Log.d("AddMedicationFragment", "Notes: $notes")
 
             if (medicationName.isEmpty() || dosage.isEmpty()) {
@@ -79,8 +102,8 @@ class AddMedicationFragment : Fragment() {
             val medication = Medication(
                 name = medicationName,
                 dosage = dosage,
-                frequency = frequency,
-                time = time,
+                frequency = selectedFrequency ?: return@setOnClickListener,
+                time = reminderTime,
                 notes = notes
             )
             Log.d("AddMedicationFragment", "Medication object created: $medication")
@@ -109,14 +132,122 @@ class AddMedicationFragment : Fragment() {
             }
         }
 
-        // Set up cancel button click listener
-        binding.closeAddMedicationView.setOnClickListener {
-            Log.d("AddMedicationFragment", "Cancel button clicked")
-            findNavController().navigateUp()
-        }
+
 
         return view
     }
+
+    private fun setupTimePicker(reminderTimeEditText: EditText) {
+        reminderTimeEditText.apply {
+            inputType = InputType.TYPE_NULL
+            isFocusable = false
+            isFocusableInTouchMode = false
+            isClickable = true
+            hint = getString(R.string.reminder_time_hint)
+        }
+
+        val getTimePickerDialog = {
+            val calendar = Calendar.getInstance()
+            TimePickerDialog(
+                requireContext(),
+                { _, hour, minute ->
+                    val formattedTime = formatTime(hour, minute)
+                    reminderTimeEditText.setText(formattedTime)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                false
+            ).apply {
+                setCancelable(true)
+                setOnCancelListener {
+                    if (reminderTimeEditText.text.isEmpty()) {
+                        reminderTimeEditText.setText("")
+                    }
+                }
+            }
+        }
+
+        reminderTimeEditText.setOnClickListener {
+            timePickerDialog?.dismiss()
+            timePickerDialog = getTimePickerDialog().also { it.show() }
+        }
+
+        reminderTimeEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                timePickerDialog?.dismiss()
+                timePickerDialog = getTimePickerDialog().also { it.show() }
+            }
+        }
+    }
+
+    private fun formatTime(hour: Int, minute: Int): String {
+        val formattedHour = when {
+            hour == 0 -> 12
+            hour > 12 -> hour - 12
+            else -> hour
+        }
+        val amPm = if (hour >= 12) "PM" else "AM"
+        return String.format(Locale.getDefault(), "%d:%02d %s", formattedHour, minute, amPm)
+    }
+
+
+
+    private fun setupFrequencyChips(chipGroup: ChipGroup) {
+        standardFrequencies.forEach { frequency ->
+            val chip = createChip(frequency)
+            chipGroup.addView(chip)
+        }
+
+        val customChip = createChip("Custom...")
+        customChip.setOnClickListener {
+            showCustomFrequencyDialog(chipGroup)
+        }
+        chipGroup.addView(customChip)
+    }
+
+    private fun createChip(text: String): Chip {
+        return Chip(requireContext()).apply {
+            this.text = text
+            isCheckable = true
+            setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    selectedFrequency = text
+                }
+            }
+        }
+    }
+
+    private fun showCustomFrequencyDialog(chipGroup: ChipGroup) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_custom_frequency, null)
+        val editText = dialogView.findViewById<EditText>(R.id.custom_frequency_edit_text)
+
+        customFrequencyDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Enter Custom Frequency")
+            .setView(dialogView)
+            .setPositiveButton("OK") { _, _ ->
+                val customFrequency = editText.text.toString()
+                if (customFrequency.isNotEmpty()) {
+                    chipGroup.findViewWithTag<Chip>("custom")?.let {
+                        chipGroup.removeView(it)
+                    }
+                    val chip = createChip(customFrequency).apply {
+                        tag = "custom"
+                        isChecked = true
+                    }
+                    chipGroup.addView(chip, chipGroup.childCount - 1)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        customFrequencyDialog?.show()
+    }
+
+
+
+
+
+
 
     private fun displayMessage(view: View, msgTxt: String) {
         Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
@@ -126,5 +257,7 @@ class AddMedicationFragment : Fragment() {
         super.onDestroyView()
         Log.d("AddMedicationFragment", "onDestroyView called")
         _binding = null
+        timePickerDialog?.dismiss()
+        timePickerDialog = null
     }
 }

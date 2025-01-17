@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                 updateToolbar(
                     showBackArrow = true,
                     menuResId =   null,
-                    title = getString(R.string.app_name)
+                    title = getString(R.string.add_medication_txt)
                 )
             }
 

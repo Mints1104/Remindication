@@ -89,6 +89,13 @@
     <string name="name_and_dosage_required">Name and dosage are required</string>
     <string name="medication_saved_successfully">Medication saved successfully</string>
     <string name="enter_frequency">Enter frequency</string>
+    <string name="frequency_of_medication">Frequency: %s</string>
+    <string name="dosage_of_medication">Dosage: %s</string>
+    <string name="time_of_medication">Time: %s</string>
+    <string name="select_time">Time</string>
+    <string name="add_notes">Notes</string>
+    <string name="select_frequency">" Select Frequency"</string>
+    <string name="select_dosage">Dosage</string>
 
 
 </resources>

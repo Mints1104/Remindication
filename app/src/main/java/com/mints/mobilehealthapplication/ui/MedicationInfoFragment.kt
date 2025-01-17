@@ -11,7 +11,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.chip.Chip
@@ -22,10 +22,10 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Locale
 
 class MedicationInfoFragment : Fragment() {
-
-    private lateinit var viewModel: RegistrationViewModel
+    private val viewModel: RegistrationViewModel by activityViewModels()
     private var timePickerDialog: TimePickerDialog? = null
     private var customFrequencyDialog: AlertDialog? = null
 
@@ -47,7 +47,6 @@ class MedicationInfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_registration_part3, container, false)
-        viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
         val medicationNameEditText = view.findViewById<EditText>(R.id.medication_name_edit_text)
         val dosageEditText = view.findViewById<EditText>(R.id.dosage_edit_text)
@@ -155,7 +154,7 @@ class MedicationInfoFragment : Fragment() {
             else -> hour
         }
         val amPm = if (hour >= 12) "PM" else "AM"
-        return String.format("%d:%02d %s", formattedHour, minute, amPm)
+        return String.format(Locale.getDefault(), "%d:%02d %s", formattedHour, minute, amPm)
     }
 
     private fun setupFrequencyChips(chipGroup: ChipGroup) {
@@ -237,8 +236,12 @@ class MedicationInfoFragment : Fragment() {
                     is RegistrationViewModel.RegistrationState.Error -> {
                         displayMessage(requireView(), state.message)
                     }
-                    RegistrationViewModel.RegistrationState.Loading -> {}
-                    RegistrationViewModel.RegistrationState.Initial -> {}
+                    RegistrationViewModel.RegistrationState.Loading -> {
+                        // Optionally show loading indicator
+                    }
+                    RegistrationViewModel.RegistrationState.Initial -> {
+                        // Initial state, no action needed
+                    }
                 }
             }
         }

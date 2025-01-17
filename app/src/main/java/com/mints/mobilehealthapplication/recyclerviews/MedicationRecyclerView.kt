@@ -35,10 +35,13 @@ class MedicationRecyclerView(private var medications: List<Medication>)
 
 
         holder.nameTextView.text = medication.name
-        holder.dosageTextView.text = medication.dosage
-        holder.frequencyTextView.text = medication.frequency
-        holder.timeTextView.text = medication.time
         holder.medicationId.text = medication.id
+        holder.dosageTextView.text = holder.itemView.context.getString(R.string.dosage_of_medication,medication.dosage)
+        holder.frequencyTextView.text = holder.itemView.context.getString(R.string.frequency_of_medication,medication.frequency)
+        holder.timeTextView.text = holder.itemView.context.getString(R.string.time_of_medication,medication.time)
+
+
+        // context.getString(R.string.quiz_result_question_text, questionNumber, questionNameDecoded)
     }
 
     override fun getItemCount(): Int {
