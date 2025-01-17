@@ -16,7 +16,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/medication_name"
+            android:id="@+id/medicationName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Medication Name"
@@ -24,28 +24,28 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/medication_id"
+            android:id="@+id/medicationId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Id:"
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/medication_dosage"
+            android:id="@+id/medicationDosage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dosage"
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/medication_frequency"
+            android:id="@+id/medicationFrequency"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Frequency"
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/medication_time"
+            android:id="@+id/medicationTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Time"

@@ -54,6 +54,7 @@
         <item name="colorSurfaceDim">@color/md_theme_surfaceDim_mediumContrast</item>
         <item name="cardBackgroundColor">@color/card_view_background_dark</item>
         <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
 
         <!-- System bars -->
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -95,6 +96,10 @@
         <item name="navigationIconTint">?attr/colorOnSurface</item>
         <item name="android:backgroundTint">?attr/colorSurface</item>
 
+    </style>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="android:navigationBarColor">@color/current_app_background_dark</item>
     </style>
 
     <style name="ThemeOverlay.App.DatePicker" parent="@style/ThemeOverlay.Material3.MaterialCalendar">

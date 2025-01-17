@@ -58,9 +58,15 @@ class HomeFragment : Fragment() {
     private fun setUpRecyclerView() {
         Log.d("HomeFragment", "Setting up RecyclerView")
 
-        // Initialize the adapter with an empty list
-        val adapter = MedicationRecyclerView(emptyList())
-
+        val adapter = MedicationRecyclerView(emptyList()) { medication ->
+            viewModel.onMedicationClicked(medication)
+            if(medication.notes.isNotEmpty()) {
+                val addMedicationNotesBottomSheet = MedicationNotesBottomSheet.newInstance(medication.notes)
+                addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
+            } else {
+                displayMessage(requireView(),"No notes available for ${medication.name}")
+            }
+        }
         // Set the adapter to the RecyclerView
         recyclerView.adapter = adapter
 
@@ -71,6 +77,7 @@ class HomeFragment : Fragment() {
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
             Log.d("HomeFragment", "Observed ${medications.size} medications in LiveData")
             adapter.updateMedicationList(medications)
+
         }
 
         Log.d("HomeFragment", "RecyclerView setup complete")

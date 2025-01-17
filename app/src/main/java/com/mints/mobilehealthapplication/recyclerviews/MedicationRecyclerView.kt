@@ -2,30 +2,25 @@ package com.mints.mobilehealthapplication.recyclerviews
 
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationDiffCallback
+import com.mints.mobilehealthapplication.databinding.ItemMedicationBinding
 
-class MedicationRecyclerView(private var medications: List<Medication>)
-    : RecyclerView.Adapter<MedicationRecyclerView.MedicationViewHolder>() {
+class MedicationRecyclerView(
+    private var medications: List<Medication>,
+    private val onClick: (Medication) -> Unit
+) : RecyclerView.Adapter<MedicationRecyclerView.MedicationViewHolder>() {
 
-    class MedicationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val nameTextView: TextView = view.findViewById(R.id.medication_name)
-        val dosageTextView: TextView = view.findViewById(R.id.medication_dosage)
-        val frequencyTextView: TextView = view.findViewById(R.id.medication_frequency)
-        val timeTextView: TextView = view.findViewById(R.id.medication_time)
-        val medicationId: TextView = view.findViewById(R.id.medication_id)
-    }
+    class MedicationViewHolder(val binding: ItemMedicationBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MedicationViewHolder {
         Log.d("MedicationRecyclerView", "Creating ViewHolder")
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_medication, parent, false)
-        return MedicationViewHolder(view)
+        val binding = ItemMedicationBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return MedicationViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MedicationViewHolder, position: Int) {
@@ -33,15 +28,17 @@ class MedicationRecyclerView(private var medications: List<Medication>)
         Log.d("MedicationRecyclerView", "Binding medication: ${medication.name}")
         Log.d("MedicationRecyclerView", "Binding medication: ${medication.id}")
 
+        val context = holder.binding.root.context
 
-        holder.nameTextView.text = medication.name
-        holder.medicationId.text = medication.id
-        holder.dosageTextView.text = holder.itemView.context.getString(R.string.dosage_of_medication,medication.dosage)
-        holder.frequencyTextView.text = holder.itemView.context.getString(R.string.frequency_of_medication,medication.frequency)
-        holder.timeTextView.text = holder.itemView.context.getString(R.string.time_of_medication,medication.time)
+        holder.binding.medicationName.text = medication.name
+        holder.binding.medicationId.text = medication.id
+        holder.binding.medicationDosage.text = context.getString(R.string.dosage_of_medication, medication.dosage)
+        holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication, medication.frequency)
+        holder.binding.medicationTime.text = context.getString(R.string.time_of_medication, medication.time)
 
-
-        // context.getString(R.string.quiz_result_question_text, questionNumber, questionNameDecoded)
+        holder.binding.root.setOnClickListener {
+                        onClick(medication)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -56,4 +53,7 @@ class MedicationRecyclerView(private var medications: List<Medication>)
         diffResult.dispatchUpdatesTo(this)
     }
 
+    interface OnClickListener {
+        fun onItemClick(medication: Medication)
+    }
 }

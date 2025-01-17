@@ -13,7 +13,8 @@ class HomeFragmentViewModel : ViewModel() {
 
     private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
-
+    private val _navigateToDetails = MutableLiveData<Medication?>()
+    val navigateToDetails: LiveData<Medication?> get() = _navigateToDetails
     fun getMedications(uid: String) {
         Log.d("HomeFragmentViewModel", "Fetching medications for user: $uid")
         viewModelScope.launch {
@@ -22,4 +23,14 @@ class HomeFragmentViewModel : ViewModel() {
             _medications.postValue(meds)
         }
     }
+
+    fun onMedicationClicked(medication: Medication) {
+        _navigateToDetails.value = medication // Trigger navigation
+    }
+
+    fun onNavigationComplete() {
+        _navigateToDetails.value = null // Reset navigation event
+    }
+
+
 }
