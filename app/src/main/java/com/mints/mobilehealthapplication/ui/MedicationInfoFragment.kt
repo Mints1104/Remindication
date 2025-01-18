@@ -6,7 +6,6 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
@@ -19,16 +18,22 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.databinding.FragmentRegistrationPart3Binding
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Locale
 
+/**
+ * Fragment for collecting medication information in the registration flow.
+ */
 class MedicationInfoFragment : Fragment() {
+
     private val viewModel: RegistrationViewModel by activityViewModels()
     private var timePickerDialog: TimePickerDialog? = null
     private var customFrequencyDialog: AlertDialog? = null
-
+    private var _binding: FragmentRegistrationPart3Binding? = null
+    private val binding get() = _binding!!
     private val standardFrequencies = listOf(
         "Once daily",
         "Twice daily",
@@ -46,25 +51,25 @@ class MedicationInfoFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_registration_part3, container, false)
+        _binding = FragmentRegistrationPart3Binding.inflate(inflater, container, false)
 
-        val medicationNameEditText = view.findViewById<EditText>(R.id.medication_name_edit_text)
-        val dosageEditText = view.findViewById<EditText>(R.id.dosage_edit_text)
-        val frequencyChipGroup = view.findViewById<ChipGroup>(R.id.frequency_chip_group)
-        val reminderTimeEditText = view.findViewById<EditText>(R.id.reminder_time_edit_text)
-        val continueButton = view.findViewById<Button>(R.id.continue_button)
-        val skipButton = view.findViewById<Button>(R.id.skip_button)
+        val medicationNameEditText = binding.medicationNameEditText
+        val dosageEditText = binding.dosageEditText
+        val frequencyChipGroup = binding.frequencyChipGroup
+        val reminderTimeEditText = binding.reminderTimeEditText
+        val continueButton = binding.continueButton
+        val skipButton = binding.skipButton
 
         setupFrequencyChips(frequencyChipGroup)
         setupTimePicker(reminderTimeEditText)
 
-        // Restore values from the ViewModel
+        // Restore values from the ViewModel, if available
         medicationNameEditText.setText(viewModel.registrationData.value.medicationName)
         dosageEditText.setText(viewModel.registrationData.value.dosage)
         reminderTimeEditText.setText(viewModel.registrationData.value.reminderTime)
         getSelectedFrequency(frequencyChipGroup)
 
-        // Save values to the ViewModel as they change
+        // Save input values to ViewModel when they change
         medicationNameEditText.doAfterTextChanged {
             viewModel.registrationData.value.medicationName = it?.toString() ?: ""
         }
@@ -74,6 +79,8 @@ class MedicationInfoFragment : Fragment() {
         reminderTimeEditText.doAfterTextChanged {
             viewModel.registrationData.value.reminderTime = it?.toString() ?: ""
         }
+
+        // Handle frequency selection changes
         frequencyChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
             if (checkedIds.isNotEmpty()) {
                 val selectedChip = group.findViewById<Chip>(checkedIds[0])
@@ -81,6 +88,7 @@ class MedicationInfoFragment : Fragment() {
             }
         }
 
+        // Continue button: Validate input and complete registration
         continueButton.setOnClickListener {
             val medicationName = medicationNameEditText.text.toString()
             val dosage = dosageEditText.text.toString()
@@ -101,9 +109,12 @@ class MedicationInfoFragment : Fragment() {
             }
         }
 
-        return view
+        return binding.root
     }
 
+    /**
+     * Initializes the time picker for setting a reminder time.
+     */
     private fun setupTimePicker(reminderTimeEditText: EditText) {
         reminderTimeEditText.apply {
             inputType = InputType.TYPE_NULL
@@ -113,6 +124,7 @@ class MedicationInfoFragment : Fragment() {
             hint = getString(R.string.reminder_time_hint)
         }
 
+        // Create time picker dialog
         val getTimePickerDialog = {
             val calendar = Calendar.getInstance()
             TimePickerDialog(
@@ -134,11 +146,13 @@ class MedicationInfoFragment : Fragment() {
             }
         }
 
+        // Show time picker when the user clicks on the input field
         reminderTimeEditText.setOnClickListener {
             timePickerDialog?.dismiss()
             timePickerDialog = getTimePickerDialog().also { it.show() }
         }
 
+        // Show time picker when the input field gains focus
         reminderTimeEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 timePickerDialog?.dismiss()
@@ -147,6 +161,9 @@ class MedicationInfoFragment : Fragment() {
         }
     }
 
+    /**
+     * Formats the time in 12-hour format (e.g., "1:30 PM").
+     */
     private fun formatTime(hour: Int, minute: Int): String {
         val formattedHour = when {
             hour == 0 -> 12
@@ -157,12 +174,16 @@ class MedicationInfoFragment : Fragment() {
         return String.format(Locale.getDefault(), "%d:%02d %s", formattedHour, minute, amPm)
     }
 
+    /**
+     * Sets up frequency chip buttons for standard frequencies and custom input.
+     */
     private fun setupFrequencyChips(chipGroup: ChipGroup) {
         standardFrequencies.forEach { frequency ->
             val chip = createChip(frequency)
             chipGroup.addView(chip)
         }
 
+        // Add a custom frequency chip with an option to enter a custom value
         val customChip = createChip("Custom...")
         customChip.setOnClickListener {
             showCustomFrequencyDialog(chipGroup)
@@ -170,6 +191,9 @@ class MedicationInfoFragment : Fragment() {
         chipGroup.addView(customChip)
     }
 
+    /**
+     * Creates a chip with the given text.
+     */
     private fun createChip(text: String): Chip {
         return Chip(requireContext()).apply {
             this.text = text
@@ -177,6 +201,9 @@ class MedicationInfoFragment : Fragment() {
         }
     }
 
+    /**
+     * Displays a dialog to enter a custom frequency.
+     */
     private fun showCustomFrequencyDialog(chipGroup: ChipGroup) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_custom_frequency, null)
         val editText = dialogView.findViewById<EditText>(R.id.custom_frequency_edit_text)
@@ -203,9 +230,13 @@ class MedicationInfoFragment : Fragment() {
         customFrequencyDialog?.show()
     }
 
+    /**
+     * Retrieves the selected frequency from the chip group.
+     */
     private fun getSelectedFrequency(chipGroup: ChipGroup): String {
         val frequency = viewModel.registrationData.value.frequency
 
+        // Restore previously selected frequency if available
         if (frequency.isNotEmpty()) {
             for (i in 0 until chipGroup.childCount) {
                 val chip = chipGroup.getChildAt(i) as? Chip
@@ -216,12 +247,16 @@ class MedicationInfoFragment : Fragment() {
             }
         }
 
+        // Return the selected frequency or an empty string if none is selected
         val selectedId = chipGroup.checkedChipId
         return if (selectedId != View.NO_ID) {
             chipGroup.findViewById<Chip>(selectedId)?.text?.toString() ?: ""
         } else ""
     }
 
+    /**
+     * Completes the registration process and navigates to the next screen.
+     */
     private fun completeRegistration() {
         viewModel.registerUser()
 
@@ -247,6 +282,9 @@ class MedicationInfoFragment : Fragment() {
         }
     }
 
+    /**
+     * Displays a message as a Snackbar.
+     */
     private fun displayMessage(view: View, msgTxt: String) {
         Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
     }
@@ -255,5 +293,6 @@ class MedicationInfoFragment : Fragment() {
         super.onDestroyView()
         timePickerDialog?.dismiss()
         timePickerDialog = null
+        _binding = null
     }
 }

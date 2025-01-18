@@ -24,14 +24,20 @@ import com.mints.mobilehealthapplication.viewmodels.MedicationViewModel
 import java.util.Calendar
 import java.util.Locale
 
+/**
+ * A Fragment to handle adding a medication entry.
+ * Allows the user to input medication details such as name, dosage, frequency, reminder time, and notes.
+ */
 class AddMedicationFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = _binding!! // Safe reference to the binding object
+
     private lateinit var viewModel: MedicationViewModel
     private var customFrequencyDialog: AlertDialog? = null
     private var timePickerDialog: TimePickerDialog? = null
 
+    // Selected frequency and a list of standard frequencies
     private var selectedFrequency: String? = null
     private val standardFrequencies = listOf(
         "Once daily",
@@ -46,46 +52,53 @@ class AddMedicationFragment : Fragment() {
         "Monthly"
     )
 
+    /**
+     * Inflates the layout and initializes UI elements for the fragment.
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Inflate the layout using ViewBinding
         _binding = FragmentAddMedicationBinding.inflate(inflater, container, false)
         val view = binding.root
 
         Log.d("AddMedicationFragment", "onCreateView called")
+
+        // Set up the frequency chip group UI element
         val frequencyChipGroup = view.findViewById<ChipGroup>(R.id.frequency_chip_group)
 
+        // Hide FAB and bottom navigation from the parent activity
         val mainActivity = activity as MainActivity
         mainActivity.hideFAB()
         mainActivity.hideBottomNav()
 
-        // Initialize ViewModel
+        // Initialize ViewModel to handle medication data
         viewModel = ViewModelProvider(this)[MedicationViewModel::class.java]
         Log.d("AddMedicationFragment", "ViewModel initialized")
 
-        // Set up UI elements
+        // Set up UI elements for user input
         val medicationNameEditText = binding.medicationNameEditText
         val dosageEditText = binding.dosageEditText
-        setupFrequencyChips(frequencyChipGroup)
+        setupFrequencyChips(frequencyChipGroup)  // Set up frequency chips
         val reminderTimeEditText = binding.reminderTimeEditText
 
+        // Set up time picker dialog for reminder time input
         setupTimePicker(reminderTimeEditText)
 
         val notesEditText = binding.notesEditText
 
-        // Set up save button click listener
+        // Set up the save button to save medication details
         binding.saveMedicationButton.setOnClickListener {
             Log.d("AddMedicationFragment", "Save button clicked")
 
+            // Collect medication details from user input
             val medicationName = medicationNameEditText.text.toString().trim()
             val dosage = dosageEditText.text.toString().trim()
             val reminderTime = reminderTimeEditText.text.toString()
-
-
             val notes = notesEditText.text.toString().trim()
 
-
+            // Log the entered medication details
             Log.d("AddMedicationFragment", "Medication details entered:")
             Log.d("AddMedicationFragment", "Name: $medicationName")
             Log.d("AddMedicationFragment", "Dosage: $dosage")
@@ -93,12 +106,14 @@ class AddMedicationFragment : Fragment() {
             Log.d("AddMedicationFragment", "Time: $reminderTime")
             Log.d("AddMedicationFragment", "Notes: $notes")
 
+            // Validate required fields
             if (medicationName.isEmpty() || dosage.isEmpty()) {
                 Log.d("AddMedicationFragment", "Validation failed: Name or dosage is empty")
-                displayMessage(requireView(),getString(R.string.name_and_dosage_required))
+                displayMessage(requireView(), getString(R.string.name_and_dosage_required))
                 return@setOnClickListener
             }
 
+            // Create a medication object to save
             val medication = Medication(
                 name = medicationName,
                 dosage = dosage,
@@ -108,36 +123,41 @@ class AddMedicationFragment : Fragment() {
             )
             Log.d("AddMedicationFragment", "Medication object created: $medication")
 
+            // Retrieve the current authenticated user's UID
             val uid = FirebaseAuth.getInstance().uid ?: ""
             Log.d("AddMedicationFragment", "Current user UID: $uid")
 
+            // Check if user is authenticated
             if (uid.isEmpty()) {
                 Log.e("AddMedicationFragment", "User is not authenticated")
-                displayMessage(requireView(),getString(R.string.user_not_authenticated))
+                displayMessage(requireView(), getString(R.string.user_not_authenticated))
                 return@setOnClickListener
             }
 
+            // Save the medication to the database using ViewModel
             viewModel.saveMedication(uid, medication)
         }
 
-        // Observe save result LiveData
+        // Observe result of saving medication and handle success/failure
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             if (success) {
                 Log.d("AddMedicationFragment", "Medication saved successfully")
-                displayMessage(requireView(),getString(R.string.medication_saved_successfully))
-                findNavController().navigateUp()
+                displayMessage(requireView(), getString(R.string.medication_saved_successfully))
+                findNavController().navigateUp()  // Navigate back to previous screen
             } else {
                 Log.e("AddMedicationFragment", "Failed to save medication")
-                displayMessage(requireView(),getString(R.string.failed_to_save_medication))
+                displayMessage(requireView(), getString(R.string.failed_to_save_medication))
             }
         }
 
-
-
-        return view
+        return view  // Return the root view
     }
 
+    /**
+     * Sets up the time picker dialog for selecting reminder time.
+     */
     private fun setupTimePicker(reminderTimeEditText: EditText) {
+        // Set up properties for the reminder time input field
         reminderTimeEditText.apply {
             inputType = InputType.TYPE_NULL
             isFocusable = false
@@ -146,6 +166,7 @@ class AddMedicationFragment : Fragment() {
             hint = getString(R.string.reminder_time_hint)
         }
 
+        // Create a time picker dialog
         val getTimePickerDialog = {
             val calendar = Calendar.getInstance()
             TimePickerDialog(
@@ -167,11 +188,13 @@ class AddMedicationFragment : Fragment() {
             }
         }
 
+        // Show time picker when clicked
         reminderTimeEditText.setOnClickListener {
             timePickerDialog?.dismiss()
             timePickerDialog = getTimePickerDialog().also { it.show() }
         }
 
+        // Show time picker when focused
         reminderTimeEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 timePickerDialog?.dismiss()
@@ -180,6 +203,9 @@ class AddMedicationFragment : Fragment() {
         }
     }
 
+    /**
+     * Formats the given hour and minute into a 12-hour format with AM/PM.
+     */
     private fun formatTime(hour: Int, minute: Int): String {
         val formattedHour = when {
             hour == 0 -> 12
@@ -190,33 +216,41 @@ class AddMedicationFragment : Fragment() {
         return String.format(Locale.getDefault(), "%d:%02d %s", formattedHour, minute, amPm)
     }
 
-
-
+    /**
+     * Sets up the frequency chip group with predefined frequency options.
+     */
     private fun setupFrequencyChips(chipGroup: ChipGroup) {
         standardFrequencies.forEach { frequency ->
             val chip = createChip(frequency)
             chipGroup.addView(chip)
         }
 
+        // Add a custom chip to allow user input for a custom frequency
         val customChip = createChip("Custom...")
         customChip.setOnClickListener {
-            showCustomFrequencyDialog(chipGroup)
+            showCustomFrequencyDialog(chipGroup)  // Show dialog for custom frequency
         }
         chipGroup.addView(customChip)
     }
 
+    /**
+     * Creates a chip for the given frequency text.
+     */
     private fun createChip(text: String): Chip {
         return Chip(requireContext()).apply {
             this.text = text
             isCheckable = true
             setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    selectedFrequency = text
+                    selectedFrequency = text  // Set the selected frequency when checked
                 }
             }
         }
     }
 
+    /**
+     * Shows the dialog to input a custom frequency.
+     */
     private fun showCustomFrequencyDialog(chipGroup: ChipGroup) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_custom_frequency, null)
         val editText = dialogView.findViewById<EditText>(R.id.custom_frequency_edit_text)
@@ -228,7 +262,7 @@ class AddMedicationFragment : Fragment() {
                 val customFrequency = editText.text.toString()
                 if (customFrequency.isNotEmpty()) {
                     chipGroup.findViewWithTag<Chip>("custom")?.let {
-                        chipGroup.removeView(it)
+                        chipGroup.removeView(it)  // Remove existing custom chip
                     }
                     val chip = createChip(customFrequency).apply {
                         tag = "custom"
@@ -243,16 +277,16 @@ class AddMedicationFragment : Fragment() {
         customFrequencyDialog?.show()
     }
 
-
-
-
-
-
-
+    /**
+     * Displays a message in a Snackbar at the bottom of the screen.
+     */
     private fun displayMessage(view: View, msgTxt: String) {
         Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
     }
 
+    /**
+     * Called when the view is destroyed, cleans up resources.
+     */
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d("AddMedicationFragment", "onDestroyView called")

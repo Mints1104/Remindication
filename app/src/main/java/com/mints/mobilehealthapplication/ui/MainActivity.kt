@@ -133,13 +133,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAllUI() {
+     fun showAllUI() {
         showAppBar()
         showBottomNav()
         showFAB()
     }
 
-    private fun hideAllUI() {
+     fun hideAllUI() {
         hideAppBar()
         hideBottomNav()
         hideFAB()

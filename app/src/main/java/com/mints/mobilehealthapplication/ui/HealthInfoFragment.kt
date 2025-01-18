@@ -5,7 +5,6 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -16,6 +15,7 @@ import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.databinding.FragmentRegistrationPart2Binding
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -30,30 +30,28 @@ class HealthInfoFragment : Fragment() {
 
     private lateinit var viewModel: RegistrationViewModel
     private var datePicker: MaterialDatePicker<Long>? = null
+    private var _binding: FragmentRegistrationPart2Binding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_registration_part2, container, false)
+        _binding = FragmentRegistrationPart2Binding.inflate(inflater, container, false)
+        val view = binding.root
 
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
 
-        val firstNameEditText = view.findViewById<EditText>(R.id.first_name_edit_text)
-        val lastNameEditText = view.findViewById<EditText>(R.id.last_name_edit_text)
-        val dobEditText = view.findViewById<EditText>(R.id.dob_edit_text)
-        val continueButton = view.findViewById<Button>(R.id.continue_button)
+        setupDatePicker(binding.dobEditText)
 
-        setupDatePicker(dobEditText)
+        binding.firstNameEditText.setText(viewModel.registrationData.value.firstName)
+        binding.lastNameEditText.setText(viewModel.registrationData.value.lastName)
+        binding.dobEditText.setText(viewModel.registrationData.value.dateOfBirth)
 
-        firstNameEditText.setText(viewModel.registrationData.value.firstName)
-        lastNameEditText.setText(viewModel.registrationData.value.lastName)
-        dobEditText.setText(viewModel.registrationData.value.dateOfBirth)
-
-        continueButton.setOnClickListener {
-            val firstName = firstNameEditText.text.toString()
-            val lastName = lastNameEditText.text.toString()
-            val dob = dobEditText.text.toString()
+        binding.continueButton.setOnClickListener {
+            val firstName = binding.firstNameEditText.text.toString()
+            val lastName = binding.lastNameEditText.text.toString()
+            val dob = binding.dobEditText.text.toString()
 
             if (firstName.isEmpty() || lastName.isEmpty() || dob.isEmpty()) {
                 displayMessage(requireView(), "Please fill in all fields.")
@@ -147,5 +145,6 @@ class HealthInfoFragment : Fragment() {
             }
         }
         datePicker = null
+        _binding = null
     }
 }
