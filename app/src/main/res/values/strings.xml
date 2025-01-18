@@ -96,6 +96,26 @@
     <string name="add_notes">Notes</string>
     <string name="select_frequency">" Select Frequency"</string>
     <string name="select_dosage">Dosage</string>
+    <string name="how_often_do_you_take_this_medication">How often do you take this medication?</string>
+    <string name="once_daily">Once Daily</string>
+    <string name="twice_daily">Twice Daily</string>
+    <string name="on_demand">On demand</string>
+    <string name="custom">Custom</string>
+    <string name="select_days">Select days</string>
+    <string name="mon">Mon</string>
+    <string name="tues">Tues</string>
+    <string name="wed">Wed</string>
+    <string name="thurs">Thurs</string>
+    <string name="fri">Fri</string>
+    <string name="sat">Sat</string>
+    <string name="sun">Sun</string>
+    <string name="days_to_take_medication">Days to take medication</string>
+    <string name="days_to_pause">Days to pause</string>
+    <string name="time">Time</string>
+    <string name="maximum_doses_per_day_optional">Maximum doses per day (optional)</string>
+    <string name="minimum_hours_between_doses_optional">Minimum hours between doses (optional)</string>
+    <string name="special_instructions_optional">Special instructions (optional)</string>
+    <string name="save">Save</string>
 
 
 </resources>

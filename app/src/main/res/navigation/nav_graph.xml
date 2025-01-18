@@ -106,14 +106,15 @@
         android:name="com.mints.mobilehealthapplication.ui.HealthInfoFragment"
         tools:layout="@layout/fragment_registration_part2">
 
-        <!-- Define the action to navigate to MedicationInfoFragment -->
+
         <action
-            android:id="@+id/action_healthInfoFragment_to_medicationInfoFragment"
-            app:destination="@id/medicationInfoFragment"
+            android:id="@+id/action_healthInfoFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+
 
         <action
             android:id="@+id/action_healthInfoFragment_to_userInfoFragment"
@@ -124,22 +125,6 @@
             app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
-    <!-- Fragment 3: MedicationInfoFragment (Registration) -->
-    <fragment
-        android:id="@+id/medicationInfoFragment"
-        android:name="com.mints.mobilehealthapplication.ui.MedicationInfoFragment"
-        tools:layout="@layout/fragment_registration_part3">
-
-        <!-- Define the action to navigate to HomeFragment -->
-        <action
-            android:id="@+id/action_medicationInfoFragment_to_homeFragment"
-            app:destination="@id/homeFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-    </fragment>
-    <!-- Fragment 4: ResetPasswordFragment) -->
 
     <fragment
         android:id="@+id/resetPasswordFragment"

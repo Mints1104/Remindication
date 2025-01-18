@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
@@ -17,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.FragmentRegistrationPart2Binding
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -48,7 +50,7 @@ class HealthInfoFragment : Fragment() {
         binding.lastNameEditText.setText(viewModel.registrationData.value.lastName)
         binding.dobEditText.setText(viewModel.registrationData.value.dateOfBirth)
 
-        binding.continueButton.setOnClickListener {
+        binding.completeRegistration.setOnClickListener {
             val firstName = binding.firstNameEditText.text.toString()
             val lastName = binding.lastNameEditText.text.toString()
             val dob = binding.dobEditText.text.toString()
@@ -69,11 +71,40 @@ class HealthInfoFragment : Fragment() {
                 this.dateOfBirth = dob
             }
 
-            findNavController().navigate(R.id.action_healthInfoFragment_to_medicationInfoFragment)
+            completeRegistration()
         }
 
         return view
     }
+    /**
+     * Completes the registration process and navigates to the next screen.
+     */
+    private fun completeRegistration() {
+        viewModel.registerUser()
+
+        lifecycleScope.launch {
+            viewModel.registrationState.collect { state ->
+                when (state) {
+                    is RegistrationViewModel.RegistrationState.Success -> {
+                        if (findNavController().currentDestination?.id == R.id.healthInfoFragment) {
+                            findNavController().navigate(R.id.action_healthInfoFragment_to_homeFragment)
+                        }
+                    }
+                    is RegistrationViewModel.RegistrationState.Error -> {
+                        displayMessage(requireView(), state.message)
+                    }
+                    RegistrationViewModel.RegistrationState.Loading -> {
+                        // Optionally show loading indicator
+                    }
+                    RegistrationViewModel.RegistrationState.Initial -> {
+                        // Initial state, no action needed
+                    }
+                }
+            }
+        }
+    }
+
+
 
     private fun setupDatePicker(dobEditText: EditText) {
         // Prevent manual text input
