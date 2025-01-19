@@ -88,7 +88,7 @@ enum class IntervalUnit {
 }
 
 object ScheduleValidator {
-    fun isValidDailySchedule(times: List<LocalTime>): Boolean {
+    private fun isValidDailySchedule(times: List<LocalTime>): Boolean {
         if (times.isEmpty()) return false
 
         val sortedTimes = times.sorted()

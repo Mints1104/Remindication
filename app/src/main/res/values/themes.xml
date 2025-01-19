@@ -71,7 +71,7 @@
 
     <!-- Custom component styles -->
     <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardElevation">2dp</item>
+        <item name="cardElevation">6dp</item>
         <item name="cardCornerRadius">12dp</item>
         <item name="cardBackgroundColor">?attr/colorSurfaceContainerHigh</item>
     </style>
@@ -103,6 +103,18 @@
         <item name="subtitleTextColor">?attr/colorOnSurfaceVariant</item>
         <item name="navigationIconTint">?attr/colorOnSurface</item>
     </style>
+
+    <style name="Widget.App.ExtendedFloatingActionButton" parent="Widget.Material3.ExtendedFloatingActionButton.Icon.Primary">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.FloatingActionButton</item>
+    </style>
+
+
+
+    <style name="ThemeOverlay.App.FloatingActionButton" parent="">
+        <item name="colorContainer">?attr/colorSurface</item>
+        <item name="colorOnContainer">?attr/colorOnPrimaryContainer</item>
+    </style>
+
 
     <style name="ThemeOverlay.App.DatePicker" parent="@style/ThemeOverlay.Material3.MaterialCalendar">
         <item name="android:windowBackground">@color/current_app_background_dark</item>

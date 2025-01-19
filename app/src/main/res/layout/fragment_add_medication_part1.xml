@@ -1,18 +1,21 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:background="?attr/colorSurface"
     android:padding="16dp">
 
-    <!-- Medication Name -->
+
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/medication_name_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/medication_name_hint"
-        app:startIconDrawable="@drawable/baseline_medication_24">
+        app:startIconDrawable="@drawable/baseline_medication_24"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/medication_name_edit_text"
             android:layout_width="match_parent"
@@ -29,7 +32,10 @@
         android:layout_height="wrap_content"
         android:hint="@string/select_dosage"
         android:layout_marginTop="16dp"
-        app:startIconDrawable="@drawable/baseline_pill_24px">
+        app:startIconDrawable="@drawable/baseline_pill_24px"
+        app:layout_constraintTop_toBottomOf="@id/medication_name_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/dosage_edit_text"
             android:layout_width="match_parent"
@@ -40,17 +46,15 @@
             android:inputType="number" />
     </com.google.android.material.textfield.TextInputLayout>
 
-
-
-
-
-    <!-- Notes -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/notes_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/add_notes"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/dosage_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/notes_edit_text"
             android:layout_width="match_parent"
@@ -59,12 +63,41 @@
             android:inputType="textMultiLine" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- ProgressBar -->
+    <ProgressBar
+        android:id="@+id/registrationProgress"
+        style="@android:style/Widget.Material.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:progress="33"
+        android:max="100"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- TextView -->
+    <TextView
+        android:id="@+id/stepTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/step_1_of_3"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@id/registrationProgress"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Save Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/continueMedicationButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/continueSignUp"
-        android:layout_gravity="center"
-        android:layout_marginTop="24dp" />
-</LinearLayout>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/stepTextView"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

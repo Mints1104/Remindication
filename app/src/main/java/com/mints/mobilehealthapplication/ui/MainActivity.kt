@@ -12,7 +12,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -23,7 +23,7 @@ import com.mints.mobilehealthapplication.R
 class MainActivity : AppCompatActivity() {
     private lateinit var mToolbar: MaterialToolbar
     private lateinit var bottomNavigation: BottomNavigationView
-    private lateinit var floatingActionButton: FloatingActionButton
+    private lateinit var floatingActionButton: ExtendedFloatingActionButton
     private lateinit var navController: NavController
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             // Detail views with back navigation
-            R.id.healthInfoFragment, R.id.medicationInfoFragment -> {
+            R.id.healthInfoFragment -> {
                 hideFAB()
                 hideBottomNav()
                 updateToolbar(
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                 hideAllUI()
             }
 
-            R.id.addMedicationFragment -> {
+            R.id.addMedicationBasicInfoFragment -> {
                 // Choose UI state:
                 showAllUI() // or hideAllUI() or mix of show/hide methods
                 updateToolbar(
@@ -151,7 +151,8 @@ class MainActivity : AppCompatActivity() {
         // Configure back navigation
         if (showBackArrow) {
             mToolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
-            mToolbar.setNavigationOnClickListener { onBackPressed() }
+            mToolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed()
+            }
         } else {
             mToolbar.navigationIcon = null
         }

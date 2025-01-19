@@ -11,6 +11,7 @@
         <item name="colorOnPrimaryFixedVariant">@color/md_theme_onPrimaryFixedVariant</item>
         <item name="chipStyle">@style/Widget.App.Chip</item>
 
+
         <item name="colorSecondary">@color/md_theme_secondaryFixed</item>
         <item name="colorOnSecondary">@color/md_theme_onSecondaryFixed</item>
         <item name="colorSecondaryContainer">@color/md_theme_secondaryFixedDim</item>
@@ -67,13 +68,13 @@
         <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigation</item>
         <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
         <item name="floatingActionButtonStyle">@style/Widget.App.FloatingActionButton</item>
+        <item name="extendedFloatingActionButtonStyle">@style/Widget.App.ExtendedFloatingActionButton</item>
     </style>
 
     <!-- Custom component styles -->
     <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardElevation">2dp</item>
+        <item name="cardElevation">6dp</item>
         <item name="cardCornerRadius">12dp</item>
-        <item name="backgroundTint">@color/black</item>
         <item name="cardBackgroundColor">@color/card_view_background_dark</item>
 
     </style>
@@ -84,6 +85,8 @@
         <item name="itemTextColor">?attr/colorOnSurfaceVariant</item>
         <item name="itemActiveIndicatorStyle">@style/Widget.App.BottomNavigation.ActiveIndicator</item>
     </style>
+
+
 
     <style name="Widget.App.BottomNavigation.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/primary_color_dark</item>
@@ -129,6 +132,23 @@
         <item name="android:textColor">@color/white</item>
 
     </style>
+    <!-- Floating action button theme -->
+
+    <style name="Widget.App.ExtendedFloatingActionButton" parent="Widget.Material3.ExtendedFloatingActionButton.Icon.Primary">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.FloatingActionButton</item>
+    </style>
+
+
+
+    <style name="ThemeOverlay.App.FloatingActionButton" parent="">
+        <item name="colorContainer">@color/primary_color_dark</item>
+        <item name="colorOnContainer">@color/white</item>
+    </style>
+
+    <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">?attr/colorSurface</item>
+        <item name="tint">@color/md_theme_background</item>
+    </style>
 
 
     <style name="Widget.App.Chip" parent="Widget.Material3.Chip.Filter">
@@ -138,8 +158,5 @@
         <item name="shapeAppearanceOverlay">@null</item>
     </style>
 
-    <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
-        <item name="backgroundTint">?attr/colorPrimaryContainer</item>
-        <item name="tint">?attr/colorOnPrimaryContainer</item>
-    </style>
+
 </resources>

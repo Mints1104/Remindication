@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
@@ -35,7 +35,7 @@ class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -100,9 +100,9 @@ class HomeFragment : Fragment() {
      * Sets up the Floating Action Button (FAB) to navigate to the AddMedicationFragment.
      */
     private fun setupFAB() {
-        val fab = requireActivity().findViewById<FloatingActionButton>(R.id.add_medication_fab)
+        val fab = requireActivity().findViewById<ExtendedFloatingActionButton>(R.id.add_medication_fab)
         fab.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_addMedicationFragment)
+            findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
         }
     }
 
@@ -125,13 +125,9 @@ class HomeFragment : Fragment() {
     /**
      * Displays a message in a Snackbar.
      * @param view The view to anchor the Snackbar to.
-     * @param message The message to display.
      */
-    private fun displayMessage(view: View, message: String) {
-        Snackbar.make(view, message, Snackbar.LENGTH_LONG).apply {
-            setAction("Dismiss") { dismiss() }
-            show()
-        }
+    private fun displayMessage(view: View, msgTxt: String) {
+        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
     }
 
     /**

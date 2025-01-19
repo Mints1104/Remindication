@@ -61,8 +61,8 @@
 
 
         <action
-            android:id="@+id/action_homeFragment_to_addMedicationFragment"
-            app:destination="@+id/addMedicationFragment"
+            android:id="@+id/action_homeFragment_to_addMedicationBasicInfoFragment"
+            app:destination="@+id/addMedicationBasicInfoFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -143,12 +143,12 @@
     </fragment>
 
     <fragment
-        android:id="@+id/addMedicationFragment"
-        android:name="com.mints.mobilehealthapplication.ui.AddMedicationFragment"
-        tools:layout="@layout/fragment_add_medication">
+        android:id="@+id/addMedicationBasicInfoFragment"
+        android:name="com.mints.mobilehealthapplication.ui.AddMedicationBasicInfoFragment"
+        tools:layout="@layout/fragment_add_medication_part1">
 
         <action
-            android:id="@+id/action_addMedicationFragment_to_homeFragment"
+            android:id="@+id/action_addMedicationBasicInfoFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"

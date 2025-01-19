@@ -8,7 +8,7 @@ import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import kotlinx.coroutines.launch
 
-class MedicationViewModel : ViewModel() {
+class AddMedicationViewModel : ViewModel() {
 
     val saveResult = MutableLiveData<Boolean>()
 

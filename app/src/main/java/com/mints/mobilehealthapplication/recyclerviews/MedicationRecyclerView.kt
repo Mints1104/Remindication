@@ -33,8 +33,7 @@ class MedicationRecyclerView(
         holder.binding.medicationName.text = medication.name
         holder.binding.medicationId.text = medication.id
         holder.binding.medicationDosage.text = context.getString(R.string.dosage_of_medication, medication.dosage)
-        holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication, medication.frequency)
-        holder.binding.medicationTime.text = context.getString(R.string.time_of_medication, medication.time)
+        holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication, medication.schedule)
 
         holder.binding.root.setOnClickListener {
                         onClick(medication)

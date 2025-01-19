@@ -18,9 +18,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
-import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationBinding
-import com.mints.mobilehealthapplication.viewmodels.MedicationViewModel
+import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import java.util.Calendar
 import java.util.Locale
 
@@ -33,7 +32,7 @@ class AddMedicationFragment : Fragment() {
     private var _binding: FragmentAddMedicationBinding? = null
     private val binding get() = _binding!! // Safe reference to the binding object
 
-    private lateinit var viewModel: MedicationViewModel
+    private lateinit var viewModel: AddMedicationViewModel
     private var customFrequencyDialog: AlertDialog? = null
     private var timePickerDialog: TimePickerDialog? = null
 
@@ -74,7 +73,7 @@ class AddMedicationFragment : Fragment() {
         mainActivity.hideBottomNav()
 
         // Initialize ViewModel to handle medication data
-        viewModel = ViewModelProvider(this)[MedicationViewModel::class.java]
+        viewModel = ViewModelProvider(this)[AddMedicationViewModel::class.java]
         Log.d("AddMedicationFragment", "ViewModel initialized")
 
         // Set up UI elements for user input
@@ -114,14 +113,7 @@ class AddMedicationFragment : Fragment() {
             }
 
             // Create a medication object to save
-            val medication = Medication(
-                name = medicationName,
-                dosage = dosage,
-                frequency = selectedFrequency ?: return@setOnClickListener,
-                time = reminderTime,
-                notes = notes
-            )
-            Log.d("AddMedicationFragment", "Medication object created: $medication")
+
 
             // Retrieve the current authenticated user's UID
             val uid = FirebaseAuth.getInstance().uid ?: ""
@@ -135,7 +127,6 @@ class AddMedicationFragment : Fragment() {
             }
 
             // Save the medication to the database using ViewModel
-            viewModel.saveMedication(uid, medication)
         }
 
         // Observe result of saving medication and handle success/failure

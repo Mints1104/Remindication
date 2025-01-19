@@ -18,10 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone"
-
-            >
-
+            android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -91,14 +88,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/wed" />
 
-
                 <com.google.android.material.chip.Chip
                     android:id="@+id/thursdayChip"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/thurs" />
-
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/fridayChip"
@@ -107,7 +102,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/fri" />
 
-
                 <com.google.android.material.chip.Chip
                     android:id="@+id/saturdayChip"
                     style="@style/Widget.Material3.Chip.Filter"
@@ -115,15 +109,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/sat" />
 
-
                 <com.google.android.material.chip.Chip
                     android:id="@+id/sundayChip"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/sun" />
-
-
             </com.google.android.material.chip.ChipGroup>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -149,7 +140,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
-
             >
 
             <com.google.android.material.textfield.TextInputLayout
@@ -202,6 +192,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:visibility="gone"
+
             >
 
             <com.google.android.material.textfield.TextInputLayout
@@ -232,9 +224,9 @@
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
         </LinearLayout>
 
+        <!-- Button, TextView, and ProgressBar -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/saveButton"
             android:layout_width="wrap_content"
@@ -242,6 +234,24 @@
             android:layout_gravity="center"
             android:layout_marginTop="24dp"
             android:text="@string/save" />
+
+        <TextView
+            android:id="@+id/stepText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/step_2_of_3"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center"/>
+
+        <ProgressBar
+            android:id="@+id/registrationProgress"
+            style="@android:style/Widget.Material.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:progress="66"
+            android:max="100"
+            android:layout_gravity="center"/>
 
     </LinearLayout>
 </ScrollView>
