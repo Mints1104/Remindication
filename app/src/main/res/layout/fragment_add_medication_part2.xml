@@ -82,6 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/step_2_of_3"
+        android:background="?attr/colorSurface"
         android:textColor="?attr/colorOnSurface"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/registrationProgress"

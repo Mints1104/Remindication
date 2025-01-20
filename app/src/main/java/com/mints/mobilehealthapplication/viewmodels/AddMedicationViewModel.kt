@@ -18,6 +18,10 @@ class AddMedicationViewModel : ViewModel() {
     private val _dosage = MutableLiveData<String>()
     private val _notes = MutableLiveData<String>()
     private val _validationState = MutableLiveData<ValidationState>()
+    private val _frequency = MutableLiveData<String>()
+    val frequency: LiveData<String> = _frequency
+    private val _currentStage = MutableLiveData<FormStage>(FormStage.BASIC_INFO)
+    val currentStage: LiveData<FormStage> = _currentStage
 
     val validationState: LiveData<ValidationState> = _validationState
     val medicationName: LiveData<String> = _medicationName
@@ -28,6 +32,29 @@ class AddMedicationViewModel : ViewModel() {
         data object Valid : ValidationState()
         data class Invalid(val message: String) : ValidationState()
         data object Initial : ValidationState()
+    }
+
+    sealed class FormStage {
+        object BASIC_INFO : FormStage()
+        object FREQUENCY : FormStage()
+    }
+
+    fun resetAllData() {
+        _medicationName.value = ""
+        _dosage.value = ""
+        _notes.value = ""
+        _frequency.value = ""
+        _validationState.value = ValidationState.Initial
+        _currentStage.value = FormStage.BASIC_INFO
+    }
+
+
+    fun resetValidationState() {
+        _validationState.value = ValidationState.Initial
+    }
+
+    fun updateFrequency(frequency: String) {
+        _frequency.value = frequency
     }
 
     fun updateMedicationName(name: String) {
@@ -43,38 +70,34 @@ class AddMedicationViewModel : ViewModel() {
     }
 
 
-    fun validateInputs(): Boolean {
+    fun validateBasicInfo(): Boolean {
         return when {
             _medicationName.value.isNullOrBlank() -> {
                 _validationState.value = ValidationState.Invalid("Medication name is required")
                 false
             }
-
             _dosage.value.isNullOrBlank() -> {
                 _validationState.value = ValidationState.Invalid("Dosage is required")
                 false
             }
             else -> {
-                Log.d(tag,"Input validated successfully")
                 _validationState.value = ValidationState.Valid
+                _currentStage.value = FormStage.FREQUENCY // Move to next stage
                 true
             }
         }
     }
 
-    fun getStage1Data(): Stage1Data {
-        return Stage1Data(
-            name = _medicationName.value ?: "",
-            dosage = _dosage.value ?: "",
-            notes = _notes.value ?: ""
-        )
+    fun validateFrequency(): Boolean {
+        return if (_frequency.value.isNullOrBlank()) {
+            _validationState.value = ValidationState.Invalid("Frequency is required")
+            false
+        } else {
+            _validationState.value = ValidationState.Valid
+            true
+        }
     }
 
-    data class Stage1Data(
-        val name: String,
-        val dosage: String,
-        val notes: String
-    )
 
     fun saveMedication(uid: String, medication: Medication) {
         Log.d("MedicationViewModel", "Saving medication for user: $uid")

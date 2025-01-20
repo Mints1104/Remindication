@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,6 +18,7 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.MedicationInfo
 import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
+import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
 
 /**
@@ -135,6 +137,8 @@ class HomeFragment : Fragment() {
      */
     override fun onDestroyView() {
         super.onDestroyView()
+        val viewModel: AddMedicationViewModel by activityViewModels()
+        viewModel.resetAllData()
         _binding = null
     }
 }

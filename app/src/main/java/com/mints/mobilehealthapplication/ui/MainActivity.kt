@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                 hideAllUI()
             }
 
-            R.id.addMedicationBasicInfoFragment -> {
+            R.id.addMedicationBasicInfoFragment, R.id.addMedicationFrequencyFragment -> {
                 // Choose UI state:
                 showAllUI() // or hideAllUI() or mix of show/hide methods
                 updateToolbar(

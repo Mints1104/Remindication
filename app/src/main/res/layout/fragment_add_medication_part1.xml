@@ -73,6 +73,8 @@
         android:id="@+id/registrationProgress"
         style="@android:style/Widget.Material.ProgressBar.Horizontal"
         android:layout_width="match_parent"
+        android:background="?attr/colorSurface"
+        android:backgroundTint="?attr/colorSurface"
         android:layout_height="8dp"
         android:progress="33"
         android:max="100"
