@@ -1,12 +1,11 @@
 package com.mints.mobilehealthapplication.ui
 
-import android.app.TimePickerDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
@@ -21,25 +20,10 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationPart1Binding? = null
     private val binding get() = _binding!!
+    private var tag = "AddMedicationBasicInfoFragment"
 
     private lateinit var viewModel: AddMedicationViewModel
-    private var customFrequencyDialog: AlertDialog? = null
-    private var timePickerDialog: TimePickerDialog? = null
 
-    // Selected frequency and a list of standard frequencies
-    private var selectedFrequency: String? = null
-    private val standardFrequencies = listOf(
-        "Once daily",
-        "Twice daily",
-        "Three times daily",
-        "Four times daily",
-        "Every morning",
-        "Every evening",
-        "Every night before bed",
-        "As needed",
-        "Weekly",
-        "Monthly"
-    )
 
     /**
      * Inflates the layout and initializes UI elements for the fragment.
@@ -60,9 +44,10 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
         viewModel = ViewModelProvider(this)[AddMedicationViewModel::class.java]
 
-        val medicationNameEditText = binding.medicationNameEditText
-        val dosageEditText = binding.dosageEditText
-        val notesEditText = binding.notesEditText
+
+
+        setUpTextInputListeners()
+        confirmInputAndContinue()
 
 
 
@@ -70,7 +55,49 @@ class AddMedicationBasicInfoFragment : Fragment() {
         return view
     }
 
+    private fun setUpTextInputListeners() {
+        binding.medicationNameEditText.doAfterTextChanged { text
+            ->
+            Log.d(tag,"Medication name inputted: $text")
+            viewModel.updateMedicationName(text.toString())
 
+        }
+
+
+
+
+        binding.dosageEditText.doAfterTextChanged { text ->
+            Log.d(tag,"Dosage  inputted: $text")
+
+            viewModel.updateDosage(text.toString())
+        }
+
+
+        binding.notesEditText.doAfterTextChanged { text ->
+            Log.d(tag,"Notes inputted: $text")
+
+            viewModel.updateNotes(text.toString())
+        }
+    }
+
+    private fun confirmInputAndContinue() {
+        binding.continueMedicationButton.setOnClickListener {
+            Log.d(tag,"Continue button clicked")
+
+            if(viewModel.validateInputs()) {
+
+                val stage1Data = viewModel.getStage1Data()
+                displayMessage(requireView(),"Input is good!")
+
+            } else {
+                displayMessage(requireView(),"Some inputs are missing!")
+
+            }
+        }
+
+
+
+    }
 
 
 
@@ -87,9 +114,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
      */
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d("AddMedicationFragment", "onDestroyView called")
+        Log.d("AddMedicationBasicInfoFragment", "onDestroyView called")
         _binding = null
-        timePickerDialog?.dismiss()
-        timePickerDialog = null
     }
 }
