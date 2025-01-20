@@ -1,13 +1,13 @@
-# Medication Reminder App  
+# Remindication 
 
 ## Overview  
-The **Medication Reminder App** is an Android application designed to address the challenges of medication non-adherence. This app incorporates customizable reminders, educational content, and gamification features to help users manage their prescriptions effectively and improve health outcomes.  
+**Remindication** is an Android application designed to address the challenges of medication non-adherence. This app incorporates customisable reminders, educational content, and gamification features to help users manage their prescriptions effectively and improve health outcomes.  
 
 ## Motivation  
 Medication non-adherence poses significant challenges to healthcare systems worldwide, leading to worsened health outcomes and increased healthcare costs. This app aims to tackle both intentional and unintentional non-adherence through habit-building features, positive reinforcement, and accessible education.  
 
 ## Features  
-- **Customizable Reminders:** Set reminders tailored to your schedule, such as before sleep or after meals.  
+- **Customisable Reminders:** Set reminders tailored to your schedule, such as before sleep or after meals.  
 - **Adherence Statistics:** Track your progress and identify missed doses.  
 - **Gamification Elements:** Enhance engagement with streaks, leaderboards, and quizzes.  
 - **Educational Content:** Access detailed, easy-to-understand information about your medication to alleviate concerns.  
