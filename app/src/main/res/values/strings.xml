@@ -131,6 +131,8 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="take_with_food">Take with food</string>
+    <string name="schedule_your_medication">Schedule your medication</string>
 
 
 </resources>

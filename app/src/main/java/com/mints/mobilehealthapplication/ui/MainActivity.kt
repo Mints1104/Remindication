@@ -3,17 +3,16 @@ package com.mints.mobilehealthapplication.ui
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -167,12 +166,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAuthenticationState() {
         val currentUser = auth.currentUser
-        if (currentUser == null && navController.currentDestination?.id != R.id.loginFragment) {
+        val currentDestination = navController.currentDestination?.id
+
+        if (currentUser == null && currentDestination != R.id.loginFragment) {
+            // Navigate to the login screen if the user is not logged in
             navController.navigate(R.id.loginFragment)
-        } else if (currentUser != null && navController.currentDestination?.id != R.id.homeFragment) {
-            navController.navigate(R.id.homeFragment)
+        } else if (currentUser != null && currentDestination != R.id.homeFragment) {
+            // Navigate to the home screen if the user is logged in
+            navController.navigate(R.id.homeFragment, null, navOptions {
+                popUpTo(R.id.loginFragment) { inclusive = true }  // Clear login fragment from back stack
+                launchSingleTop = true  // Ensure we don't push a new instance of home fragment
+            })
         }
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -194,10 +201,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun displayMessage(view: View, msgTxt: String) {
-        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Only inflate the menu if it should be shown
         if (shouldShowMenu && currentMenu != null) {
@@ -208,11 +211,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     // UI visibility control methods
-    fun showFAB() { floatingActionButton.isVisible = true }
+    private fun showFAB() { floatingActionButton.isVisible = true }
     fun hideFAB() { floatingActionButton.isVisible = false }
-    fun hideAppBar() { mToolbar.isVisible = false }
+    private fun hideAppBar() { mToolbar.isVisible = false }
     fun showAppBar() { mToolbar.isVisible = true }
-    fun showBottomNav() { bottomNavigation.isVisible = true }
+    private fun showBottomNav() { bottomNavigation.isVisible = true }
     fun hideBottomNav() { bottomNavigation.isVisible = false }
 
     override fun onSupportNavigateUp(): Boolean {

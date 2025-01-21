@@ -22,7 +22,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationPart1Binding? = null
     private val binding get() = _binding!!
-    private var tag = "AddMedicationBasicInfoFragment"
+    private var tag = "M.BasicInfoFragment"
 
     private val viewModel: AddMedicationViewModel by activityViewModels()
 

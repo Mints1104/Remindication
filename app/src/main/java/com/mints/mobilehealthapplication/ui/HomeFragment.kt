@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -30,6 +32,7 @@ class HomeFragment : Fragment() {
     private lateinit var viewModel: HomeFragmentViewModel
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private lateinit var adapter: MedicationRecyclerView
 
     /**
      * Inflates the fragment layout using ViewBinding.
@@ -48,13 +51,14 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
-
         val mainActivity = requireActivity() as MainActivity
         mainActivity.showAllUI()
         setupFAB()
         setUpRecyclerView()
+        fetchUserMedication()
+    }
 
-        // Fetch medications for the authenticated user
+    private fun fetchUserMedication() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         Log.d("HomeFragment", "Current user UID: $uid")
         if (uid.isEmpty()) {
@@ -72,24 +76,19 @@ class HomeFragment : Fragment() {
     private fun setUpRecyclerView() {
         Log.d("HomeFragment", "Setting up RecyclerView")
 
-        // Initialize the RecyclerView adapter
-        val adapter = MedicationRecyclerView(emptyList()) { medication ->
+         adapter = MedicationRecyclerView(emptyList()) { medication ->
             viewModel.onMedicationClicked(medication)
             if (medication.notes.isNotEmpty()) {
-                // Show notes in a bottom sheet if available
                 val addMedicationNotesBottomSheet = MedicationNotesBottomSheet.newInstance(medication.notes)
                 addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
             } else {
-                // Show a Snackbar message if no notes are available
-                displayMessage(requireView(), "No notes available for ${medication.name}")
+                displayMessage("No notes available for ${medication.name}")
             }
         }
 
-        // Attach the adapter and layout manager to the RecyclerView
         binding.medicationsRecyclerView.adapter = adapter
         binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        // Observe medication list from the ViewModel and update the adapter
+        addSwipeFunctionality()
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
             Log.d("HomeFragment", "Observed ${medications.size} medications in LiveData")
             adapter.updateMedicationList(medications)
@@ -98,8 +97,34 @@ class HomeFragment : Fragment() {
         Log.d("HomeFragment", "RecyclerView setup complete")
     }
 
+    private fun addSwipeFunctionality() {
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                when (direction) {
+                    ItemTouchHelper.LEFT -> {
+
+                        displayMessage("Swiped left")
+
+                    }
+                    ItemTouchHelper.RIGHT -> {
+                        displayMessage("Swiped right")
+                    }
+
+                }
+                adapter.notifyItemChanged(position)
+
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.medicationsRecyclerView)
+    }
+
     /**
-     * Sets up the Floating Action Button (FAB) to navigate to the AddMedicationFragment.
+     * Sets up the Floating Action Button (FAB) to navigate to the AddMedicationBasicInfoFragment.
      */
     private fun setupFAB() {
         val fab = requireActivity().findViewById<ExtendedFloatingActionButton>(R.id.add_medication_fab)
@@ -125,11 +150,13 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Displays a message in a Snackbar.
-     * @param view The view to anchor the Snackbar to.
+     * Displays a message in a Snackbar at the bottom of the screen.
      */
-    private fun displayMessage(view: View, msgTxt: String) {
-        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
+    private fun displayMessage(msgTxt: String) {
+        Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+            .show()
+
     }
 
     /**
@@ -139,6 +166,7 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         val viewModel: AddMedicationViewModel by activityViewModels()
         viewModel.resetAllData()
+        viewModel.resetValidationState()
         _binding = null
     }
 }

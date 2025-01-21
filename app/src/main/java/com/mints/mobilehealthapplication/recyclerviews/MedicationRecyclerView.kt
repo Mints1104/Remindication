@@ -33,7 +33,8 @@ class MedicationRecyclerView(
         holder.binding.medicationName.text = medication.name
         holder.binding.medicationId.text = medication.id
         holder.binding.medicationDosage.text = context.getString(R.string.dosage_of_medication, medication.dosage)
-        holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication, medication.schedule)
+        holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication,medication.schedule.formattedFrequency)
+        holder.binding.medicationTime.text = context.getString(R.string.time_of_medication,medication.schedule.formattedTimes)
 
         holder.binding.root.setOnClickListener {
                         onClick(medication)
@@ -41,7 +42,6 @@ class MedicationRecyclerView(
     }
 
     override fun getItemCount(): Int {
-        Log.d("MedicationRecyclerView", "Item count: ${medications.size}")
         return medications.size
     }
 
@@ -52,7 +52,4 @@ class MedicationRecyclerView(
         diffResult.dispatchUpdatesTo(this)
     }
 
-    interface OnClickListener {
-        fun onItemClick(medication: Medication)
-    }
 }

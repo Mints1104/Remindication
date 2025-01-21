@@ -53,17 +53,17 @@ class UserInfoFragment : Fragment() {
             val confirmPassword = binding.confirmPasswordEditText.text.toString()
 
             if (email.isEmpty() || phone.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                displayMessage(requireView(), getString(R.string.fill_in_all_fields))
+                displayMessage(getString(R.string.fill_in_all_fields))
                 return@setOnClickListener
             }
 
             if (!isValidEmail(email)) {
-                displayMessage(requireView(), getString(R.string.please_enter_a_valid_email_address))
+                displayMessage(getString(R.string.please_enter_a_valid_email_address))
                 return@setOnClickListener
             }
 
             if (password != confirmPassword) {
-                displayMessage(requireView(), getString(R.string.passwords_do_not_match))
+                displayMessage(getString(R.string.passwords_do_not_match))
                 return@setOnClickListener
             }
 
@@ -80,13 +80,12 @@ class UserInfoFragment : Fragment() {
     }
 
     /**
-     * Helper function to display a message using a Snackbar.
-     *
-     * @param view The view to anchor the Snackbar to
-     * @param msgTxt The message text to display
+     * Displays a message in a Snackbar at the bottom of the screen.
      */
-    private fun displayMessage(view: View, msgTxt: String) {
-        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
+    private fun displayMessage(msgTxt: String) {
+        Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+            .show()
     }
 
     /**

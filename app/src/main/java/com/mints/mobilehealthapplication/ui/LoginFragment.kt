@@ -31,7 +31,7 @@ class LoginFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentLoginscreenBinding.inflate(inflater, container, false)
 
         val mainActivity = requireActivity() as MainActivity
@@ -73,7 +73,7 @@ class LoginFragment : Fragment() {
                 findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
             } else {
                 // Show error message if login fails
-                displayMessage(view, message)
+                displayMessage(message)
             }
         }
     }
@@ -87,13 +87,13 @@ class LoginFragment : Fragment() {
     }
 
     /**
-     * Displays a message to the user using a Snackbar.
-     *
-     * @param view The parent view to attach the Snackbar to.
-     * @param msgTxt The message text to display.
+     * Displays a message in a Snackbar at the bottom of the screen.
      */
-    private fun displayMessage(view: View, msgTxt: String) {
-        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
+    private fun displayMessage(msgTxt: String) {
+        Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+            .show()
+
     }
 
     /**

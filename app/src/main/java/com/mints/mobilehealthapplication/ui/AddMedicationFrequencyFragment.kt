@@ -21,7 +21,7 @@ class AddMedicationFrequencyFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationPart2Binding? = null
     private val binding get() = _binding!!
-    private var tag = "AddMedicationFrequencyFragment"
+    private var tag = "M.FrequencyFragment"
 
     private val viewModel: AddMedicationViewModel by activityViewModels()
 
@@ -32,53 +32,45 @@ class AddMedicationFrequencyFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout using ViewBinding
+        Log.d(tag, "onCreateView: Inflating layout")
         _binding = FragmentAddMedicationPart2Binding.inflate(inflater, container, false)
         val view = binding.root
         viewModel.resetValidationState()
-
-
-
-
-
-
         val mainActivity = activity as MainActivity
         mainActivity.hideFAB()
         mainActivity.hideBottomNav()
-
-
-
-
         setUpRadioButtonListeners()
         setupContinueButton()
         observeValidationState()
-
-
 
         return view
     }
 
 
     private fun observeValidationState() {
+        Log.d(tag, "observeValidationState: Observing validation state")
         viewModel.validationState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AddMedicationViewModel.ValidationState.Invalid -> {
+                    Log.d(tag, "observeValidationState: Invalid state - ${state.message}")
                     displayMessage(state.message)
                     viewModel.resetValidationState()
                 }
                 AddMedicationViewModel.ValidationState.Valid -> {
+                    Log.d(tag, "observeValidationState: Valid state - Navigating to next fragment")
                     navigateToNextFragment()
                     viewModel.resetValidationState()
-
                 }
-                AddMedicationViewModel.ValidationState.Initial -> {}
+                AddMedicationViewModel.ValidationState.Initial -> {
+                    Log.d(tag, "observeValidationState: Initial state")
+                }
             }
         }
     }
 
 
     private fun setUpRadioButtonListeners() {
-        // Restore previous selection FIRST
+        Log.d(tag, "setUpRadioButtonListeners: Restoring previous selection")
         viewModel.frequency.value?.let { freq ->
             val radioId = when (freq) {
                 "Once Daily" -> R.id.onceDailyButton
@@ -89,9 +81,9 @@ class AddMedicationFrequencyFragment : Fragment() {
                 else -> -1
             }
             if (radioId != -1) binding.radioGroup.check(radioId)
-        }
+            Log.d(tag, "setUpRadioButtonListeners: Previous selection restored - $freq")
 
-        // Then set up listener
+        }
         binding.radioGroup.setOnCheckedChangeListener { _, checkedId ->
             val frequency = when(checkedId) {
                 R.id.onceDailyButton -> "Once Daily"
@@ -101,7 +93,9 @@ class AddMedicationFrequencyFragment : Fragment() {
                 R.id.onDemandButton -> "On Demand"
                 else -> null
             }
-            frequency?.let { viewModel.updateFrequency(it) }
+            frequency?.let {
+                Log.d(tag, "setUpRadioButtonListeners: Selected frequency - $it")
+                viewModel.updateFrequency(it) }
         }
     }
 
@@ -109,14 +103,18 @@ class AddMedicationFrequencyFragment : Fragment() {
 
     private fun setupContinueButton() {
         binding.continueMedicationButton.setOnClickListener {
+            Log.d(tag, "setupContinueButton: Continue button clicked")
             viewModel.validateFrequency()
         }
     }
 
     private fun navigateToNextFragment() {
         if (isCurrentDestinationValid()) {
-         //   findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_addMedicationFrequencyFragment)
+            Log.d(tag, "navigateToNextFragment: Navigating to schedule fragment")
+            findNavController().navigate(R.id.action_addMedicationFrequencyFragment_to_addMedicationScheduleFragment)
             viewModel.resetValidationState()
+        } else {
+            Log.d(tag, "navigateToNextFragment: Navigation aborted, invalid destination")
         }
     }
 
@@ -140,7 +138,7 @@ class AddMedicationFrequencyFragment : Fragment() {
      */
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d("AddMedicationBasicInfoFragment", "onDestroyView called")
+        Log.d(tag, "onDestroyView: Cleaning up resources")
         _binding = null
     }
 }

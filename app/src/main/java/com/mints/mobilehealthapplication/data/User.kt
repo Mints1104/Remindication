@@ -3,6 +3,7 @@ package com.mints.mobilehealthapplication.data
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 data class Medication(
     var id: String? = null,
@@ -11,29 +12,23 @@ data class Medication(
     val schedule: MedicationSchedule,
     val notes: String = "",
     val createdAt: Timestamp = Timestamp.now(),
-    val active: Boolean = true,  // To track if medication is currently active
+    val active: Boolean = true,
     val lastModified: Timestamp = Timestamp.now(),
-    val refillReminder: RefillInfo? = null  // Optional refill information
-)
-
-data class RefillInfo(
-    val pillsRemaining: Int,
-    val totalPills: Int,
-    val reminderThreshold: Int = 7  // Remind when X days of pills remaining
+    val refillReminder: RefillInfo? = null
 )
 
 sealed class MedicationSchedule {
     data class Daily(
         val frequency: DailyFrequency,
         val times: List<LocalTime>,
-        val withFood: Boolean = false,  // Indicate if medication should be taken with food
-        val specificInstructions: String = ""  // Any special instructions
+        val withFood: Boolean = false,
+        val specificInstructions: String = ""
     ) : MedicationSchedule()
 
     data class Interval(
         val interval: IntervalPeriod,
         val startTime: LocalTime,
-        val endDate: Timestamp? = null  // Optional end date for temporary medications
+        val endDate: Timestamp? = null
     ) : MedicationSchedule()
 
     data class WeeklySchedule(
@@ -46,15 +41,69 @@ sealed class MedicationSchedule {
         val intakeDays: Int,
         val pauseDays: Int,
         val times: List<LocalTime>,
-        val currentCycleStartDate: Timestamp? = null  // Track current cycle
+        val currentCycleStartDate: Timestamp? = null
     ) : MedicationSchedule()
 
     data class OnDemand(
-        val maxDailyDoses: Int? = null,  // Maximum allowed doses per day
-        val minTimeBetweenDoses: Int? = null,  // Minimum hours between doses
+        val maxDailyDoses: Int? = null,
+        val minTimeBetweenDoses: Int? = null,
         val instructions: String = ""
     ) : MedicationSchedule()
+
+    // Formatting properties
+    val formattedFrequency: String
+        get() = when (this) {
+            is Daily -> when (frequency) {
+                DailyFrequency.ONCE -> "Once Daily"
+                DailyFrequency.TWICE -> "Twice Daily"
+            }
+            is WeeklySchedule -> days.joinToString { it.shortName }
+            is Cyclic -> "Cyclic ($intakeDays days on, $pauseDays days off)"
+            is OnDemand -> "As Needed"
+            is Interval -> "Every ${interval.value} ${interval.unit.name.lowercase()}"
+        }
+
+    val formattedTimes: String
+        get() = when (this) {
+            is Daily -> times.formatTimes()
+            is WeeklySchedule -> times.formatTimes()
+            is Cyclic -> times.formatTimes()
+            is Interval -> startTime.formatTime()
+            is OnDemand -> maxDailyDoses?.let { "Max $it doses/day" } ?: ""
+        }
+
+    val formattedDetails: String
+        get() = when (this) {
+            is Daily -> if (withFood) "With food" else specificInstructions
+            is WeeklySchedule -> if (withFood) "With food" else ""
+            is Cyclic -> currentCycleStartDate?.let { "Started ${it.toDate()}" } ?: ""
+            is Interval -> endDate?.let { "Until ${it.toDate()}" } ?: ""
+            is OnDemand -> minTimeBetweenDoses?.let { "Min ${it}h between" } ?: instructions
+        }
 }
+
+// Extension functions
+private fun List<LocalTime>.formatTimes(): String = joinToString(", ") { it.formatTime() }
+
+private fun LocalTime.formatTime(): String =
+    this.format(DateTimeFormatter.ofPattern("HH:mm"))
+
+val DayOfWeek.shortName: String get() = when (this) {
+    DayOfWeek.MONDAY -> "Mon"
+    DayOfWeek.TUESDAY -> "Tue"
+    DayOfWeek.WEDNESDAY -> "Wed"
+    DayOfWeek.THURSDAY -> "Thu"
+    DayOfWeek.FRIDAY -> "Fri"
+    DayOfWeek.SATURDAY -> "Sat"
+    DayOfWeek.SUNDAY -> "Sun"
+}
+
+// Rest of your existing classes
+data class RefillInfo(
+    val pillsRemaining: Int,
+    val totalPills: Int,
+    val reminderThreshold: Int = 7
+)
 
 enum class DailyFrequency {
     ONCE,
@@ -86,6 +135,7 @@ enum class IntervalUnit {
     WEEKS,
     MONTHS
 }
+
 
 object ScheduleValidator {
     private fun isValidDailySchedule(times: List<LocalTime>): Boolean {

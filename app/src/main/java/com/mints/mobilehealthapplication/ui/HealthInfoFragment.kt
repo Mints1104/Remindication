@@ -38,7 +38,7 @@ class HealthInfoFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRegistrationPart2Binding.inflate(inflater, container, false)
         val view = binding.root
 
@@ -56,12 +56,12 @@ class HealthInfoFragment : Fragment() {
             val dob = binding.dobEditText.text.toString()
 
             if (firstName.isEmpty() || lastName.isEmpty() || dob.isEmpty()) {
-                displayMessage(requireView(), "Please fill in all fields.")
+                displayMessage("Please fill in all fields.")
                 return@setOnClickListener
             }
 
             if (!viewModel.isAgeValid(dob)) {
-                displayMessage(requireView(), "You must be at least 18 years old.")
+                displayMessage( "You must be at least 18 years old.")
                 return@setOnClickListener
             }
 
@@ -91,7 +91,7 @@ class HealthInfoFragment : Fragment() {
                         }
                     }
                     is RegistrationViewModel.RegistrationState.Error -> {
-                        displayMessage(requireView(), state.message)
+                        displayMessage(state.message)
                     }
                     RegistrationViewModel.RegistrationState.Loading -> {
                         // Optionally show loading indicator
@@ -164,8 +164,14 @@ class HealthInfoFragment : Fragment() {
         }
     }
 
-    private fun displayMessage(view: View, msgTxt: String) {
-        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
+    /**
+     * Displays a message in a Snackbar at the bottom of the screen.
+     */
+    private fun displayMessage(msgTxt: String) {
+        Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+            .show()
+
     }
 
     override fun onDestroyView() {
