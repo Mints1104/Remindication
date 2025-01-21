@@ -40,7 +40,7 @@ class ResetPasswordFragment : Fragment() {
             val email = emailInput.text.toString().trim()
 
             viewModel.sendPasswordResetEmail(email) { _, message ->
-                displayMessage(requireView(), message)
+                displayMessage(message)
             }
         }
 
@@ -52,12 +52,12 @@ class ResetPasswordFragment : Fragment() {
     }
 
     /**
-     * Displays a Snackbar message.
-     * @param view The view to anchor the Snackbar to
-     * @param msgTxt The message to display
+     * Displays a message in a Snackbar at the bottom of the screen.
      */
-    private fun displayMessage(view: View, msgTxt: String) {
-        Snackbar.make(view, msgTxt, Snackbar.LENGTH_SHORT).show()
+    private fun displayMessage(msgTxt: String) {
+        Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+            .show()
     }
 
     /**

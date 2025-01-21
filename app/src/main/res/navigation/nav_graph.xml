@@ -61,8 +61,8 @@
 
 
         <action
-            android:id="@+id/action_homeFragment_to_addMedicationFragment"
-            app:destination="@+id/addMedicationFragment"
+            android:id="@+id/action_homeFragment_to_addMedicationBasicInfoFragment"
+            app:destination="@+id/addMedicationBasicInfoFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -106,14 +106,15 @@
         android:name="com.mints.mobilehealthapplication.ui.HealthInfoFragment"
         tools:layout="@layout/fragment_registration_part2">
 
-        <!-- Define the action to navigate to MedicationInfoFragment -->
+
         <action
-            android:id="@+id/action_healthInfoFragment_to_medicationInfoFragment"
-            app:destination="@id/medicationInfoFragment"
+            android:id="@+id/action_healthInfoFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+
 
         <action
             android:id="@+id/action_healthInfoFragment_to_userInfoFragment"
@@ -124,22 +125,6 @@
             app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
-    <!-- Fragment 3: MedicationInfoFragment (Registration) -->
-    <fragment
-        android:id="@+id/medicationInfoFragment"
-        android:name="com.mints.mobilehealthapplication.ui.MedicationInfoFragment"
-        tools:layout="@layout/fragment_registration_part3">
-
-        <!-- Define the action to navigate to HomeFragment -->
-        <action
-            android:id="@+id/action_medicationInfoFragment_to_homeFragment"
-            app:destination="@id/homeFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-    </fragment>
-    <!-- Fragment 4: ResetPasswordFragment) -->
 
     <fragment
         android:id="@+id/resetPasswordFragment"
@@ -158,20 +143,83 @@
     </fragment>
 
     <fragment
-        android:id="@+id/addMedicationFragment"
-        android:name="com.mints.mobilehealthapplication.ui.AddMedicationFragment"
-        tools:layout="@layout/fragment_add_medication">
+        android:id="@+id/addMedicationBasicInfoFragment"
+        android:name="com.mints.mobilehealthapplication.ui.AddMedicationBasicInfoFragment"
+        tools:layout="@layout/fragment_add_medication_part1">
 
         <action
-            android:id="@+id/action_addMedicationFragment_to_homeFragment"
+            android:id="@+id/action_addMedicationBasicInfoFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
 
+        <action
+            android:id="@+id/action_addMedicationBasicInfoFragment_to_addMedicationFrequencyFragment"
+            app:destination="@+id/addMedicationFrequencyFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+
 
     </fragment>
+
+
+    <fragment
+        android:id="@id/addMedicationFrequencyFragment"
+        android:name = "com.mints.mobilehealthapplication.ui.AddMedicationFrequencyFragment"
+        tools:layout="@layout/fragment_add_medication_part2">
+
+        <action
+            android:id="@+id/action_addMedicationFrequencyFragment_to_addMedicationBasicInfoFragment"
+            app:destination="@id/addMedicationBasicInfoFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_addMedicationFrequencyFragment_to_addMedicationScheduleFragment"
+            app:destination="@+id/addMedicationScheduleFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+
+
+    </fragment>
+
+    <fragment
+        android:id="@id/addMedicationScheduleFragment"
+        android:name="com.mints.mobilehealthapplication.ui.AddMedicationScheduleFragment"
+        tools:layout="@layout/fragment_add_medication_part3_schedule">
+
+        <action
+            android:id="@+id/action_addMedicationScheduleFragment_to_addMedicationFrequencyFragment"
+            app:destination="@id/addMedicationFrequencyFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+
+        <action
+            android:id="@+id/action_addMedicationScheduleFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+
+
+
+    </fragment>
+
+
+
 
 
 

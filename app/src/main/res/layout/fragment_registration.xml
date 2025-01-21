@@ -38,23 +38,7 @@
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Phone Number Input -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/phone_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/phone_number_hint"
-            app:startIconDrawable="@drawable/baseline_phone_24"
-            android:layout_marginTop="16dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/phone_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="phone"
-                android:paddingStart="40dp"
-                android:paddingEnd="10dp"
-                />
-        </com.google.android.material.textfield.TextInputLayout>
+
 
         <!-- Password Input -->
         <com.google.android.material.textfield.TextInputLayout
@@ -91,6 +75,24 @@
                 android:inputType="textPassword"
                 android:paddingStart="40dp"
                 android:paddingEnd="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Phone Number Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/phone_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/phone_number_hint"
+            app:startIconDrawable="@drawable/baseline_phone_24"
+            android:layout_marginTop="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phone_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:paddingStart="40dp"
+                android:paddingEnd="10dp"
+                />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Continue Button -->

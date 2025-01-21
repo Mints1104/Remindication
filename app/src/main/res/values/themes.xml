@@ -54,11 +54,11 @@
         <item name="colorSurfaceBright">@color/md_theme_surfaceBright</item>
         <item name="colorSurfaceDim">@color/md_theme_surfaceDim</item>
         <item name="materialCalendarTheme">@style/ThemeOverlay.App.DatePicker</item>
-        <item name="snackbarStyle">@style/ThemeOverlay.App.Snackbar</item>
-
+        <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
+        <item name="snackbarTextViewStyle">@style/Widget.App.Snackbar.TextView</item>
         <!-- System bars -->
-        <item name="android:statusBarColor">@color/md_theme_surfaceContainer</item>
-        <item name="android:navigationBarColor">@color/md_theme_surfaceContainer</item>
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:navigationBarColor">?attr/colorSurface</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
 
@@ -71,7 +71,7 @@
 
     <!-- Custom component styles -->
     <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardElevation">2dp</item>
+        <item name="cardElevation">6dp</item>
         <item name="cardCornerRadius">12dp</item>
         <item name="cardBackgroundColor">?attr/colorSurfaceContainerHigh</item>
     </style>
@@ -83,9 +83,12 @@
         <item name="itemActiveIndicatorStyle">@style/Widget.App.BottomNavigation.ActiveIndicator</item>
     </style>
 
-    <style name="ThemeOverlay.App.Snackbar" parent="ThemeOverlay.Material3.Snackbar">
-        <item name="colorSurface">?attr/colorSurface</item>
-        <item name="colorOnSurface">?attr/colorOnSurface</item>
+    <style name="Widget.App.Snackbar" parent="Widget.Material3.Snackbar">
+        <item name="backgroundTint">?attr/colorSurface</item>
+    </style>
+
+    <style name="Widget.App.Snackbar.TextView" parent="Widget.Material3.Snackbar.TextView">
+        <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 
     <style name="Widget.App.BottomNavigation.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
@@ -103,6 +106,18 @@
         <item name="subtitleTextColor">?attr/colorOnSurfaceVariant</item>
         <item name="navigationIconTint">?attr/colorOnSurface</item>
     </style>
+
+    <style name="Widget.App.ExtendedFloatingActionButton" parent="Widget.Material3.ExtendedFloatingActionButton.Icon.Primary">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.FloatingActionButton</item>
+    </style>
+
+
+
+    <style name="ThemeOverlay.App.FloatingActionButton" parent="">
+        <item name="colorContainer">?attr/colorSurface</item>
+        <item name="colorOnContainer">?attr/colorOnPrimaryContainer</item>
+    </style>
+
 
     <style name="ThemeOverlay.App.DatePicker" parent="@style/ThemeOverlay.Material3.MaterialCalendar">
         <item name="android:windowBackground">@color/current_app_background_dark</item>

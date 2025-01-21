@@ -121,7 +121,7 @@
 
             <!-- Continue Button -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/continue_button"
+                android:id="@+id/completeRegistration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/complete_registration"

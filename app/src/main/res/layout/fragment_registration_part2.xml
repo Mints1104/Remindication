@@ -81,10 +81,10 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/continue_button"
+            android:id="@+id/completeRegistration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/continueSignUp"
+            android:text="@string/complete_registration"
             android:textColor="@android:color/white"
             android:layout_marginTop="32dp"/>
 

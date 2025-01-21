@@ -8,7 +8,6 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.data.FireStoreRepository
-import com.mints.mobilehealthapplication.data.Medication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -141,25 +140,7 @@ class RegistrationViewModel : ViewModel() {
                     return@launch
                 }
 
-                // Save medication if provided
-                if (userData.medicationName.isNotEmpty()) {
-                    val medication = Medication(
-                        name = userData.medicationName,
-                        dosage = userData.dosage,
-                        frequency = userData.frequency,
-                        time = userData.reminderTime
-                    )
 
-                    val isMedicationSaved = FireStoreRepository.saveMedication(user.uid, medication)
-                    if (!isMedicationSaved) {
-                        _registrationState.value = RegistrationState.Error(
-                            "Your account was created but medication details couldn't be saved. " +
-                                    "You can add them later from your profile.",
-                            ErrorType.GENERAL
-                        )
-                        return@launch
-                    }
-                }
 
                 _registrationState.value = RegistrationState.Success(user.uid)
             } else {
