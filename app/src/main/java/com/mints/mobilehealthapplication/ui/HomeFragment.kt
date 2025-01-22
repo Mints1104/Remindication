@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -97,31 +96,64 @@ class HomeFragment : Fragment() {
         Log.d("HomeFragment", "RecyclerView setup complete")
     }
 
+//    private fun addSwipeFunctionality() {
+//        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+//            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+//                return false
+//            }
+//
+//            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+//                val position = viewHolder.adapterPosition
+//                when (direction) {
+//                    ItemTouchHelper.LEFT -> {
+//
+//                        displayMessage("Swiped left")
+//
+//                    }
+//                    ItemTouchHelper.RIGHT -> {
+//                        displayMessage("Swiped right")
+//                    }
+//
+//                }
+//                adapter.notifyItemChanged(position)
+//
+//            }
+//        })
+//        itemTouchHelper.attachToRecyclerView(binding.medicationsRecyclerView)
+//    }
+
     private fun addSwipeFunctionality() {
-        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-                return false
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                when (direction) {
-                    ItemTouchHelper.LEFT -> {
-
-                        displayMessage("Swiped left")
-
-                    }
-                    ItemTouchHelper.RIGHT -> {
-                        displayMessage("Swiped right")
-                    }
-
-                }
+        val swipeCallback = MaterialSwipeCallback(
+            context = requireContext(),
+            swipeLeftAction = MaterialSwipeCallback.SwipeAction(
+                iconRes = R.drawable.baseline_delete_24px,
+                backgroundColorRes = android.R.color.holo_red_dark,
+                label = "Delete Medication"
+            ),
+            swipeRightAction = MaterialSwipeCallback.SwipeAction(
+                iconRes = R.drawable.baseline_check_24px,
+                backgroundColorRes = R.color.darker_green_primary_button,
+                label = "Mark as Taken"
+            ),
+            onSwipeLeft = { position ->
+                // Handle delete action
+                displayMessage("Delete medication")
                 adapter.notifyItemChanged(position)
-
+            },
+            onSwipeRight = { position ->
+                // Handle mark as taken action
+                displayMessage("Marked as taken")
+                adapter.notifyItemChanged(position)
             }
-        })
-        itemTouchHelper.attachToRecyclerView(binding.medicationsRecyclerView)
+        )
+
+        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
     }
+
+
+
+
+
 
     /**
      * Sets up the Floating Action Button (FAB) to navigate to the AddMedicationBasicInfoFragment.

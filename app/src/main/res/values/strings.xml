@@ -133,6 +133,9 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="take_with_food">Take with food</string>
     <string name="schedule_your_medication">Schedule your medication</string>
+    <string name="medication_name">Medication Name</string>
+    <string name="id">Id: %s</string>
+    <string name="medication_dosage">Dosage: %s</string>
 
 
 </resources>
