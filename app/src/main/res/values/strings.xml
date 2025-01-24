@@ -136,6 +136,8 @@
     <string name="medication_name">Medication Name</string>
     <string name="id">Id: %s</string>
     <string name="medication_dosage">Dosage: %s</string>
+    <string name ="empty_string"></string>
+    <string name="days">Days: %s</string>
 
 
 </resources>

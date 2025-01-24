@@ -34,10 +34,10 @@ class AddMedicationBasicInfoFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout using ViewBinding
         _binding = FragmentAddMedicationPart1Binding.inflate(inflater, container, false)
         val view = binding.root
         viewModel.resetValidationState()
+        viewModel.testDateLogic()
 
 
         val mainActivity = activity as MainActivity

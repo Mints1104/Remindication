@@ -15,26 +15,33 @@ class MedicationRecyclerView(
     private val onClick: (Medication) -> Unit
 ) : RecyclerView.Adapter<MedicationRecyclerView.MedicationViewHolder>() {
 
+    private val tag = "RecyclerView"
     class MedicationViewHolder(val binding: ItemMedicationBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MedicationViewHolder {
-        Log.d("MedicationRecyclerView", "Creating ViewHolder")
+        Log.d(tag, "Creating ViewHolder")
         val binding = ItemMedicationBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MedicationViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MedicationViewHolder, position: Int) {
         val medication = medications[position]
-        Log.d("MedicationRecyclerView", "Binding medication: ${medication.name}")
-        Log.d("MedicationRecyclerView", "Binding medication: ${medication.id}")
+        Log.d(tag, "Binding medication: ${medication.name}")
+        Log.d(tag, "Binding medication: ${medication.id}")
 
         val context = holder.binding.root.context
 
         holder.binding.medicationName.text = medication.name
-        holder.binding.medicationId.text = medication.id
+        holder.binding.medicationId.text = context.getString(R.string.id,medication.id)
         holder.binding.medicationDosage.text = context.getString(R.string.dosage_of_medication, medication.dosage)
         holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication,medication.schedule.formattedFrequency)
-        holder.binding.medicationTime.text = context.getString(R.string.time_of_medication,medication.schedule.formattedTimes)
+        if(medication.schedule.formattedFrequency ==  "As Needed") {
+            holder.binding.medicationTime.text = context.getString(R.string.empty_string)
+        } else {
+            holder.binding.medicationTime.text = context.getString(R.string.time_of_medication,medication.schedule.formattedTimes)
+
+        }
+
 
         holder.binding.root.setOnClickListener {
                         onClick(medication)
@@ -43,6 +50,19 @@ class MedicationRecyclerView(
 
     override fun getItemCount(): Int {
         return medications.size
+    }
+
+    fun getMedicationList(): List<Medication> {
+        return medications
+    }
+
+
+    fun getMedicationAt(position: Int): Medication {
+        return medications[position]
+    }
+
+    fun getMedicationNameAt(position: Int): String {
+        return medications[position].name
     }
 
     fun updateMedicationList(newMedications: List<Medication>) {

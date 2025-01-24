@@ -1,5 +1,6 @@
 package com.mints.mobilehealthapplication.data
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
@@ -7,7 +8,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 object FireStoreRepository {
     private val db by lazy { FirebaseFirestore.getInstance() }
@@ -40,7 +44,6 @@ object FireStoreRepository {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     suspend fun getMedications(uid: String): List<Medication> {
         return db.collection("users")
             .document(uid)
@@ -94,12 +97,42 @@ object FireStoreRepository {
         }
     }
 
+    suspend fun deleteMedication(uid: String, medicationId: String) {
+        val tag = "FireStoreRepository"
+        try {
+            Log.i(tag, "🔥 Initiating deletion for medication ID: $medicationId (User: ${uid.take(4)}...)")
+            Log.d(tag, "🗄️ Database path: users/$uid/medications/$medicationId")
+
+            val startTime = System.currentTimeMillis()
+            db.collection("users").document(uid)
+                .collection("medications")
+                .document(medicationId)
+                .delete()
+                .await()
+
+            val duration = System.currentTimeMillis() - startTime
+            Log.i(tag, "✅ Successfully deleted medication ID: $medicationId in ${duration}ms")
+        } catch (e: Exception) {
+            Log.e(tag, "❌ FAILED to delete medication ID: $medicationId", e)
+            Log.w(tag, "⚠️ Error details: ${e.message?.take(200)}...")
+            Log.d(tag, "🔄 Possible mitigation: Verify network connection and document permissions")
+            throw e
+        }
+    }
+
+
+    private fun LocalDateTime.toFirestoreTimestamp(): Timestamp {
+        return Timestamp(this.toEpochSecond(ZoneOffset.UTC), 0)
+    }
+
+
     private fun convertScheduleToMap(schedule: MedicationSchedule): Map<String, Any> {
         return when (schedule) {
             is MedicationSchedule.Daily -> hashMapOf(
                 "type" to "daily",
                 "frequency" to (schedule.frequency.ordinal + 1),
                 "times" to schedule.times.map { it.toString() },
+                "nextDueDates" to schedule.nextDueDates.map { it.toFirestoreTimestamp() },
                 "withFood" to schedule.withFood,
                 "specificInstructions" to schedule.specificInstructions
             )
@@ -138,7 +171,6 @@ object FireStoreRepository {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun parseMedicationSchedule(scheduleMap: Map<String, Any>?): MedicationSchedule {
         if (scheduleMap == null) return MedicationSchedule.OnDemand()
 
@@ -149,11 +181,21 @@ object FireStoreRepository {
                 } ?: emptyList()
 
                 MedicationSchedule.Daily(
-                    frequency = DailyFrequency.fromInt((scheduleMap["frequency"] as? Long)?.toInt() ?: 1),
+                    frequency = DailyFrequency.fromInt(
+                        (scheduleMap["frequency"] as? Long)?.toInt() ?: 1
+                    ),
+
                     times = times,
                     withFood = scheduleMap["withFood"] as? Boolean ?: false,
-                    specificInstructions = scheduleMap["specificInstructions"] as? String ?: ""
+                    specificInstructions = scheduleMap["specificInstructions"] as? String ?: "",
+                    nextDueDates = (scheduleMap["nextDueDates"] as? List<Timestamp>)?.map { timestamp ->
+                        LocalDateTime.ofInstant(
+                            timestamp.toDate().toInstant(),
+                            ZoneId.systemDefault()
+                        )
+                    } ?: emptyList()
                 )
+
             }
 
             "interval" -> {
@@ -208,6 +250,33 @@ object FireStoreRepository {
             }
 
             else -> MedicationSchedule.OnDemand()
+        }
+    }
+
+    suspend fun updateMedicationDates(
+        userId: String,
+        medicationId: String,
+        newDates: List<LocalDateTime>
+    ): Boolean {
+        return try {
+            val firestoreDates = newDates.map { it.toFirestoreTimestamp() }
+
+            db.collection("users")
+                .document(userId)
+                .collection("medications")
+                .document(medicationId)
+                .update("schedule.nextDueDates", firestoreDates)
+                .await()
+
+           newDates.forEach{date ->
+               Log.d("FIRESTORE_UPDATE","Success, new date: $date")
+           }
+
+
+            true
+        } catch (e: Exception) {
+            Log.e("FIRESTORE_UPDATE", "Failed to update dates", e)
+            false
         }
     }
 

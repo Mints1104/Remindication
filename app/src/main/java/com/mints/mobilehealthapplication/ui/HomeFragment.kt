@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -16,11 +17,14 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationInfo
+import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
+
 
 /**
  * HomeFragment displays the list of medications and serves as the main screen of the application.
@@ -32,6 +36,9 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: MedicationRecyclerView
+    private var uid = ""
+    private var medicationList = MutableLiveData<List<Medication>>()
+    private val addMedicationViewModel: AddMedicationViewModel by activityViewModels()
 
     /**
      * Inflates the fragment layout using ViewBinding.
@@ -55,16 +62,22 @@ class HomeFragment : Fragment() {
         setupFAB()
         setUpRecyclerView()
         fetchUserMedication()
+
+        
     }
 
+
+
     private fun fetchUserMedication() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+         uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         Log.d("HomeFragment", "Current user UID: $uid")
         if (uid.isEmpty()) {
             Log.e("HomeFragment", "User is not authenticated")
             Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
         } else {
             viewModel.getMedications(uid)
+            medicationList = viewModel.getMedicationList()
+
         }
     }
 
@@ -77,9 +90,20 @@ class HomeFragment : Fragment() {
 
          adapter = MedicationRecyclerView(emptyList()) { medication ->
             viewModel.onMedicationClicked(medication)
-            if (medication.notes.isNotEmpty()) {
+             when (val schedule = medication.schedule) {
+                 is MedicationSchedule.Daily -> {
+
+                     Log.d("MED_TEST", "Times: ${schedule.times}")
+                     Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
+                 }
+                 else -> Log.d(tag,"N/A")
+                 }
+
+
+             if (medication.notes.isNotEmpty()) {
                 val addMedicationNotesBottomSheet = MedicationNotesBottomSheet.newInstance(medication.notes)
                 addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
+
             } else {
                 displayMessage("No notes available for ${medication.name}")
             }
@@ -123,6 +147,7 @@ class HomeFragment : Fragment() {
 //    }
 
     private fun addSwipeFunctionality() {
+
         val swipeCallback = MaterialSwipeCallback(
             context = requireContext(),
             swipeLeftAction = MaterialSwipeCallback.SwipeAction(
@@ -134,22 +159,56 @@ class HomeFragment : Fragment() {
                 iconRes = R.drawable.baseline_check_24px,
                 backgroundColorRes = R.color.darker_green_primary_button,
                 label = "Mark as Taken"
+
             ),
             onSwipeLeft = { position ->
-                // Handle delete action
-                displayMessage("Delete medication")
-                adapter.notifyItemChanged(position)
+                val medicationName = adapter.getMedicationNameAt(position)
+                val medication= adapter.getMedicationAt(position)
+                displayMessage("Delete medication: $medicationName")
+                showUndoSnackbar(medication, position)
             },
             onSwipeRight = { position ->
-                // Handle mark as taken action
-                displayMessage("Marked as taken")
+                val medication = adapter.getMedicationAt(position)
+                displayMessage("Mark $medication as taken")
+                viewModel.markMedicationAsTaken(uid,medication)
                 adapter.notifyItemChanged(position)
+                adapter.updateMedicationList(adapter.getMedicationList())
+
             }
         )
 
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
     }
+    private fun showUndoSnackbar(medication: Medication, position: Int) {
+        // Create a copy of the current list
+        val currentList = adapter.getMedicationList().toMutableList()
+        val removedItem = currentList.removeAt(position)
 
+        // Update adapter with new list using DiffUtil
+        adapter.updateMedicationList(currentList)
+
+        Snackbar.make(binding.root, "${medication.name} deleted", Snackbar.LENGTH_LONG)
+            .setAction("UNDO") {
+                // Re-insert at original position
+                currentList.add(position, removedItem)
+                adapter.updateMedicationList(currentList)
+                adapter.notifyItemChanged(position)
+
+            }
+            .addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION) {
+                        // Delete from ViewModel after confirmation
+                        medication.id?.let {
+                            viewModel.deleteMedication(uid, it) {
+                                viewModel.getMedications(uid)
+                            }
+                        }
+                    }
+                }
+            })
+            .show()
+    }
 
 
 

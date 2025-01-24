@@ -40,6 +40,8 @@
             android:text="@string/frequency_of_medication"
             android:textSize="16sp" />
 
+       
+
         <TextView
             android:id="@+id/medicationTime"
             android:layout_width="wrap_content"

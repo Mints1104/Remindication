@@ -2,6 +2,7 @@ package com.mints.mobilehealthapplication.data
 
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -14,7 +15,7 @@ data class Medication(
     val createdAt: Timestamp = Timestamp.now(),
     val active: Boolean = true,
     val lastModified: Timestamp = Timestamp.now(),
-    val refillReminder: RefillInfo? = null
+    val refillReminder: RefillInfo? = null,
 )
 
 sealed class MedicationSchedule {
@@ -22,26 +23,35 @@ sealed class MedicationSchedule {
         val frequency: DailyFrequency,
         val times: List<LocalTime>,
         val withFood: Boolean = false,
-        val specificInstructions: String = ""
+        val specificInstructions: String = "",
+        val nextDueDates: List<LocalDateTime>
+
+
     ) : MedicationSchedule()
 
     data class Interval(
         val interval: IntervalPeriod,
         val startTime: LocalTime,
-        val endDate: Timestamp? = null
+        val endDate: Timestamp? = null,
+      //  val nextDueDates: List<LocalDateTime>
+
     ) : MedicationSchedule()
 
     data class WeeklySchedule(
         val days: List<DayOfWeek>,
         val times: List<LocalTime>,
-        val withFood: Boolean = false
+        val withFood: Boolean = false,
+      //  val nextDueDates: List<LocalDateTime>
+
     ) : MedicationSchedule()
 
     data class Cyclic(
         val intakeDays: Int,
         val pauseDays: Int,
         val times: List<LocalTime>,
-        val currentCycleStartDate: Timestamp? = null
+   //     val nextDueDates: List<LocalDateTime>,
+        val currentCycleStartDate: Timestamp? = null,
+
     ) : MedicationSchedule()
 
     data class OnDemand(
@@ -81,6 +91,10 @@ sealed class MedicationSchedule {
             is OnDemand -> minTimeBetweenDoses?.let { "Min ${it}h between" } ?: instructions
         }
 }
+
+
+
+
 
 // Extension functions
 private fun List<LocalTime>.formatTimes(): String = joinToString(", ") { it.formatTime() }
