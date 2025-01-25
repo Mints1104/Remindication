@@ -39,6 +39,7 @@ class HomeFragment : Fragment() {
     private var uid = ""
     private var medicationList = MutableLiveData<List<Medication>>()
     private val addMedicationViewModel: AddMedicationViewModel by activityViewModels()
+    private lateinit var medToClear: Medication
 
     /**
      * Inflates the fragment layout using ViewBinding.
@@ -62,8 +63,31 @@ class HomeFragment : Fragment() {
         setupFAB()
         setUpRecyclerView()
         fetchUserMedication()
+//
+//        binding.undoButton.setOnClickListener{
+//            val firstMed = viewModel.medications.value?.firstOrNull()
+//            if(firstMed != null) {
+//                val updatedMed = viewModel.markWithUndoPrep(firstMed)
+//                Log.d("UNDO_TEST", "Current stored: ${viewModel.lastOriginalDates}")
+//                viewModel._medications.value = viewModel._medications.value?.map {
+//                    if (it.id == firstMed.id) updatedMed else it
+//                }
+//
+//            }
+//        }
 
-        
+//        binding.undoButton.setOnClickListener {
+//            viewModel.undoLastTaken()
+//        }
+//        binding.clearUndoButton.setOnClickListener {
+//
+//                if(medToClear != null) {
+//                    viewModel.undoLastTaken()
+//
+//                }
+//        }
+
+
     }
 
 
@@ -169,10 +193,8 @@ class HomeFragment : Fragment() {
             },
             onSwipeRight = { position ->
                 val medication = adapter.getMedicationAt(position)
-                displayMessage("Mark $medication as taken")
-                viewModel.markMedicationAsTaken(uid,medication)
-                adapter.notifyItemChanged(position)
-                adapter.updateMedicationList(adapter.getMedicationList())
+                displayMessage("Mark ${medication.name} as taken")
+                showUndoMedicationSnackbar(medication,position)
 
             }
         )
@@ -204,6 +226,29 @@ class HomeFragment : Fragment() {
                                 viewModel.getMedications(uid)
                             }
                         }
+                    }
+                }
+            })
+            .show()
+    }
+
+    private fun showUndoMedicationSnackbar(medication: Medication,position: Int) {
+        val currentList = adapter.getMedicationList().toMutableList()
+
+        Snackbar.make(binding.root,"${medication.name} taken", Snackbar.LENGTH_LONG)
+            .setAction("UNDO") {
+                viewModel.undoLastTaken(medication)
+                adapter.updateMedicationList(currentList)
+                adapter.notifyItemChanged(position)
+
+            }
+            .addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION) {
+                        // update firestore with new date
+
+                        viewModel.markMedicationAsTaken(uid,medication)
+
                     }
                 }
             })

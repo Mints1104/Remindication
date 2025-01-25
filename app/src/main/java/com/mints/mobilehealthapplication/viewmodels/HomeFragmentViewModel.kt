@@ -13,19 +13,82 @@ import java.time.LocalDateTime
 
 class HomeFragmentViewModel : ViewModel() {
 
-    private val _medications = MutableLiveData<List<Medication>>()
+     val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
     private val _navigateToDetails = MutableLiveData<Medication?>()
     val navigateToDetails: LiveData<Medication?> get() = _navigateToDetails
 
+    private var _lastOriginalMedication: Medication? = null
+    private var _lastOriginalDates: List<LocalDateTime>? = null
+
+    val lastOriginalDates: List<LocalDateTime>? get() = _lastOriginalDates
+
+    /*
+    1. Store the medication we are marking as taken and its original and new date
+    2. Upon completion, then we want to temporarily assign the new date to the medication
+    3. If they click "Undo" then we revert back
+    4. If they do not click "Undo" then we save that medication with the new date to firestore
+    which we already have a function for
 
 
+     */
 
 
+     fun clearUndoState(medication: Medication) {
+         val medicationSchedule = medication.schedule
+         if(medicationSchedule is MedicationSchedule.Daily) {
+             _lastOriginalMedication = medication
+             _lastOriginalDates = medicationSchedule.nextDueDates.toList()
+         }
+
+    }
 
 
+    fun testStateTracking(medication: Medication) {
+        val medicationSchedule = medication.schedule
 
+        if (medicationSchedule is MedicationSchedule.Daily) {
+            _lastOriginalDates = medicationSchedule.nextDueDates.toList()
+            _lastOriginalMedication = medication
+            Log.d("UNDO_TEST", "Stored dates: $_lastOriginalDates")
+            Log.d("UNDO_TEST", "Stored medication: ${_lastOriginalMedication?.name}")
+        } else {
+            Log.d("UNDO_TEST","Not a daily schedule, ignoring for now")
+        }
 
+    }
+
+        fun markWithUndoPrep(medication: Medication): Medication {
+        val medicationSchedule = medication.schedule
+        if (medicationSchedule is MedicationSchedule.Daily) {
+
+            _lastOriginalDates = medicationSchedule.nextDueDates.toList()
+            _lastOriginalMedication = medication
+            return debugAdvanceDates(medication) // From previous step
+
+        } else {
+            return medication
+        }
+
+    }
+    fun undoLastTaken(medication: Medication) {
+        _lastOriginalMedication?.let { originalMed ->
+            _lastOriginalDates?.let { originalDates ->
+                // Create reverted copy
+                val revertedMed = originalMed.copy(
+                    schedule = (originalMed.schedule as MedicationSchedule.Daily).copy(
+                        nextDueDates = originalDates
+                    )
+                )
+                Log.d("UndoLastTaken","Reverted medication dates: $originalDates")
+
+                _medications.value = _medications.value?.map {
+                    if (it.id == originalMed.id) revertedMed else it
+                }
+            }
+        }
+        clearUndoState(medication)
+    }
 
 
 
@@ -88,7 +151,7 @@ class HomeFragmentViewModel : ViewModel() {
                             if (it.id == medication.id) updatedMedication else it
                         }
                     } else {
-
+                    Log.e("HomeViewModel","Error marking ${medication.name} as taken")
                     }
                 }
             }
