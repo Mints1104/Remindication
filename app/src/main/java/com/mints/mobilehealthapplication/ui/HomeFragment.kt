@@ -63,6 +63,10 @@ class HomeFragment : Fragment() {
         setupFAB()
         setUpRecyclerView()
         fetchUserMedication()
+        viewModel.getCurrentDay()
+        addMedicationViewModel.testWeeklyDateCalculation()
+        addMedicationViewModel.testWeeklyDateCalculationEdgeCase()
+        addMedicationViewModel.testSingleDateAdvance()
 //
 //        binding.undoButton.setOnClickListener{
 //            val firstMed = viewModel.medications.value?.firstOrNull()
@@ -92,6 +96,9 @@ class HomeFragment : Fragment() {
 
 
 
+
+
+
     private fun fetchUserMedication() {
          uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         Log.d("HomeFragment", "Current user UID: $uid")
@@ -117,6 +124,11 @@ class HomeFragment : Fragment() {
              when (val schedule = medication.schedule) {
                  is MedicationSchedule.Daily -> {
 
+                     Log.d("MED_TEST", "Times: ${schedule.times}")
+                     Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
+                 }
+
+                 is MedicationSchedule.WeeklySchedule -> {
                      Log.d("MED_TEST", "Times: ${schedule.times}")
                      Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
                  }
@@ -195,6 +207,7 @@ class HomeFragment : Fragment() {
                 val medication = adapter.getMedicationAt(position)
                 displayMessage("Mark ${medication.name} as taken")
                 showUndoMedicationSnackbar(medication,position)
+                adapter.notifyItemChanged(position)
 
             }
         )

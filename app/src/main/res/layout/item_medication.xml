@@ -48,6 +48,14 @@
             android:layout_height="wrap_content"
             android:text="@string/time_of_medication"
             android:textSize="16sp" />
+
+
+        <TextView
+            android:id="@+id/medicationDay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/medication_date"
+            android:textSize="16sp" />
     </LinearLayout>
 
 

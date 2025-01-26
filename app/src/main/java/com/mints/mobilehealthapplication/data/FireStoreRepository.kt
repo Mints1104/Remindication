@@ -151,6 +151,7 @@ object FireStoreRepository {
                 "type" to "weekly",
                 "days" to schedule.days.map { it.name },
                 "times" to schedule.times.map { it.toString() },
+                "nextDueDates" to schedule.nextDueDates.map { it.toFirestoreTimestamp() },
                 "withFood" to schedule.withFood
             )
 
@@ -224,7 +225,13 @@ object FireStoreRepository {
                 MedicationSchedule.WeeklySchedule(
                     days = days,
                     times = times,
-                    withFood = scheduleMap["withFood"] as? Boolean ?: false
+                    withFood = scheduleMap["withFood"] as? Boolean ?: false,
+                    nextDueDates = (scheduleMap["nextDueDates"] as? List<Timestamp>)?.map { timestamp ->
+                        LocalDateTime.ofInstant(
+                            timestamp.toDate().toInstant(),
+                            ZoneId.systemDefault()
+                        )
+                    } ?: emptyList()
                 )
             }
 

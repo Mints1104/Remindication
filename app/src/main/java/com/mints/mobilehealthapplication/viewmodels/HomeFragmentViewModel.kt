@@ -9,6 +9,7 @@ import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class HomeFragmentViewModel : ViewModel() {
@@ -34,7 +35,7 @@ class HomeFragmentViewModel : ViewModel() {
      */
 
 
-     fun clearUndoState(medication: Medication) {
+     private fun clearUndoState(medication: Medication) {
          val medicationSchedule = medication.schedule
          if(medicationSchedule is MedicationSchedule.Daily) {
              _lastOriginalMedication = medication
@@ -101,6 +102,7 @@ class HomeFragmentViewModel : ViewModel() {
         }
     }
 
+
     fun deleteMedication(uid: String, medicationId: String, onComplete: () -> Unit) {
         viewModelScope.launch {
             try {
@@ -131,6 +133,17 @@ class HomeFragmentViewModel : ViewModel() {
                 medication // Return unchanged
             }
         }
+    }
+
+
+
+
+    fun getCurrentDay() {
+
+        val today = LocalDate.now()
+
+        Log.d("HomeViewModel","Current date: $today and the day is ${today.dayOfWeek}")
+
     }
 
     fun markMedicationAsTaken(userId: String, medication: Medication) {

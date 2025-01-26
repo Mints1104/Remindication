@@ -13,8 +13,10 @@ import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.ScheduleValidator
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.LocalDateTime
+    import java.time.LocalDate
+    import java.time.LocalDateTime
 import java.time.LocalTime
+    import java.time.temporal.TemporalAdjusters
 
     class AddMedicationViewModel : ViewModel() {
 
@@ -278,17 +280,86 @@ import java.time.LocalTime
 
 
 
-//        private fun calculateWeeklyDueDates(days: List<DayOfWeek>, times: List<LocalTime>): List<LocalDateTime> {
-//            return days.flatMap { day ->
-//                times.map { time ->
-//                    LocalDate.now()
-//                        .with(TemporalAdjusters.nextOrSame(day))
-//                        .atTime(time)
-//                        .let { if (it.isBefore(LocalDateTime.now())) it.plusWeeks(1) else it }
-//                }
-//            }
-//        }
+            private fun calculateWeeklyDueDates(days: List<DayOfWeek>, times: List<LocalTime>): List<LocalDateTime> {
+                return days.flatMap { day ->
+                    times.map { time ->
+                        LocalDate.now()
+                            .with(TemporalAdjusters.nextOrSame(day))
+                            .atTime(time)
+                            .let { if (it.isBefore(LocalDateTime.now())) it.plusWeeks(1) else it }
+                    }
+                }
+            }
+        fun testWeeklyDateCalculation() {
+            val testDays = listOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY)
+            val testTimes = listOf(LocalTime.of(8, 0), LocalTime.of(20, 0))
 
+            val calculated = calculateWeeklyDueDates(testDays, testTimes)
+            Log.d("WEEKLY_TEST", "Calculated dates: $calculated")
+        }
+
+        fun testWeeklyDateCalculationEdgeCase() {
+            val fixedNow = LocalDateTime.of(2025, 1, 29, 9, 0) // Wednesday 9 AM
+            val testDays = listOf(DayOfWeek.WEDNESDAY)
+            val testTimes = listOf(LocalTime.of(8, 0), LocalTime.of(20, 0))
+
+            val calculated = testDays.flatMap { day ->
+                testTimes.map { time ->
+                    fixedNow.toLocalDate()
+                        .with(TemporalAdjusters.nextOrSame(day))
+                        .atTime(time)
+                        .let { if (it.isBefore(fixedNow)) it.plusWeeks(1) else it }
+                }
+            }
+
+            Log.d("WEEKLY_TEST", "Edge Case Result: $calculated")
+        }
+
+        fun advanceWeeklyDate(
+            medication: Medication,
+            takenDate: LocalDateTime
+        ): Medication {
+            return if (medication.schedule is MedicationSchedule.WeeklySchedule) {
+                val newDates = medication.schedule.nextDueDates.map { date ->
+                    if (date == takenDate) date.plusWeeks(1) else date
+                }
+                medication.copy(
+                    schedule = medication.schedule.copy(nextDueDates = newDates)
+                )
+            } else {
+                medication
+            }
+        }
+
+        fun testSingleDateAdvance() {
+            val originalDates = listOf(
+                LocalDateTime.of(2025, 1, 29, 8, 0),  // To be advanced
+                LocalDateTime.of(2025, 1, 29, 20, 0) // Unchanged
+            )
+
+            val testMed = Medication(
+                schedule = MedicationSchedule.WeeklySchedule(
+                    days = listOf(DayOfWeek.WEDNESDAY),
+                    times = listOf(LocalTime.of(8, 0), LocalTime.of(20, 0)),
+                    nextDueDates = originalDates
+                )
+            )
+
+            val updatedMed = advanceWeeklyDate(testMed, originalDates[0])
+
+            val testMedSchedule = testMed.schedule
+
+            if(testMedSchedule is MedicationSchedule.WeeklySchedule) {
+                val updatedMedSchedule = updatedMed.schedule
+                if(updatedMedSchedule is MedicationSchedule.WeeklySchedule) {
+                    Log.d("WEEKLY_ADVANCE", "Original: ${testMedSchedule.nextDueDates}")
+                    Log.d("WEEKLY_ADVANCE", "Updated: ${updatedMedSchedule.nextDueDates}")
+                }
+                }
+
+
+
+        }
 
 
             private fun calculateDueDates(times: List<LocalTime>): List<LocalDateTime> {
@@ -315,10 +386,10 @@ import java.time.LocalTime
                 "Weekly" -> MedicationSchedule.WeeklySchedule(
                     days = _selectedDays.value?.toList() ?: emptyList(),
                     times = _selectedTimes.value ?: emptyList(),
-//                    nextDueDates = calculateWeeklyDueDates( // ADD THIS LINE
-//                        _selectedDays.value?.toList() ?: emptyList(),
-//                        _selectedTimes.value ?: emptyList()
-//                    ),
+                   nextDueDates = calculateWeeklyDueDates(
+                        _selectedDays.value?.toList() ?: emptyList(),
+                        _selectedTimes.value ?: emptyList()
+                    ),
                     withFood = _withFood.value ?: false
                 )
                 "Cyclic" -> MedicationSchedule.Cyclic(

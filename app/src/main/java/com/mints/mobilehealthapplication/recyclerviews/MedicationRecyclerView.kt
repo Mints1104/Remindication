@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationDiffCallback
+import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.databinding.ItemMedicationBinding
 
 class MedicationRecyclerView(
@@ -35,6 +36,20 @@ class MedicationRecyclerView(
         holder.binding.medicationId.text = context.getString(R.string.id,medication.id)
         holder.binding.medicationDosage.text = context.getString(R.string.dosage_of_medication, medication.dosage)
         holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication,medication.schedule.formattedFrequency)
+
+        val medicationSchedule = medication.schedule
+
+
+
+        if(medicationSchedule is MedicationSchedule.Daily) {
+            holder.binding.medicationDay.text = context.getString(R.string.medication_date,medicationSchedule.nextDueDates)
+
+        }
+
+        if(medicationSchedule is MedicationSchedule.WeeklySchedule) {
+            holder.binding.medicationDay.text = context.getString(R.string.medication_date,medicationSchedule.nextDueDates)
+        }
+
         if(medication.schedule.formattedFrequency ==  "As Needed") {
             holder.binding.medicationTime.text = context.getString(R.string.empty_string)
         } else {

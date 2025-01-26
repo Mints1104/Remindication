@@ -41,7 +41,7 @@ sealed class MedicationSchedule {
         val days: List<DayOfWeek>,
         val times: List<LocalTime>,
         val withFood: Boolean = false,
-      //  val nextDueDates: List<LocalDateTime>
+        val nextDueDates: List<LocalDateTime>
 
     ) : MedicationSchedule()
 
