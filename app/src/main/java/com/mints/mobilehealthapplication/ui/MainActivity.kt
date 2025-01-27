@@ -1,10 +1,22 @@
 package com.mints.mobilehealthapplication.ui
 
+import android.Manifest
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -18,6 +30,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.data.NotificationReceiver
+import java.util.Calendar
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mToolbar: MaterialToolbar
@@ -27,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private var shouldShowMenu = false
+    private lateinit var alarmManager: AlarmManager
+    private val REQUEST_PERMISSION_CODE = 1001
 
     // Tracks current toolbar menu to prevent duplicate inflation
     private var currentMenu: Int? = null
@@ -39,6 +56,112 @@ class MainActivity : AppCompatActivity() {
         bindUIElements()
         setupNavigation()
         checkAuthenticationState()
+        requestNotificationPermission()
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MINUTE, 1)
+        val medicationName = "Paracetamol"
+        val dosage = "500mg"
+        val triggerTime = System.currentTimeMillis() + 10_000
+
+        setUpAlarmManager()
+    }
+
+    private fun setUpAlarmManager() {
+        Log.d("AlarmDebug", "Setting up alarm manager")
+
+        alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                Log.d("AlarmDebug", "Exact alarm permission already granted")
+                scheduleExactAlarm()  // You'll define this function next
+            } else {
+                Log.w("AlarmDebug", "Exact alarm permission NOT granted")
+                requestPermission()
+            }
+        } else {
+            // For devices below API level 31, we can directly use setExact()
+            scheduleExactAlarm()
+        }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private val alarmPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        if (alarmManager.canScheduleExactAlarms()) {
+            Log.d("AlarmDebug", "Exact alarm permission granted")
+            scheduleExactAlarm()
+        } else {
+            Log.w("AlarmDebug", "Exact alarm permission denied")
+            Toast.makeText(
+                this,
+                "Permission denied. Using fallback method.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun requestPermission() {
+        try {
+            alarmPermissionLauncher.launch(Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+        } catch (e: Exception) {
+            Log.e("AlarmDebug", "Permission request failed", e)
+            Toast.makeText(this, "Error requesting permission", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun scheduleExactAlarm() {
+        val triggerTime = System.currentTimeMillis() + 5000 // For testing, 5 seconds from now
+        Log.d("AlarmDebug", "Scheduling exact alarm at ${Date(triggerTime)}")
+        Log.d("AlarmDebug", "Creating PendingIntent with requestCode 0")
+
+        // Step 1: Create the intent to trigger when the alarm goes off
+        val intent = Intent(this, NotificationReceiver::class.java).apply {
+            // Add any extras if needed, like medication details
+            putExtra("medication_name", "Aspirin")
+            putExtra("dosage", "500mg")
+        }
+
+        // Step 2: Create the PendingIntent to trigger the notification
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,  // You can use a unique request code here
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        // Step 3: Schedule the alarm with AlarmManager using setExact
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,  // Wake the device if it's asleep
+                triggerTime,  // Trigger time in milliseconds
+                pendingIntent  // PendingIntent that will be triggered
+            )
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+        }
+
+        // Optional: Log the time the alarm is set for
+        Log.d("Alarm", "Exact alarm set for: $triggerTime")
+    }
+
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1
+                )
+            }
+        }
     }
 
     private fun initializeFirebase() {

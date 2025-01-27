@@ -65,7 +65,7 @@ class HomeFragmentViewModel : ViewModel() {
 
             _lastOriginalDates = medicationSchedule.nextDueDates.toList()
             _lastOriginalMedication = medication
-            return debugAdvanceDates(medication) // From previous step
+            return debugAdvanceDates(medication)
 
         } else {
             return medication
@@ -168,6 +168,8 @@ class HomeFragmentViewModel : ViewModel() {
                     Log.e("HomeViewModel","Error marking ${medication.name} as taken")
                     }
                 }
+
+
             }
         }
     }
@@ -176,34 +178,34 @@ class HomeFragmentViewModel : ViewModel() {
         val currentDate = LocalDate.now()
 
         viewModelScope.launch {
-            when(medication.schedule) {
+            when (medication.schedule) {
                 is MedicationSchedule.WeeklySchedule -> {
-                    val myList: MutableList<LocalDateTime> = medication.schedule.nextDueDates.toMutableList()
-
-                    medication.schedule.nextDueDates.forEach { date ->
+                    val weeklySchedule = medication.schedule
+                    val originalDates = weeklySchedule.nextDueDates
+                    val updatedDates = originalDates.map { date ->
                         if (date.toLocalDate() <= currentDate) {
                             Log.d("TEST_DATE_ADVANCE", "Advancing week by 1 for $date")
-
-                            // Remove the old date and add the new advanced date
-                            myList.remove(date)
                             val newDate = date.plusWeeks(1)
-                            myList.add(newDate)
-
-                            // Update the medication dates in Firestore
-                            medication.id?.let {
-                                val success = FireStoreRepository.updateMedicationDates(userId, it, myList)
-
-                                if (success) {
-                                    Log.d("TEST_DATE_ADVANCE", "Successfully updated dates for medication: ${medication.name}")
-                                } else {
-                                    Log.e("TEST_DATE_ADVANCE", "Error updating dates for medication: ${medication.name}")
-                                }
-                            }
-
                             Log.d("TEST_DATE_ADVANCE", "New Date: $newDate")
+                            newDate
                         } else {
                             Log.d("TEST_DATE_ADVANCE", "Not updating date: $date")
+                            date
                         }
+                    }.toMutableList()
+
+                    // Check if any dates were actually updated
+                    if (updatedDates != originalDates) {
+                        medication.id?.let { medId ->
+                            val success = FireStoreRepository.updateMedicationDates(userId, medId, updatedDates)
+                            if (success) {
+                                Log.d("TEST_DATE_ADVANCE", "Successfully updated dates for medication: ${medication.name}")
+                            } else {
+                                Log.e("TEST_DATE_ADVANCE", "Error updating dates for medication: ${medication.name}")
+                            }
+                        }
+                    } else {
+                        Log.d("TEST_DATE_ADVANCE", "No dates needed updating for ${medication.name}")
                     }
                 }
                 else -> {

@@ -20,10 +20,13 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationInfo
 import com.mints.mobilehealthapplication.data.MedicationSchedule
+import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 
 /**
@@ -40,6 +43,7 @@ class HomeFragment : Fragment() {
     private var medicationList = MutableLiveData<List<Medication>>()
     private val addMedicationViewModel: AddMedicationViewModel by activityViewModels()
     private lateinit var medToClear: Medication
+    private lateinit var notificationHelper: NotificationHelper
 
     /**
      * Inflates the fragment layout using ViewBinding.
@@ -67,6 +71,8 @@ class HomeFragment : Fragment() {
         addMedicationViewModel.testWeeklyDateCalculation()
         addMedicationViewModel.testWeeklyDateCalculationEdgeCase()
         addMedicationViewModel.testSingleDateAdvance()
+        notificationHelper = NotificationHelper(requireContext())
+
 //
 //        binding.undoButton.setOnClickListener{
 //            val firstMed = viewModel.medications.value?.firstOrNull()
@@ -126,6 +132,13 @@ class HomeFragment : Fragment() {
 
                      Log.d("MED_TEST", "Times: ${schedule.times}")
                      Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
+                     val nextDueTimeMillis = schedule.nextDueDates[0]
+                         .atZone(ZoneId.systemDefault())  // Use device's timezone
+                         .toInstant()
+                         .toEpochMilli()
+
+                     notificationHelper.scheduleNotification(medication.name, medication.dosage,nextDueTimeMillis)
+
                  }
 
                  is MedicationSchedule.WeeklySchedule -> {
@@ -154,6 +167,12 @@ class HomeFragment : Fragment() {
         }
 
         Log.d("HomeFragment", "RecyclerView setup complete")
+    }
+
+    fun convertToMilliseconds(localDateTime: LocalDateTime): Long {
+        val zoneId = ZoneId.systemDefault() // Use system's default time zone
+        val zonedDateTime = localDateTime.atZone(zoneId) // Convert to ZonedDateTime
+        return zonedDateTime.toInstant().toEpochMilli()  // Convert to milliseconds
     }
 
 //    private fun addSwipeFunctionality() {
@@ -262,6 +281,11 @@ class HomeFragment : Fragment() {
 
                         viewModel.markMedicationAsTaken(uid,medication)
 
+                        if(medication.schedule is MedicationSchedule.WeeklySchedule) {
+                            viewModel.testDateAdvanceMedication(uid,medication)
+                        }
+                        adapter.updateMedicationList(currentList)
+                        adapter.notifyItemChanged(position)
                     }
                 }
             })

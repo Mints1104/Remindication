@@ -334,7 +334,7 @@
             style="@android:style/Widget.Material.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="8dp"
-            android:progress="66"
+            android:progress="100"
             android:max="100"/>
 
     </LinearLayout>
