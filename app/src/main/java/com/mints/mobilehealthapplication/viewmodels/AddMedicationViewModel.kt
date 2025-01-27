@@ -315,10 +315,7 @@ import java.time.LocalTime
             Log.d("WEEKLY_TEST", "Edge Case Result: $calculated")
         }
 
-        fun advanceWeeklyDate(
-            medication: Medication,
-            takenDate: LocalDateTime
-        ): Medication {
+        fun advanceWeeklyDate(medication: Medication, takenDate: LocalDateTime): Medication {
             return if (medication.schedule is MedicationSchedule.WeeklySchedule) {
                 val newDates = medication.schedule.nextDueDates.map { date ->
                     if (date == takenDate) date.plusWeeks(1) else date
@@ -331,10 +328,12 @@ import java.time.LocalTime
             }
         }
 
+
+
         fun testSingleDateAdvance() {
             val originalDates = listOf(
-                LocalDateTime.of(2025, 1, 29, 8, 0),  // To be advanced
-                LocalDateTime.of(2025, 1, 29, 20, 0) // Unchanged
+                LocalDateTime.of(2025, 1, 27, 8, 0),  // To be advanced
+                LocalDateTime.of(2025, 1, 26, 20, 0) // Unchanged
             )
 
             val testMed = Medication(
@@ -344,6 +343,29 @@ import java.time.LocalTime
                     nextDueDates = originalDates
                 )
             )
+
+            val currentDate = LocalDate.now()
+            val isDatePresent = originalDates.any { it.toLocalDate() == currentDate }
+            val anyDatesInPast = originalDates.any{it.toLocalDate() < currentDate}
+
+            originalDates.forEach { date ->
+                if(date.toLocalDate() < currentDate || date.toLocalDate() == currentDate) {
+                    Log.d("WEEKLY_ADVANCE","Advancing week by 1 for $date")
+                    val newDate = date.plusWeeks(1)
+                    Log.d("WEEKLY_ADVANCE","New Date: $newDate")
+               } else {
+                    Log.d("WEEKLY_ADVANCE","Not updating date: $date")
+
+                }
+
+            }
+
+            Log.d("WEEKLY_ADVANCE", when {
+                anyDatesInPast && isDatePresent -> "Date in list is in the past AND today's date is in list."
+                anyDatesInPast -> "Date in list is in the past."
+                isDatePresent -> "Today's date is in the list."
+                else -> "No past dates, today's date not found."
+            })
 
             val updatedMed = advanceWeeklyDate(testMed, originalDates[0])
 

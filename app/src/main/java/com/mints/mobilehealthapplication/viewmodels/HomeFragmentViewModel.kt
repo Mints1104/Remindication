@@ -127,6 +127,7 @@ class HomeFragmentViewModel : ViewModel() {
                     schedule = schedule.copy(nextDueDates = newDates)
                 )
             }
+
             // Handle other schedule types if needed
             else -> {
                 Log.d("DEBUG_DATES", "Non-daily schedule - no change")
@@ -171,9 +172,51 @@ class HomeFragmentViewModel : ViewModel() {
         }
     }
 
+    fun testDateAdvanceMedication(userId: String, medication: Medication) {
+        val currentDate = LocalDate.now()
+
+        viewModelScope.launch {
+            when(medication.schedule) {
+                is MedicationSchedule.WeeklySchedule -> {
+                    val myList: MutableList<LocalDateTime> = medication.schedule.nextDueDates.toMutableList()
+
+                    medication.schedule.nextDueDates.forEach { date ->
+                        if (date.toLocalDate() <= currentDate) {
+                            Log.d("TEST_DATE_ADVANCE", "Advancing week by 1 for $date")
+
+                            // Remove the old date and add the new advanced date
+                            myList.remove(date)
+                            val newDate = date.plusWeeks(1)
+                            myList.add(newDate)
+
+                            // Update the medication dates in Firestore
+                            medication.id?.let {
+                                val success = FireStoreRepository.updateMedicationDates(userId, it, myList)
+
+                                if (success) {
+                                    Log.d("TEST_DATE_ADVANCE", "Successfully updated dates for medication: ${medication.name}")
+                                } else {
+                                    Log.e("TEST_DATE_ADVANCE", "Error updating dates for medication: ${medication.name}")
+                                }
+                            }
+
+                            Log.d("TEST_DATE_ADVANCE", "New Date: $newDate")
+                        } else {
+                            Log.d("TEST_DATE_ADVANCE", "Not updating date: $date")
+                        }
+                    }
+                }
+                else -> {
+                    Log.d("TEST_DATE_ADVANCE", "Medication ${medication.name} is not a weekly medication")
+                }
+            }
+        }
+    }
 
 
-        fun testFirestoreUpdate() {
+
+
+    fun testFirestoreUpdate() {
             viewModelScope.launch {
                 val testDates = listOf(LocalDateTime.now().plusDays(1))
                 val success = FireStoreRepository.updateMedicationDates(
