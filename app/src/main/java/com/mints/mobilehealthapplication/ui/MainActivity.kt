@@ -356,9 +356,9 @@ class MainActivity : AppCompatActivity() {
     // UI visibility control methods
     private fun showFAB() { floatingActionButton.isVisible = true }
     fun hideFAB() { floatingActionButton.isVisible = false }
-    private fun hideAppBar() { mToolbar.isVisible = false }
+     fun hideAppBar() { mToolbar.isVisible = false }
     fun showAppBar() { mToolbar.isVisible = true }
-    private fun showBottomNav() { bottomNavigation.isVisible = true }
+     fun showBottomNav() { bottomNavigation.isVisible = true }
     fun hideBottomNav() { bottomNavigation.isVisible = false }
 
     override fun onSupportNavigateUp(): Boolean {

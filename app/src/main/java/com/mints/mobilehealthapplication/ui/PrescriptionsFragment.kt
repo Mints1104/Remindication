@@ -69,6 +69,9 @@ class PrescriptionsFragment : Fragment() {
         addMedicationViewModel.testSingleDateAdvance()
         notificationHelper = NotificationHelper(requireContext())
 
+        val mainActivity = activity as MainActivity
+        mainActivity.showBottomNav()
+
 //
 //        binding.undoButton.setOnClickListener{
 //            val firstMed = viewModel.medications.value?.firstOrNull()
