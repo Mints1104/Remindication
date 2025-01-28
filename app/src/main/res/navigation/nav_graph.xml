@@ -79,9 +79,6 @@
 
 
 
-
-
-
     </fragment>
 
 
@@ -92,12 +89,26 @@
 
 
         <action
-            android:id="@+id/action_todayFragment_to_homeFragment"
+            android:id="@+id/action_prescriptionsFragment_to_homeFragment"
             app:destination="@+id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_prescriptionsFragment_to_addMedicationBasicInfoFragment"
+            app:destination="@+id/addMedicationBasicInfoFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right">
+
+            <argument
+                android:name="medicationId"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
 
 
     </fragment>
@@ -175,6 +186,16 @@
         android:id="@+id/addMedicationBasicInfoFragment"
         android:name="com.mints.mobilehealthapplication.ui.AddMedicationBasicInfoFragment"
         tools:layout="@layout/fragment_add_medication_part1">
+
+
+        <argument
+            android:name="medicationId"
+            app:argType="string"
+            android:defaultValue="" />
+
+
+
+
 
         <action
             android:id="@+id/action_addMedicationBasicInfoFragment_to_homeFragment"

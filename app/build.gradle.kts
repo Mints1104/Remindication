@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+    id("androidx.navigation.safeargs.kotlin") // Safe Args plugin HERE
+
 }
 
 android {
@@ -23,6 +25,8 @@ android {
         viewBinding = true
 
     }
+
+
 
     buildTypes {
         debug {
@@ -69,5 +73,6 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation (libs.material)
+
 
 }

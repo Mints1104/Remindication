@@ -205,8 +205,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUIForDestination(destinationId: Int) {
         when (destinationId) {
-            R.id.homeFragment,R.id.prescriptionsFragment -> {
+            R.id.homeFragment -> {
                 showAllUI()
+                updateToolbar(
+                    showBackArrow = false,
+                    menuResId = R.menu.top_app_bar,
+                    title = getString(R.string.app_name)
+                )
+                invalidateOptionsMenu()
+
+            }
+            R.id.prescriptionsFragment -> {
+                hideFAB()
                 updateToolbar(
                     showBackArrow = false,
                     menuResId = R.menu.top_app_bar,
@@ -271,6 +281,10 @@ class MainActivity : AppCompatActivity() {
         hideAppBar()
         hideBottomNav()
         hideFAB()
+    }
+
+    fun updateToolBarTitle(title:String) {
+        mToolbar.title = title
     }
 
     private fun updateToolbar(showBackArrow: Boolean, menuResId: Int?, title: String) {

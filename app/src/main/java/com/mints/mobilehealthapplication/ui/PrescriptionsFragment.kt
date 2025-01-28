@@ -25,7 +25,6 @@ import com.mints.mobilehealthapplication.databinding.FragmentPrescriptionsBindin
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 
@@ -62,9 +61,6 @@ class PrescriptionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
-        val mainActivity = requireActivity() as MainActivity
-        mainActivity.showAllUI()
-        setupFAB()
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()
@@ -169,37 +165,9 @@ class PrescriptionsFragment : Fragment() {
         Log.d("HomeFragment", "RecyclerView setup complete")
     }
 
-    fun convertToMilliseconds(localDateTime: LocalDateTime): Long {
-        val zoneId = ZoneId.systemDefault() // Use system's default time zone
-        val zonedDateTime = localDateTime.atZone(zoneId) // Convert to ZonedDateTime
-        return zonedDateTime.toInstant().toEpochMilli()  // Convert to milliseconds
-    }
 
-//    private fun addSwipeFunctionality() {
-//        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-//            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-//                return false
-//            }
-//
-//            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//                val position = viewHolder.adapterPosition
-//                when (direction) {
-//                    ItemTouchHelper.LEFT -> {
-//
-//                        displayMessage("Swiped left")
-//
-//                    }
-//                    ItemTouchHelper.RIGHT -> {
-//                        displayMessage("Swiped right")
-//                    }
-//
-//                }
-//                adapter.notifyItemChanged(position)
-//
-//            }
-//        })
-//        itemTouchHelper.attachToRecyclerView(binding.medicationsRecyclerView)
-//    }
+
+
 
     private fun addSwipeFunctionality() {
 
@@ -211,9 +179,9 @@ class PrescriptionsFragment : Fragment() {
                 label = "Delete Medication"
             ),
             swipeRightAction = MaterialSwipeCallback.SwipeAction(
-                iconRes = R.drawable.baseline_check_24px,
-                backgroundColorRes = R.color.darker_green_primary_button,
-                label = "Mark as Taken"
+                iconRes = R.drawable.baseline_edit_24px,
+                backgroundColorRes = R.color.material_yellow,
+                label = "Edit Medication"
 
             ),
             onSwipeLeft = { position ->
@@ -223,16 +191,31 @@ class PrescriptionsFragment : Fragment() {
                 showUndoSnackbar(medication, position)
             },
             onSwipeRight = { position ->
-                val medication = adapter.getMedicationAt(position)
-                displayMessage("Mark ${medication.name} as taken")
-                showUndoMedicationSnackbar(medication,position)
+                displayMessage("Test for editing medication")
                 adapter.notifyItemChanged(position)
+                val medication = adapter.getMedicationAt(position)
+                // Navigate to AddMedicationBasicInfoFragment with the medicationId argument
+                val medicationId = "123" // Replace with your data
+                val action = PrescriptionsFragmentDirections
+                    .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId)
+                findNavController().navigate(action)
 
+                   editMedication(uid,medication)
             }
         )
 
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
     }
+    private fun editMedication(userId:String, medication: Medication) {
+
+        viewModel.getMedicationDetails(userId,medication.id!!)
+
+
+    }
+
+
+
+
     private fun showUndoSnackbar(medication: Medication, position: Int) {
         // Create a copy of the current list
         val currentList = adapter.getMedicationList().toMutableList()
@@ -264,33 +247,7 @@ class PrescriptionsFragment : Fragment() {
             .show()
     }
 
-    private fun showUndoMedicationSnackbar(medication: Medication,position: Int) {
-        val currentList = adapter.getMedicationList().toMutableList()
 
-        Snackbar.make(binding.root,"${medication.name} taken", Snackbar.LENGTH_LONG)
-            .setAction("UNDO") {
-                viewModel.undoLastTaken(medication)
-                adapter.updateMedicationList(currentList)
-                adapter.notifyItemChanged(position)
-
-            }
-            .addCallback(object : Snackbar.Callback() {
-                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    if (event != DISMISS_EVENT_ACTION) {
-                        // update firestore with new date
-
-                        viewModel.markMedicationAsTaken(uid,medication)
-
-                        if(medication.schedule is MedicationSchedule.WeeklySchedule) {
-                            viewModel.testDateAdvanceMedication(uid,medication)
-                        }
-                        adapter.updateMedicationList(currentList)
-                        adapter.notifyItemChanged(position)
-                    }
-                }
-            })
-            .show()
-    }
 
 
 

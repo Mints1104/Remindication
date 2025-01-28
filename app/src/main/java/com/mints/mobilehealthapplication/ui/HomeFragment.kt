@@ -206,9 +206,9 @@ class HomeFragment : Fragment() {
         val swipeCallback = MaterialSwipeCallback(
             context = requireContext(),
             swipeLeftAction = MaterialSwipeCallback.SwipeAction(
-                iconRes = R.drawable.baseline_delete_24px,
-                backgroundColorRes = android.R.color.holo_red_dark,
-                label = "Delete Medication"
+                iconRes = R.drawable.baseline_close_24,
+                backgroundColorRes = android.R.color.darker_gray,
+                label = "Skip Medication"
             ),
             swipeRightAction = MaterialSwipeCallback.SwipeAction(
                 iconRes = R.drawable.baseline_check_24px,
@@ -217,10 +217,8 @@ class HomeFragment : Fragment() {
 
             ),
             onSwipeLeft = { position ->
-                val medicationName = adapter.getMedicationNameAt(position)
-                val medication= adapter.getMedicationAt(position)
-                displayMessage("Delete medication: $medicationName")
-                showUndoSnackbar(medication, position)
+                val medication = adapter.getMedicationAt(position)
+                displayMessage("Mark ${medication.name} as skipped")
             },
             onSwipeRight = { position ->
                 val medication = adapter.getMedicationAt(position)

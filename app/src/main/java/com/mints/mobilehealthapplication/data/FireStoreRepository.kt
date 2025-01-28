@@ -65,6 +65,35 @@ object FireStoreRepository {
             }
     }
 
+    suspend fun getMedicationDetails(uid: String, medicationId: String): Medication {
+        return try {
+            val documentSnapshot = db.collection("users")
+                .document(uid)
+                .collection("medications")
+                .document(medicationId)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                Medication(
+                    id = documentSnapshot.id,
+                    name = documentSnapshot.getString("name") ?: "",
+                    dosage = documentSnapshot.getString("dosage") ?: "",
+                    schedule = parseMedicationSchedule(documentSnapshot.get("schedule") as? Map<String, Any>),
+                    notes = documentSnapshot.getString("notes") ?: "",
+                    createdAt = documentSnapshot.getTimestamp("createdAt") ?: Timestamp.now(),
+                    active = documentSnapshot.getBoolean("active") ?: true,
+                    lastModified = documentSnapshot.getTimestamp("lastModified") ?: Timestamp.now(),
+                    refillReminder = parseRefillInfo(documentSnapshot.get("refillReminder") as? Map<String, Any>)
+                )
+            } else {
+                throw Exception("Medication not found!")
+            }
+        } catch (e: Exception) {
+            throw Exception("Error fetching medication details: ${e.message}")
+        }
+    }
+
     suspend fun saveMedication(uid: String, medication: Medication): Boolean {
         return try {
             val medicationData = hashMapOf(

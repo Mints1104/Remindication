@@ -92,6 +92,15 @@ class HomeFragmentViewModel : ViewModel() {
     }
 
 
+    fun getMedicationDetails(uid: String, medicationId: String) {
+        Log.d("HomeFragmentViewModel","Fetching medication: $medicationId")
+
+        viewModelScope.launch {
+            val med = FireStoreRepository.getMedicationDetails(uid,medicationId)
+            Log.d("HomeFragmentViewModel", "Fetched ${med.name}")
+
+        }
+    }
 
     fun getMedications(uid: String) {
         Log.d("HomeFragmentViewModel", "Fetching medications for user: $uid")

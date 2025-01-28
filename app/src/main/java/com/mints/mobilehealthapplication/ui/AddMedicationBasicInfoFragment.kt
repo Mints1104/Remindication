@@ -9,6 +9,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationPart1Binding
@@ -26,7 +27,6 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     private val viewModel: AddMedicationViewModel by activityViewModels()
 
-
     /**
      * Inflates the layout and initializes UI elements for the fragment.
      */
@@ -38,22 +38,28 @@ class AddMedicationBasicInfoFragment : Fragment() {
         val view = binding.root
         viewModel.resetValidationState()
         viewModel.testDateLogic()
-
-
-        val mainActivity = activity as MainActivity
-        mainActivity.hideFAB()
-        mainActivity.hideBottomNav()
-
-
-
-
+        setUpUI()
         setUpTextInputListeners()
         setupContinueButton()
         observeValidationState()
 
-
-
         return view
+    }
+
+    private fun setUpUI() {
+        val mainActivity = activity as MainActivity
+        mainActivity.hideFAB()
+        mainActivity.hideBottomNav()
+        checkIfEditingMedication(mainActivity)
+    }
+
+    private fun checkIfEditingMedication(mainActivity: MainActivity) {
+        val args: AddMedicationBasicInfoFragmentArgs by navArgs()
+        val medicationId = args.medicationId
+
+        if (medicationId.isNotEmpty()) {
+            mainActivity.updateToolBarTitle("Edit Medication")
+        }
     }
 
     private fun observeValidationState() {
