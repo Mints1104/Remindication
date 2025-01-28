@@ -31,7 +31,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.NotificationReceiver
-import java.util.Calendar
 import java.util.Date
 
 class MainActivity : AppCompatActivity() {
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var alarmManager: AlarmManager
     private val REQUEST_PERMISSION_CODE = 1001
 
-    // Tracks current toolbar menu to prevent duplicate inflation
     private var currentMenu: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,13 +55,11 @@ class MainActivity : AppCompatActivity() {
         setupNavigation()
         checkAuthenticationState()
         requestNotificationPermission()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, 1)
-        val medicationName = "Paracetamol"
-        val dosage = "500mg"
-        val triggerTime = System.currentTimeMillis() + 10_000
-
         setUpAlarmManager()
+
+
+
+
     }
 
     private fun setUpAlarmManager() {
@@ -73,13 +69,12 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
                 Log.d("AlarmDebug", "Exact alarm permission already granted")
-                scheduleExactAlarm()  // You'll define this function next
+                scheduleExactAlarm()
             } else {
                 Log.w("AlarmDebug", "Exact alarm permission NOT granted")
                 requestPermission()
             }
         } else {
-            // For devices below API level 31, we can directly use setExact()
             scheduleExactAlarm()
         }
 
@@ -113,7 +108,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scheduleExactAlarm() {
-        val triggerTime = System.currentTimeMillis() + 5000 // For testing, 5 seconds from now
+        val triggerTime = System.currentTimeMillis() + 5000
         Log.d("AlarmDebug", "Scheduling exact alarm at ${Date(triggerTime)}")
         Log.d("AlarmDebug", "Creating PendingIntent with requestCode 0")
 
@@ -143,7 +138,6 @@ class MainActivity : AppCompatActivity() {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
         }
 
-        // Optional: Log the time the alarm is set for
         Log.d("Alarm", "Exact alarm set for: $triggerTime")
     }
 
@@ -176,8 +170,25 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(mToolbar)
 
+//        bottomNavigation.setOnItemSelectedListener { item ->
+//            when (item.itemId) {
+//                R.id.home_tab -> {
+//                    true
+//                }
+//                R.id.statistics_tab -> {
+//                    true
+//                }
+//                R.id.prescriptions_tab -> {
+//                    true
+//                }
+//                else -> false
+//            }
+//        }
+
+
+
+
         floatingActionButton.setOnClickListener {
-            // Handle FAB click
         }
     }
 
@@ -194,18 +205,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUIForDestination(destinationId: Int) {
         when (destinationId) {
-            // Main dashboard with full navigation
-            R.id.homeFragment -> {
+            R.id.homeFragment,R.id.prescriptionsFragment -> {
                 showAllUI()
                 updateToolbar(
                     showBackArrow = false,
                     menuResId = R.menu.top_app_bar,
                     title = getString(R.string.app_name)
                 )
-                invalidateOptionsMenu()  // Force menu refresh
+                invalidateOptionsMenu()
 
             }
-            // Profile view without additional navigation
             R.id.userInfoFragment -> {
                 hideFAB()
                 hideBottomNav()
@@ -215,7 +224,6 @@ class MainActivity : AppCompatActivity() {
                     title = getString(R.string.app_name)
                 )
             }
-            // Detail views with back navigation
             R.id.healthInfoFragment -> {
                 hideFAB()
                 hideBottomNav()
@@ -225,14 +233,12 @@ class MainActivity : AppCompatActivity() {
                     title = getString(R.string.app_name)
                 )
             }
-            // Authentication view without navigation elements
             R.id.loginFragment, R.id.resetPasswordFragment -> {
                 hideAllUI()
             }
 
             R.id.addMedicationBasicInfoFragment, R.id.addMedicationFrequencyFragment -> {
-                // Choose UI state:
-                showAllUI() // or hideAllUI() or mix of show/hide methods
+                showAllUI()
                 updateToolbar(
                     showBackArrow = true,
                     menuResId =   null,
