@@ -13,12 +13,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
-import com.mints.mobilehealthapplication.data.MedicationInfo
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.databinding.FragmentPrescriptionsBinding
@@ -41,9 +39,8 @@ class PrescriptionsFragment : Fragment() {
     private var uid = ""
     private var medicationList = MutableLiveData<List<Medication>>()
     private val addMedicationViewModel: AddMedicationViewModel by activityViewModels()
-    private lateinit var medToClear: Medication
     private lateinit var notificationHelper: NotificationHelper
-
+    private var tag = "PrescriptionsFrag"
     /**
      * Inflates the fragment layout using ViewBinding.
      */
@@ -64,37 +61,12 @@ class PrescriptionsFragment : Fragment() {
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()
-        addMedicationViewModel.testWeeklyDateCalculation()
-        addMedicationViewModel.testWeeklyDateCalculationEdgeCase()
-        addMedicationViewModel.testSingleDateAdvance()
         notificationHelper = NotificationHelper(requireContext())
 
         val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
 
-//
-//        binding.undoButton.setOnClickListener{
-//            val firstMed = viewModel.medications.value?.firstOrNull()
-//            if(firstMed != null) {
-//                val updatedMed = viewModel.markWithUndoPrep(firstMed)
-//                Log.d("UNDO_TEST", "Current stored: ${viewModel.lastOriginalDates}")
-//                viewModel._medications.value = viewModel._medications.value?.map {
-//                    if (it.id == firstMed.id) updatedMed else it
-//                }
-//
-//            }
-//        }
 
-//        binding.undoButton.setOnClickListener {
-//            viewModel.undoLastTaken()
-//        }
-//        binding.clearUndoButton.setOnClickListener {
-//
-//                if(medToClear != null) {
-//                    viewModel.undoLastTaken()
-//
-//                }
-//        }
 
 
     }
@@ -106,9 +78,9 @@ class PrescriptionsFragment : Fragment() {
 
     private fun fetchUserMedication() {
         uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        Log.d("HomeFragment", "Current user UID: $uid")
+        Log.d(tag, "Current user UID: $uid")
         if (uid.isEmpty()) {
-            Log.e("HomeFragment", "User is not authenticated")
+            Log.e(tag, "User is not authenticated")
             Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
         } else {
             viewModel.getMedications(uid)
@@ -161,11 +133,11 @@ class PrescriptionsFragment : Fragment() {
         binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         addSwipeFunctionality()
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
-            Log.d("HomeFragment", "Observed ${medications.size} medications in LiveData")
+            Log.d(tag, "Observed ${medications.size} medications in LiveData")
             adapter.updateMedicationList(medications)
         }
 
-        Log.d("HomeFragment", "RecyclerView setup complete")
+        Log.d(tag, "RecyclerView setup complete")
     }
 
 
@@ -198,18 +170,18 @@ class PrescriptionsFragment : Fragment() {
                 adapter.notifyItemChanged(position)
                 val medication = adapter.getMedicationAt(position)
                 // Navigate to AddMedicationBasicInfoFragment with the medicationId argument
-                val medicationId = "123" // Replace with your data
+                val medicationId = medication.id // Replace with your data
                 val action = PrescriptionsFragmentDirections
-                    .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId)
+                    .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
                 findNavController().navigate(action)
 
-                   editMedication(uid,medication)
             }
         )
 
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
     }
     private fun editMedication(userId:String, medication: Medication) {
+        Log.d(tag,"Medication Id: ${medication.id}")
 
         viewModel.getMedicationDetails(userId,medication.id!!)
 
@@ -248,38 +220,6 @@ class PrescriptionsFragment : Fragment() {
                 }
             })
             .show()
-    }
-
-
-
-
-
-
-
-    /**
-     * Sets up the Floating Action Button (FAB) to navigate to the AddMedicationBasicInfoFragment.
-     */
-    private fun setupFAB() {
-        val fab = requireActivity().findViewById<ExtendedFloatingActionButton>(R.id.add_medication_fab)
-        fab.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
-        }
-    }
-
-    /**
-     * Updates the card displaying the next medication to be taken.
-     * @param medication The medication to display in the next card.
-     */
-    private fun updateNextMedicationCard(medication: MedicationInfo?) {
-        // Logic for updating the next medication card goes here
-    }
-
-    /**
-     * Displays details of the selected medication using a Snackbar.
-     * @param medication The medication whose details are to be displayed.
-     */
-    private fun showMedicationDetails(medication: MedicationInfo) {
-        // For now, just show details in a Snackbar
     }
 
     /**

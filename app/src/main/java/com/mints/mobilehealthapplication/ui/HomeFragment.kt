@@ -68,9 +68,9 @@ class HomeFragment : Fragment() {
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()
-        addMedicationViewModel.testWeeklyDateCalculation()
-        addMedicationViewModel.testWeeklyDateCalculationEdgeCase()
-        addMedicationViewModel.testSingleDateAdvance()
+   //     addMedicationViewModel.testWeeklyDateCalculation()
+     //   addMedicationViewModel.testWeeklyDateCalculationEdgeCase()
+      //  addMedicationViewModel.testSingleDateAdvance()
         notificationHelper = NotificationHelper(requireContext())
 
 //

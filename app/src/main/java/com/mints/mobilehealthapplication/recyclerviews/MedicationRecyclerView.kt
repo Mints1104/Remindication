@@ -1,6 +1,5 @@
 package com.mints.mobilehealthapplication.recyclerviews
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -20,15 +19,15 @@ class MedicationRecyclerView(
     class MedicationViewHolder(val binding: ItemMedicationBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MedicationViewHolder {
-        Log.d(tag, "Creating ViewHolder")
+    //    Log.d(tag, "Creating ViewHolder")
         val binding = ItemMedicationBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MedicationViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MedicationViewHolder, position: Int) {
         val medication = medications[position]
-        Log.d(tag, "Binding medication: ${medication.name}")
-        Log.d(tag, "Binding medication: ${medication.id}")
+       // Log.d(tag, "Binding medication: ${medication.name}")
+    //    Log.d(tag, "Binding medication: ${medication.id}")
 
         val context = holder.binding.root.context
 

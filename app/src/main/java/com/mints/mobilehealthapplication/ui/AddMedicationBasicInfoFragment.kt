@@ -8,12 +8,15 @@ import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationPart1Binding
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
+import kotlinx.coroutines.launch
 
 /**
  * A Fragment to handle adding a medication entry.
@@ -24,6 +27,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
     private var _binding: FragmentAddMedicationPart1Binding? = null
     private val binding get() = _binding!!
     private var tag = "M.BasicInfoFragment"
+    private var uid = ""
 
     private val viewModel: AddMedicationViewModel by activityViewModels()
 
@@ -38,10 +42,12 @@ class AddMedicationBasicInfoFragment : Fragment() {
         val view = binding.root
         viewModel.resetValidationState()
         viewModel.testDateLogic()
+        uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         setUpUI()
         setUpTextInputListeners()
         setupContinueButton()
         observeValidationState()
+        Log.d(tag,"UserId: $uid")
 
         return view
     }
@@ -59,6 +65,14 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
         if (medicationId.isNotEmpty()) {
             mainActivity.updateToolBarTitle("Edit Medication")
+            lifecycleScope.launch {
+                viewModel.getMedicationDetails(uid, medicationId)
+
+                // Log only after fetching is complete
+                Log.d(tag, "Name: ${viewModel.getName()}")
+                Log.d(tag, "Dosage: ${viewModel.getDosage()}")
+                Log.d(tag, "Notes: ${viewModel.getNotes()}")
+            }
         }
     }
 

@@ -21,16 +21,16 @@ import java.time.LocalTime
     class AddMedicationViewModel : ViewModel() {
 
         // LiveData Properties
-        private val _medicationName = MutableLiveData<String>("")
+        private val _medicationName = MutableLiveData("")
         val medicationName: LiveData<String> = _medicationName
 
-        private val _dosage = MutableLiveData<String>("")
+        private val _dosage = MutableLiveData("")
         val dosage: LiveData<String> = _dosage
 
-        private val _notes = MutableLiveData<String>("")
+        private val _notes = MutableLiveData("")
         val notes: LiveData<String> = _notes
 
-        private val _frequency = MutableLiveData<String>("")
+        private val _frequency = MutableLiveData("")
         val frequency: LiveData<String> = _frequency
 
         private val _selectedDays = MutableLiveData<Set<DayOfWeek>>(emptySet())
@@ -51,7 +51,7 @@ import java.time.LocalTime
         private val _minHoursBetween = MutableLiveData<Int?>(null)
         val minHoursBetween: LiveData<Int?> = _minHoursBetween
 
-        private val _withFood = MutableLiveData<Boolean>(false)
+        private val _withFood = MutableLiveData(false)
         val withFood: LiveData<Boolean> = _withFood
 
         private val _validationState = MutableLiveData<ValidationState>(ValidationState.Initial)
@@ -63,16 +63,19 @@ import java.time.LocalTime
         val saveResult = MutableLiveData<Boolean>()
 
         sealed class ValidationState {
-            object Valid : ValidationState()
+            data object Valid : ValidationState()
             data class Invalid(val message: String) : ValidationState()
-            object Initial : ValidationState()
+            data object Initial : ValidationState()
         }
 
         sealed class FormStage {
-            object BASIC_INFO : FormStage()
-            object FREQUENCY : FormStage()
-            object SCHEDULE : FormStage()
+            data object BASIC_INFO : FormStage()
+            data object FREQUENCY : FormStage()
+            data object SCHEDULE : FormStage()
         }
+
+
+
 
 
 
@@ -229,6 +232,29 @@ import java.time.LocalTime
         fun resetValidationState() {
             _validationState.value = ValidationState.Initial
         }
+
+        suspend fun getMedicationDetails(uid: String, medicationId: String) {
+            Log.d("HomeFragmentViewModel", "Fetching medication: $medicationId")
+            Log.d("HomeFragmentViewModel", "Fetching userId: $uid")
+
+            val med = FireStoreRepository.getMedicationDetails(uid, medicationId)
+
+            Log.d("HomeFragmentViewModel", "Fetched ${med.name}")
+            Log.d("HomeFragmentViewModel", "Fetched ${med.id}")
+            Log.d("HomeFragmentViewModel", "Fetched ${med.dosage}")
+            Log.d("HomeFragmentViewModel", "Fetched ${med.createdAt}")
+
+            // Update mutable states
+            updateMedicationName(med.name)
+            updateDosage(med.dosage)
+            updateNotes(med.notes)
+
+
+        }
+
+
+
+
 
         // Save functionality
         fun saveMedication(userId: String) {
@@ -453,4 +479,7 @@ import java.time.LocalTime
         }
 
         fun getFrequency(): String? = _frequency.value
+        fun getName(): String? = _medicationName.value
+        fun getNotes(): String? = _notes.value
+        fun getDosage(): String? = _dosage.value
     }
