@@ -85,6 +85,8 @@ sealed class MedicationSchedule {
             }
         }
 
+
+
     val formattedTimes: String
         get() = when (this) {
             is Daily -> times.formatTimes()

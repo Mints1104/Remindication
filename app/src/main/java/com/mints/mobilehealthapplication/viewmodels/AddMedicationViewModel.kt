@@ -99,6 +99,8 @@ import java.time.temporal.TemporalAdjusters
             _selectedDays.value = days
         }
 
+        fun getSelectedDays(): Set<DayOfWeek>? = _selectedDays.value
+
         fun setSelectedTimes(times: List<LocalTime>) {
             _selectedTimes.value = times
         }
@@ -269,13 +271,6 @@ import java.time.temporal.TemporalAdjusters
         }
 
 
-        fun updateEditMedFirstStage(medName:String, medDosage:String,medNotes:String) {
-
-            updateMedicationName(medName)
-            updateDosage(medDosage)
-            updateNotes(medNotes)
-
-        }
 
 
         // Save functionality

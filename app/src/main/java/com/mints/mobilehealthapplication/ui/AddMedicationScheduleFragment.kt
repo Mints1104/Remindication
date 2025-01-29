@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -56,6 +57,38 @@ class AddMedicationScheduleFragment : Fragment() {
         resetContainerVisibility()
         setContainerVisibility()
 
+
+        if(viewModel.getIsEditing() == true) {
+            val test = viewModel.getFrequency()
+
+            Log.d(tag,"Get Frequency: $test")
+
+
+            if(viewModel.getFrequencyType() == "Weekly") {
+                val frequencyString = viewModel.getFrequency() ?: ""
+
+                val selectedDays = frequencyString.split(",")
+                    .map { it.trim() }
+                    .mapNotNull { abbreviation ->
+                        when (abbreviation) {
+                            "Mon" -> R.id.mondayChip
+                            "Tue" -> R.id.tuesdayChip
+                            "Wed" -> R.id.wednesdayChip
+                            "Thu" -> R.id.thursdayChip
+                            "Fri" -> R.id.fridayChip
+                            "Sat" -> R.id.saturdayChip
+                            "Sun" -> R.id.sundayChip
+                            else -> null
+                        }
+                    }
+
+                selectedDays.forEach { chipId ->
+                    binding.daysChipGroup.findViewById<Chip>(chipId)?.isChecked = true
+                }
+            }
+
+        }
+
         // Set up time pickers
         listOf(
             binding.dailyTimeInput,
@@ -88,7 +121,7 @@ class AddMedicationScheduleFragment : Fragment() {
 
         // Set up save button
         binding.saveButton.setOnClickListener {
-            when (viewModel.getFrequency()) {
+            when (viewModel.getFrequencyType()) {
                 "Once Daily", "Twice Daily" -> {
                     if (validateDailySchedule()) {
                         Log.d(tag,"Attempting to save medication daily")
@@ -100,6 +133,9 @@ class AddMedicationScheduleFragment : Fragment() {
                         Log.d(tag,"Attempting to save medication weekly")
 
                         saveMedication()
+                    } else {
+                        Log.d(tag,"Failed  to save medication weekly")
+
                     }
                 }
                 "Cyclic" -> {
