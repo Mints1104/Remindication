@@ -238,7 +238,7 @@ class PrescriptionsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         val viewModel: AddMedicationViewModel by activityViewModels()
-        viewModel.resetAllData()
+        Log.d("PrescriptionsFrag","Resetting all data.")
         viewModel.resetValidationState()
         _binding = null
     }

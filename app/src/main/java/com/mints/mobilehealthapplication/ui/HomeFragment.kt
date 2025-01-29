@@ -336,6 +336,7 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         val viewModel: AddMedicationViewModel by activityViewModels()
+        Log.d("HomeFrag","Resetting all data.")
         viewModel.resetAllData()
         viewModel.resetValidationState()
         _binding = null

@@ -62,6 +62,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
     private fun checkIfEditingMedication(mainActivity: MainActivity) {
         val args: AddMedicationBasicInfoFragmentArgs by navArgs()
         val medicationId = args.medicationId
+        viewModel.setIsEditing(true)
 
         if (medicationId.isNotEmpty()) {
             mainActivity.updateToolBarTitle("Edit Medication")
@@ -72,6 +73,10 @@ class AddMedicationBasicInfoFragment : Fragment() {
                 Log.d(tag, "Name: ${viewModel.getName()}")
                 Log.d(tag, "Dosage: ${viewModel.getDosage()}")
                 Log.d(tag, "Notes: ${viewModel.getNotes()}")
+                binding.medicationNameEditText.setText(viewModel.getName())
+                binding.dosageEditText.setText(viewModel.getDosage())
+                binding.notesEditText.setText(viewModel.getNotes())
+
             }
         }
     }
@@ -119,6 +124,9 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     private fun setupContinueButton() {
         binding.continueMedicationButton.setOnClickListener {
+            Log.d("AddMedicationViewModel", "Button clicked")
+            Log.d("AddMedicationViewModel", "Current EditText value: ${binding.medicationNameEditText.text}")
+            Log.d("AddMedicationViewModel", "Pre-validation name value: ${viewModel.getName()}")
             viewModel.validateBasicInfo()
         }
     }
@@ -133,6 +141,17 @@ class AddMedicationBasicInfoFragment : Fragment() {
     private fun isCurrentDestinationValid(): Boolean {
         return findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment
     }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(tag, "onPause called, current name: ${viewModel.getName()}")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(tag, "onResume called, current name: ${viewModel.getName()}")
+    }
+
 
 
 

@@ -13,25 +13,35 @@ import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.ScheduleValidator
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-    import java.time.LocalDate
-    import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
-    import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalAdjusters
 
     class AddMedicationViewModel : ViewModel() {
 
         // LiveData Properties
-        private val _medicationName = MutableLiveData("")
+        private val _medicationName = MutableLiveData("").apply {
+            observeForever { newValue ->
+                Log.d("AddMedicationViewModel", "medicationName value changed to: $newValue")
+            }
+        }
+
         val medicationName: LiveData<String> = _medicationName
 
         private val _dosage = MutableLiveData("")
         val dosage: LiveData<String> = _dosage
+
+
 
         private val _notes = MutableLiveData("")
         val notes: LiveData<String> = _notes
 
         private val _frequency = MutableLiveData("")
         val frequency: LiveData<String> = _frequency
+
+        private val _frequencyType = MutableLiveData("")
+        val frequencyType: LiveData<String> = _frequencyType
 
         private val _selectedDays = MutableLiveData<Set<DayOfWeek>>(emptySet())
         val selectedDays: LiveData<Set<DayOfWeek>> = _selectedDays
@@ -53,6 +63,11 @@ import java.time.LocalTime
 
         private val _withFood = MutableLiveData(false)
         val withFood: LiveData<Boolean> = _withFood
+
+
+        private val _isEditing = MutableLiveData(false)
+        val isEditing: LiveData<Boolean> = _isEditing
+
 
         private val _validationState = MutableLiveData<ValidationState>(ValidationState.Initial)
         val validationState: LiveData<ValidationState> = _validationState
@@ -109,24 +124,13 @@ import java.time.LocalTime
         }
 
         // Validation methods
-        fun validateBasicInfo(): Boolean {
-            return when {
-                _medicationName.value.isNullOrBlank() -> {
-                    _validationState.value = ValidationState.Invalid("Medication name is required")
-                    false
-                }
-                _dosage.value.isNullOrBlank() -> {
-                    _validationState.value = ValidationState.Invalid("Dosage is required")
-                    false
-                }
-                else -> {
-                    // Update both validation state AND current stage
-                    _validationState.value = ValidationState.Valid
-                    _currentStage.value = FormStage.FREQUENCY
-                    true
-                }
-            }
+
+        fun setIsEditing(status:Boolean) {
+            _isEditing.value = status
         }
+
+        fun getIsEditing(): Boolean? = _isEditing.value
+
 
         fun validateFrequency(): Boolean {
             return if (_frequency.value.isNullOrBlank()) {
@@ -227,11 +231,14 @@ import java.time.LocalTime
             _withFood.value = false
             _validationState.value = ValidationState.Initial
             _currentStage.value = FormStage.BASIC_INFO
+            _isEditing.value = false
         }
 
         fun resetValidationState() {
             _validationState.value = ValidationState.Initial
         }
+
+
 
         suspend fun getMedicationDetails(uid: String, medicationId: String) {
             Log.d("HomeFragmentViewModel", "Fetching medication: $medicationId")
@@ -243,17 +250,32 @@ import java.time.LocalTime
             Log.d("HomeFragmentViewModel", "Fetched ${med.id}")
             Log.d("HomeFragmentViewModel", "Fetched ${med.dosage}")
             Log.d("HomeFragmentViewModel", "Fetched ${med.createdAt}")
+            Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.formattedFrequency}")
+            Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.frequencyType}")
 
             // Update mutable states
-            updateMedicationName(med.name)
-            updateDosage(med.dosage)
-            updateNotes(med.notes)
+
+
+
+                updateMedicationName(med.name)
+                updateDosage(med.dosage)
+                updateNotes(med.notes)
+                updateFrequency(med.schedule.formattedFrequency)
+                updateFrequencyType(med.schedule.frequencyType)
+
+
 
 
         }
 
 
+        fun updateEditMedFirstStage(medName:String, medDosage:String,medNotes:String) {
 
+            updateMedicationName(medName)
+            updateDosage(medDosage)
+            updateNotes(medNotes)
+
+        }
 
 
         // Save functionality
@@ -301,6 +323,7 @@ import java.time.LocalTime
 
             Log.d("TEST", "8:00 PM should be $resultDate")
         }
+
 
 
 
@@ -466,11 +489,25 @@ import java.time.LocalTime
             _frequency.value = frequency
         }
 
+        fun updateFrequencyType(frequencyType:String) {
+            _frequencyType.value = frequencyType
+        }
+
+        fun getFrequencyType(): String? = _frequencyType.value
+
+
+
+
         fun updateMedicationName(name: String) {
+            Log.d("Update medication name","Updated name: $name")
             _medicationName.value = name
+
+            val test = getName()
+            Log.d("Test","Get name just after update: $test")
         }
 
         fun updateDosage(dosage: String) {
+            Log.d("AddMedicationViewModel","Updating dosage: $dosage")
             _dosage.value = dosage
         }
 
@@ -479,7 +516,37 @@ import java.time.LocalTime
         }
 
         fun getFrequency(): String? = _frequency.value
-        fun getName(): String? = _medicationName.value
+        fun getName(): String? {
+            Log.d("AddMedicationViewModel", "getName() called, current value: ${_medicationName.value}")
+            return _medicationName.value
+        }
+
         fun getNotes(): String? = _notes.value
         fun getDosage(): String? = _dosage.value
+
+        fun validateBasicInfo(): Boolean {
+
+            val name =   getName()
+            Log.d("Validating basic info","Name: $name")
+            getNotes()
+            getDosage()
+
+
+            return when {
+                _medicationName.value.isNullOrBlank() -> {
+                    _validationState.value = ValidationState.Invalid("Medication name is required")
+                    false
+                }
+                _dosage.value.isNullOrBlank() -> {
+                    _validationState.value = ValidationState.Invalid("Dosage is required")
+                    false
+                }
+                else -> {
+                    // Update both validation state AND current stage
+                    _validationState.value = ValidationState.Valid
+                    _currentStage.value = FormStage.FREQUENCY
+                    true
+                }
+            }
+        }
     }

@@ -162,11 +162,11 @@ class AddMedicationScheduleFragment : Fragment() {
     }
 
     private fun setContainerVisibility() {
-        when (viewModel.getFrequency()) {
+        when (viewModel.getFrequencyType()) {
             "Once Daily" -> binding.dailyScheduleContainer.isVisible = true
             "Weekly" -> binding.weeklyScheduleContainer.isVisible = true
             "Cyclic" -> binding.cyclicScheduleContainer.isVisible = true
-            "On Demand" -> binding.onDemandContainer.isVisible = true
+            "On demand" -> binding.onDemandContainer.isVisible = true
             "Twice Daily" -> binding.twiceDailyScheduleContainer.isVisible = true
             else -> showError("Unknown schedule type")
         }

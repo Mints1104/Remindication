@@ -36,14 +36,33 @@ class AddMedicationFrequencyFragment : Fragment() {
         _binding = FragmentAddMedicationPart2Binding.inflate(inflater, container, false)
         val view = binding.root
         viewModel.resetValidationState()
-        val mainActivity = activity as MainActivity
-        mainActivity.hideFAB()
-        mainActivity.hideBottomNav()
+        setUpUI()
         setUpRadioButtonListeners()
         setupContinueButton()
         observeValidationState()
 
         return view
+    }
+
+    private fun setUpUI() {
+        val mainActivity = activity as MainActivity
+        mainActivity.hideFAB()
+        mainActivity.hideBottomNav()
+        setUpForEditing(mainActivity)
+
+
+    }
+
+    private fun setUpForEditing(mainActivity: MainActivity) {
+        val isEditing = viewModel.getIsEditing()
+        if(isEditing == true) {
+            mainActivity.updateToolBarTitle("Edit Medication")
+            Log.d(tag,"Test getting frequency: ${viewModel.getFrequency()}")
+            Log.d(tag,"Test getting frequency type: ${viewModel.getFrequencyType()}")
+
+
+
+        }
     }
 
 
@@ -71,18 +90,42 @@ class AddMedicationFrequencyFragment : Fragment() {
 
     private fun setUpRadioButtonListeners() {
         Log.d(tag, "setUpRadioButtonListeners: Restoring previous selection")
-        viewModel.frequency.value?.let { freq ->
-            val radioId = when (freq) {
-                "Once Daily" -> R.id.onceDailyButton
-                "Twice Daily" -> R.id.twiceDailyButton
-                "Weekly" -> R.id.weeklyButton
-                "Cyclic" -> R.id.cyclicButton
-                "On Demand" -> R.id.onDemandButton
-                else -> -1
-            }
-            if (radioId != -1) binding.radioGroup.check(radioId)
-            Log.d(tag, "setUpRadioButtonListeners: Previous selection restored - $freq")
 
+        Log.d(tag,"Test before restoring prev selection: ${viewModel.frequency.value}")
+        Log.d(tag,"Test before restoring prev selection: ${viewModel.getFrequencyType()}")
+
+        if(viewModel.getIsEditing() == true) {
+            Log.d(tag,"We are editing so use saved frequencytype: ${viewModel.getFrequencyType()}")
+
+            viewModel.frequencyType.value?.let { freq ->
+               val radioId = when(freq) {
+                   "Once Daily" -> R.id.onceDailyButton
+                   "Twice Daily" -> R.id.twiceDailyButton
+                   "Weekly" -> R.id.weeklyButton
+                   "Cyclic" -> R.id.cyclicButton
+                   "On demand" -> R.id.onDemandButton
+                   else -> -1
+               }
+                if (radioId != -1) binding.radioGroup.check(radioId)
+
+            }
+        } else {
+            Log.d(tag,"We are not editing")
+            viewModel.frequency.value?.let { freq ->
+                val radioId = when (freq) {
+                    "Once Daily" -> R.id.onceDailyButton
+                    "Twice Daily" -> R.id.twiceDailyButton
+                    "Weekly" -> R.id.weeklyButton
+                    "Cyclic" -> R.id.cyclicButton
+                    "On Demand", "As Needed" -> R.id.onDemandButton
+                    else -> -1
+                }
+
+
+                if (radioId != -1) binding.radioGroup.check(radioId)
+                Log.d(tag, "setUpRadioButtonListeners: Previous selection restored - $freq")
+
+            }
         }
         binding.radioGroup.setOnCheckedChangeListener { _, checkedId ->
             val frequency = when(checkedId) {

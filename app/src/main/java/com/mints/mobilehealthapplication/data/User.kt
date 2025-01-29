@@ -72,6 +72,18 @@ sealed class MedicationSchedule {
             is OnDemand -> "As Needed"
             is Interval -> "Every ${interval.value} ${interval.unit.name.lowercase()}"
         }
+    val frequencyType: String
+        get() = when(this) {
+
+            is WeeklySchedule -> "Weekly"
+            is Cyclic -> "Cyclic"
+            is OnDemand -> "On demand"
+            is Interval -> "Interval"
+            is Daily -> when (frequency) {
+                DailyFrequency.ONCE -> "Once Daily"
+                DailyFrequency.TWICE -> "Twice Daily"
+            }
+        }
 
     val formattedTimes: String
         get() = when (this) {
