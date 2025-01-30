@@ -21,6 +21,7 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: BottomsheetMedicationNotesBinding? = null
     private val binding get() = _binding!!
+    private var tag = "BottomSheet"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,12 +34,12 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("MedicationNotesBottomSheet", "We are in medication notes bottom sheet.")
+        Log.d(tag, "We are in medication notes bottom sheet.")
         db = Firebase.firestore
         auth = Firebase.auth
 
         notes = arguments?.getString("NOTES_KEY")
-        Log.d("MedicationNotesBottomSheet", "Notes: $notes")
+        Log.d(tag, "Notes: $notes")
         binding.notesTextView.text = notes ?: "No notes available"
 
         binding.closeNotesDialogButton.setOnClickListener {

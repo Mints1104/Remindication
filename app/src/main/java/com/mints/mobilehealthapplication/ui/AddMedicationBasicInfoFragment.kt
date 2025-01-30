@@ -26,10 +26,10 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationPart1Binding? = null
     private val binding get() = _binding!!
-    private var tag = "M.BasicInfoFragment"
+    private var tag = "BasicInfoFragment"
     private var uid = ""
-
     private val viewModel: AddMedicationViewModel by activityViewModels()
+
 
     /**
      * Inflates the layout and initializes UI elements for the fragment.
@@ -48,9 +48,9 @@ class AddMedicationBasicInfoFragment : Fragment() {
         setupContinueButton()
         observeValidationState()
         Log.d(tag,"UserId: $uid")
-
         return view
     }
+
 
     private fun setUpUI() {
         val mainActivity = activity as MainActivity
@@ -59,17 +59,15 @@ class AddMedicationBasicInfoFragment : Fragment() {
         checkIfEditingMedication(mainActivity)
     }
 
+
     private fun checkIfEditingMedication(mainActivity: MainActivity) {
         val args: AddMedicationBasicInfoFragmentArgs by navArgs()
         val medicationId = args.medicationId
         viewModel.setIsEditing(true)
-
         if (medicationId.isNotEmpty()) {
             mainActivity.updateToolBarTitle("Edit Medication")
             lifecycleScope.launch {
                 viewModel.getMedicationDetails(uid, medicationId)
-
-                // Log only after fetching is complete
                 Log.d(tag, "Name: ${viewModel.getName()}")
                 Log.d(tag, "Dosage: ${viewModel.getDosage()}")
                 Log.d(tag, "Notes: ${viewModel.getNotes()}")
@@ -80,6 +78,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
             }
         }
     }
+
 
     private fun observeValidationState() {
         viewModel.validationState.observe(viewLifecycleOwner) { state ->
@@ -102,25 +101,17 @@ class AddMedicationBasicInfoFragment : Fragment() {
             ->
             Log.d(tag,"Medication name inputted: $text")
             viewModel.updateMedicationName(text?.toString() ?: "")
-
         }
-
-
-
-
         binding.dosageEditText.doAfterTextChanged { text ->
             Log.d(tag,"Dosage  inputted: $text")
-
-            viewModel.updateDosage(text?.toString() ?: "") // Handle null
+            viewModel.updateDosage(text?.toString() ?: "")
         }
-
-
         binding.notesEditText.doAfterTextChanged { text ->
             Log.d(tag,"Notes inputted: $text")
-
-            viewModel.updateNotes(text?.toString() ?: "") // Handle null
+            viewModel.updateNotes(text?.toString() ?: "")
         }
     }
+
 
     private fun setupContinueButton() {
         binding.continueMedicationButton.setOnClickListener {
@@ -131,6 +122,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
         }
     }
 
+
     private fun navigateToNextFragment() {
         if (isCurrentDestinationValid()) {
             findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_addMedicationFrequencyFragment)
@@ -138,22 +130,22 @@ class AddMedicationBasicInfoFragment : Fragment() {
         }
     }
 
+
     private fun isCurrentDestinationValid(): Boolean {
         return findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment
     }
+
 
     override fun onPause() {
         super.onPause()
         Log.d(tag, "onPause called, current name: ${viewModel.getName()}")
     }
 
+
     override fun onResume() {
         super.onResume()
         Log.d(tag, "onResume called, current name: ${viewModel.getName()}")
     }
-
-
-
 
 
     /**
@@ -165,6 +157,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
             .show()
 
     }
+
 
     /**
      * Called when the view is destroyed, cleans up resources.

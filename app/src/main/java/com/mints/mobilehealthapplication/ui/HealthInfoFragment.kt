@@ -29,11 +29,11 @@ import java.util.Locale
  * It also handles navigation to the next fragment after the user completes the form.
  */
 class HealthInfoFragment : Fragment() {
-
     private lateinit var viewModel: RegistrationViewModel
     private var datePicker: MaterialDatePicker<Long>? = null
     private var _binding: FragmentRegistrationPart2Binding? = null
     private val binding get() = _binding!!
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,47 +41,49 @@ class HealthInfoFragment : Fragment() {
     ): View {
         _binding = FragmentRegistrationPart2Binding.inflate(inflater, container, false)
         val view = binding.root
-
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
+        setUpUI()
+        handleRegisterUser()
+        return view
+    }
 
+
+    private fun setUpUI() {
         setupDatePicker(binding.dobEditText)
-
         binding.firstNameEditText.setText(viewModel.registrationData.value.firstName)
         binding.lastNameEditText.setText(viewModel.registrationData.value.lastName)
         binding.dobEditText.setText(viewModel.registrationData.value.dateOfBirth)
+    }
 
+
+    private fun handleRegisterUser() {
         binding.completeRegistration.setOnClickListener {
             val firstName = binding.firstNameEditText.text.toString()
             val lastName = binding.lastNameEditText.text.toString()
             val dob = binding.dobEditText.text.toString()
-
             if (firstName.isEmpty() || lastName.isEmpty() || dob.isEmpty()) {
                 displayMessage("Please fill in all fields.")
                 return@setOnClickListener
             }
-
             if (!viewModel.isAgeValid(dob)) {
-                displayMessage( "You must be at least 18 years old.")
+                displayMessage("You must be at least 18 years old.")
                 return@setOnClickListener
             }
-
             viewModel.updateRegistrationData {
                 this.firstName = firstName
                 this.lastName = lastName
                 this.dateOfBirth = dob
             }
-
             completeRegistration()
         }
-
-        return view
     }
+
+
     /**
      * Completes the registration process and navigates to the next screen.
      */
     private fun completeRegistration() {
         viewModel.registerUser()
-
         lifecycleScope.launch {
             viewModel.registrationState.collect { state ->
                 when (state) {
@@ -105,7 +107,6 @@ class HealthInfoFragment : Fragment() {
     }
 
 
-
     private fun setupDatePicker(dobEditText: EditText) {
         // Prevent manual text input
         dobEditText.apply {
@@ -114,14 +115,11 @@ class HealthInfoFragment : Fragment() {
             isFocusableInTouchMode = false
             isClickable = true
         }
-
         // Set default date to 18 years ago
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.YEAR, -18)
         val minDate = calendar.timeInMillis
-
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.UK)
-
         val datePickerBuilder = MaterialDatePicker.Builder.datePicker()
             .setTitleText("Select Date of Birth")
             .setTheme(R.style.ThemeOverlay_App_DatePicker)
@@ -131,7 +129,6 @@ class HealthInfoFragment : Fragment() {
                     .setValidator(DateValidatorPointBackward.before(minDate))
                     .build()
             )
-
         datePicker = datePickerBuilder.build()
 
         datePicker?.addOnPositiveButtonClickListener { selectedDate ->

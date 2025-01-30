@@ -18,34 +18,25 @@ import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
  * Validates and collects user email, phone, and password inputs.
  */
 class UserInfoFragment : Fragment() {
-
     private lateinit var viewModel: RegistrationViewModel
     private var _binding: FragmentRegistrationBinding? = null
     private val binding get() = _binding!!
 
-    /**
-     * Called to inflate the fragment's view and initialize the necessary components.
-     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegistrationBinding.inflate(inflater, container, false)
 
+        viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
         val mainActivity = requireActivity() as MainActivity
         mainActivity.showAppBar()
+        setUpUI()
+        handleContinueRegistration()
+        return binding.root
+    }
 
-        viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
-
-        binding.emailEditText.setText(viewModel.registrationData.value.email)
-        binding.phoneEditText.setText(viewModel.registrationData.value.phoneNumber)
-        binding.passwordEditText.setText(viewModel.registrationData.value.password)
-        binding.confirmPasswordEditText.setText(viewModel.registrationData.value.password)
-
-        binding.alreadyHaveAccountText.setOnClickListener {
-            findNavController().navigate(R.id.action_userInfoFragment_to_loginFragment)
-        }
-
+    private fun handleContinueRegistration() {
         binding.continueButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()
             val phone = binding.phoneEditText.text.toString()
@@ -75,13 +66,19 @@ class UserInfoFragment : Fragment() {
 
             findNavController().navigate(R.id.action_userInfoFragment_to_healthInfoFragment)
         }
-
-        return binding.root
     }
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+    private fun setUpUI() {
+        binding.emailEditText.setText(viewModel.registrationData.value.email)
+        binding.phoneEditText.setText(viewModel.registrationData.value.phoneNumber)
+        binding.passwordEditText.setText(viewModel.registrationData.value.password)
+        binding.confirmPasswordEditText.setText(viewModel.registrationData.value.password)
+        binding.alreadyHaveAccountText.setOnClickListener {
+            findNavController().navigate(R.id.action_userInfoFragment_to_loginFragment)
+        }
+    }
+
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
@@ -98,9 +95,7 @@ class UserInfoFragment : Fragment() {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    /**
-     * Called when the fragment is destroyed to clean up the ViewBinding reference.
-     */
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

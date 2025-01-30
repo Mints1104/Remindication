@@ -38,9 +38,10 @@ class PrescriptionsFragment : Fragment() {
     private lateinit var adapter: MedicationRecyclerView
     private var uid = ""
     private var medicationList = MutableLiveData<List<Medication>>()
-    private val addMedicationViewModel: AddMedicationViewModel by activityViewModels()
     private lateinit var notificationHelper: NotificationHelper
     private var tag = "PrescriptionsFrag"
+
+
     /**
      * Inflates the fragment layout using ViewBinding.
      */
@@ -70,10 +71,6 @@ class PrescriptionsFragment : Fragment() {
 
 
     }
-
-
-
-
 
 
     private fun fetchUserMedication() {
@@ -178,13 +175,7 @@ class PrescriptionsFragment : Fragment() {
 
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
     }
-    private fun editMedication(userId:String, medication: Medication) {
-        Log.d(tag,"Medication Id: ${medication.id}")
 
-        viewModel.getMedicationDetails(userId,medication.id!!)
-
-
-    }
 
 
 

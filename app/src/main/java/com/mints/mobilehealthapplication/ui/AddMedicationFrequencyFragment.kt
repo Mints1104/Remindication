@@ -22,8 +22,8 @@ class AddMedicationFrequencyFragment : Fragment() {
     private var _binding: FragmentAddMedicationPart2Binding? = null
     private val binding get() = _binding!!
     private var tag = "M.FrequencyFragment"
-
     private val viewModel: AddMedicationViewModel by activityViewModels()
+
 
     /**
      * Inflates the layout and initializes UI elements for the fragment.
@@ -40,7 +40,6 @@ class AddMedicationFrequencyFragment : Fragment() {
         setUpRadioButtonListeners()
         setupContinueButton()
         observeValidationState()
-
         return view
     }
 
@@ -49,9 +48,8 @@ class AddMedicationFrequencyFragment : Fragment() {
         mainActivity.hideFAB()
         mainActivity.hideBottomNav()
         setUpForEditing(mainActivity)
-
-
     }
+
 
     private fun setUpForEditing(mainActivity: MainActivity) {
         val isEditing = viewModel.getIsEditing()
@@ -59,9 +57,6 @@ class AddMedicationFrequencyFragment : Fragment() {
             mainActivity.updateToolBarTitle("Edit Medication")
             Log.d(tag,"Test getting frequency: ${viewModel.getFrequency()}")
             Log.d(tag,"Test getting frequency type: ${viewModel.getFrequencyType()}")
-
-
-
         }
     }
 
@@ -90,13 +85,10 @@ class AddMedicationFrequencyFragment : Fragment() {
 
     private fun setUpRadioButtonListeners() {
         Log.d(tag, "setUpRadioButtonListeners: Restoring previous selection")
-
         Log.d(tag,"Test before restoring prev selection: ${viewModel.frequency.value}")
         Log.d(tag,"Test before restoring prev selection: ${viewModel.getFrequencyType()}")
-
         if(viewModel.getIsEditing() == true) {
             Log.d(tag,"We are editing so use saved frequencytype: ${viewModel.getFrequencyType()}")
-
             viewModel.frequencyType.value?.let { freq ->
                val radioId = when(freq) {
                    "Once Daily" -> R.id.onceDailyButton
@@ -107,7 +99,6 @@ class AddMedicationFrequencyFragment : Fragment() {
                    else -> -1
                }
                 if (radioId != -1) binding.radioGroup.check(radioId)
-
             }
         } else {
             Log.d(tag,"We are not editing")
@@ -120,11 +111,8 @@ class AddMedicationFrequencyFragment : Fragment() {
                     "On Demand", "As Needed" -> R.id.onDemandButton
                     else -> -1
                 }
-
-
                 if (radioId != -1) binding.radioGroup.check(radioId)
                 Log.d(tag, "setUpRadioButtonListeners: Previous selection restored - $freq")
-
             }
         }
         binding.radioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -138,10 +126,12 @@ class AddMedicationFrequencyFragment : Fragment() {
             }
             frequency?.let {
                 Log.d(tag, "setUpRadioButtonListeners: Selected frequency - $it")
-                viewModel.updateFrequency(it) }
+                viewModel.updateFrequency(it)
+                viewModel.updateFrequencyType(it)
+
+            }
         }
     }
-
 
 
     private fun setupContinueButton() {
@@ -150,6 +140,7 @@ class AddMedicationFrequencyFragment : Fragment() {
             viewModel.validateFrequency()
         }
     }
+
 
     private fun navigateToNextFragment() {
         if (isCurrentDestinationValid()) {
@@ -160,6 +151,7 @@ class AddMedicationFrequencyFragment : Fragment() {
             Log.d(tag, "navigateToNextFragment: Navigation aborted, invalid destination")
         }
     }
+
 
     private fun isCurrentDestinationValid(): Boolean {
         return findNavController().currentDestination?.id == R.id.addMedicationFrequencyFragment
@@ -175,6 +167,7 @@ class AddMedicationFrequencyFragment : Fragment() {
             .show()
 
     }
+
 
     /**
      * Called when the view is destroyed, cleans up resources.

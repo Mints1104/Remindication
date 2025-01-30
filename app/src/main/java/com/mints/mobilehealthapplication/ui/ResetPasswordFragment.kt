@@ -14,18 +14,14 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.FragmentResetPasswordScreenBinding
 import com.mints.mobilehealthapplication.viewmodels.ResetPasswordViewModel
 
-/**
- * A Fragment responsible for handling the password reset flow.
- */
+
 class ResetPasswordFragment : Fragment() {
 
     private val viewModel: ResetPasswordViewModel by viewModels()
     private var _binding: FragmentResetPasswordScreenBinding? = null
     private val binding get() = _binding!!
 
-    /**
-     * Inflates the view and sets up the UI components with listeners.
-     */
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -51,18 +47,14 @@ class ResetPasswordFragment : Fragment() {
         return binding.root
     }
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()
     }
 
-    /**
-     * Ensures the view binding is cleaned up to prevent memory leaks.
-     */
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -33,62 +33,50 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLoginscreenBinding.inflate(inflater, container, false)
-
-        val mainActivity = requireActivity() as MainActivity
-        mainActivity.hideAllUI()
-
         Log.d("LoginFragment", "This is the login fragment.")
-
-        val signUpText: TextView = binding.newUserText
-        val forgotPasswordText: TextView = binding.forgotUserPasswordText
-        val loginButton: Button = binding.loginButton
-
-        forgotPasswordText.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_resetPasswordFragment)
-        }
-
-        loginButton.setOnClickListener { view ->
-            loginClick(view)
-        }
-
-        signUpText.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_userInfoFragment)
-        }
+        setUpUI()
 
         return binding.root
     }
 
-    /**
-     * Handles the login button click event.
-     *
-     * @param view The view that was clicked.
-     */
-    private fun loginClick(view: View) {
+
+    private fun setUpUI() {
+        val mainActivity = requireActivity() as MainActivity
+        mainActivity.hideAllUI()
+        val signUpText: TextView = binding.newUserText
+        val forgotPasswordText: TextView = binding.forgotUserPasswordText
+        val loginButton: Button = binding.loginButton
+        forgotPasswordText.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_resetPasswordFragment)
+        }
+        loginButton.setOnClickListener { view ->
+            loginClick()
+        }
+        signUpText.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_userInfoFragment)
+        }
+    }
+
+
+    private fun loginClick() {
         val emailText = binding.emailEditText.text.toString().trim()
         val passwordText = binding.passwordEditText.text.toString().trim()
-
-        // Call the ViewModel to handle login logic
         viewModel.login(emailText, passwordText) { success, message ->
             if (success) {
                 findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
             } else {
-                // Show error message if login fails
                 displayMessage(message)
             }
         }
     }
 
-    /**
-     * Lifecycle callback invoked when the fragment resumes.
-     */
+
     override fun onResume() {
         super.onResume()
         Log.d("LoginFragment", "In OnResume...")
     }
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
@@ -96,10 +84,7 @@ class LoginFragment : Fragment() {
 
     }
 
-    /**
-     * Lifecycle callback invoked when the fragment's view is destroyed.
-     * Clears references to avoid memory leaks.
-     */
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

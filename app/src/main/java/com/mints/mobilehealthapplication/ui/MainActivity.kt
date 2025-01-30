@@ -49,22 +49,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         initializeFirebase()
         bindUIElements()
         setupNavigation()
         checkAuthenticationState()
         requestNotificationPermission()
         setUpAlarmManager()
-
-
-
-
     }
+
 
     private fun setUpAlarmManager() {
         Log.d("AlarmDebug", "Setting up alarm manager")
-
         alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
@@ -79,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
 
     @RequiresApi(Build.VERSION_CODES.S)
     private val alarmPermissionLauncher = registerForActivityResult(
@@ -96,6 +92,7 @@ class MainActivity : AppCompatActivity() {
             ).show()
         }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun requestPermission() {
@@ -158,46 +155,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     private fun initializeFirebase() {
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
     }
 
+
     private fun bindUIElements() {
         mToolbar = findViewById(R.id.main_toolbar)
         bottomNavigation = findViewById(R.id.bottom_navigation)
         floatingActionButton = findViewById(R.id.add_medication_fab)
-
         setSupportActionBar(mToolbar)
-
-//        bottomNavigation.setOnItemSelectedListener { item ->
-//            when (item.itemId) {
-//                R.id.home_tab -> {
-//                    true
-//                }
-//                R.id.statistics_tab -> {
-//                    true
-//                }
-//                R.id.prescriptions_tab -> {
-//                    true
-//                }
-//                else -> false
-//            }
-//        }
-
-
-
-
-        floatingActionButton.setOnClickListener {
-        }
     }
 
     private fun setupNavigation() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         bottomNavigation.setupWithNavController(navController)
-
-        // Update UI elements whenever navigation destination changes
         navController.addOnDestinationChangedListener { _, destination, _ ->
             updateUIForDestination(destination.id)
         }
@@ -213,7 +188,6 @@ class MainActivity : AppCompatActivity() {
                     title = getString(R.string.app_name)
                 )
                 invalidateOptionsMenu()
-
             }
             R.id.prescriptionsFragment -> {
                 hideFAB()
@@ -223,7 +197,6 @@ class MainActivity : AppCompatActivity() {
                     title = getString(R.string.app_name)
                 )
                 invalidateOptionsMenu()
-
             }
             R.id.userInfoFragment -> {
                 hideFAB()
@@ -246,7 +219,6 @@ class MainActivity : AppCompatActivity() {
             R.id.loginFragment, R.id.resetPasswordFragment -> {
                 hideAllUI()
             }
-
             R.id.addMedicationBasicInfoFragment, R.id.addMedicationFrequencyFragment -> {
                 showAllUI()
                 updateToolbar(
@@ -277,19 +249,21 @@ class MainActivity : AppCompatActivity() {
         showFAB()
     }
 
+
      fun hideAllUI() {
         hideAppBar()
         hideBottomNav()
         hideFAB()
     }
 
+
     fun updateToolBarTitle(title:String) {
         mToolbar.title = title
     }
 
+
     private fun updateToolbar(showBackArrow: Boolean, menuResId: Int?, title: String) {
         mToolbar.title = title
-
         // Configure back navigation
         if (showBackArrow) {
             mToolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
@@ -307,18 +281,16 @@ class MainActivity : AppCompatActivity() {
         invalidateOptionsMenu()
     }
 
+
     private fun checkAuthenticationState() {
         val currentUser = auth.currentUser
         val currentDestination = navController.currentDestination?.id
-
         if (currentUser == null && currentDestination != R.id.loginFragment) {
-            // Navigate to the login screen if the user is not logged in
             navController.navigate(R.id.loginFragment)
         } else if (currentUser != null && currentDestination != R.id.homeFragment) {
-            // Navigate to the home screen if the user is logged in
             navController.navigate(R.id.homeFragment, null, navOptions {
-                popUpTo(R.id.loginFragment) { inclusive = true }  // Clear login fragment from back stack
-                launchSingleTop = true  // Ensure we don't push a new instance of home fragment
+                popUpTo(R.id.loginFragment) { inclusive = true }
+                launchSingleTop = true
             })
         }
     }
@@ -344,8 +316,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Only inflate the menu if it should be shown
         if (shouldShowMenu && currentMenu != null) {
             menuInflater.inflate(currentMenu!!, menu)
             return true
@@ -353,13 +325,14 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    // UI visibility control methods
+
     private fun showFAB() { floatingActionButton.isVisible = true }
     fun hideFAB() { floatingActionButton.isVisible = false }
-     fun hideAppBar() { mToolbar.isVisible = false }
+    fun hideAppBar() { mToolbar.isVisible = false }
     fun showAppBar() { mToolbar.isVisible = true }
-     fun showBottomNav() { bottomNavigation.isVisible = true }
+    fun showBottomNav() { bottomNavigation.isVisible = true }
     fun hideBottomNav() { bottomNavigation.isVisible = false }
+
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()

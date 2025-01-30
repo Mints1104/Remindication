@@ -25,7 +25,6 @@ import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 
@@ -68,41 +67,8 @@ class HomeFragment : Fragment() {
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()
-   //     addMedicationViewModel.testWeeklyDateCalculation()
-     //   addMedicationViewModel.testWeeklyDateCalculationEdgeCase()
-      //  addMedicationViewModel.testSingleDateAdvance()
         notificationHelper = NotificationHelper(requireContext())
-
-//
-//        binding.undoButton.setOnClickListener{
-//            val firstMed = viewModel.medications.value?.firstOrNull()
-//            if(firstMed != null) {
-//                val updatedMed = viewModel.markWithUndoPrep(firstMed)
-//                Log.d("UNDO_TEST", "Current stored: ${viewModel.lastOriginalDates}")
-//                viewModel._medications.value = viewModel._medications.value?.map {
-//                    if (it.id == firstMed.id) updatedMed else it
-//                }
-//
-//            }
-//        }
-
-//        binding.undoButton.setOnClickListener {
-//            viewModel.undoLastTaken()
-//        }
-//        binding.clearUndoButton.setOnClickListener {
-//
-//                if(medToClear != null) {
-//                    viewModel.undoLastTaken()
-//
-//                }
-//        }
-
-
     }
-
-
-
-
 
 
     private fun fetchUserMedication() {
@@ -118,6 +84,7 @@ class HomeFragment : Fragment() {
         }
     }
 
+
     /**
      * Sets up the RecyclerView to display a list of medications.
      * Observes LiveData from the ViewModel to update the medication list dynamically.
@@ -129,26 +96,20 @@ class HomeFragment : Fragment() {
             viewModel.onMedicationClicked(medication)
              when (val schedule = medication.schedule) {
                  is MedicationSchedule.Daily -> {
-
                      Log.d("MED_TEST", "Times: ${schedule.times}")
                      Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
                      val nextDueTimeMillis = schedule.nextDueDates[0]
                          .atZone(ZoneId.systemDefault())  // Use device's timezone
                          .toInstant()
                          .toEpochMilli()
-
                      notificationHelper.scheduleNotification(medication.name, medication.dosage,nextDueTimeMillis)
-
                  }
-
                  is MedicationSchedule.WeeklySchedule -> {
                      Log.d("MED_TEST", "Times: ${schedule.times}")
                      Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
                  }
                  else -> Log.d(tag,"N/A")
                  }
-
-
              if (medication.notes.isNotEmpty()) {
                 val addMedicationNotesBottomSheet = MedicationNotesBottomSheet.newInstance(medication.notes)
                 addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
@@ -157,7 +118,6 @@ class HomeFragment : Fragment() {
                 displayMessage("No notes available for ${medication.name}")
             }
         }
-
         binding.medicationsRecyclerView.adapter = adapter
         binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         addSwipeFunctionality()
@@ -169,40 +129,8 @@ class HomeFragment : Fragment() {
         Log.d("HomeFragment", "RecyclerView setup complete")
     }
 
-    fun convertToMilliseconds(localDateTime: LocalDateTime): Long {
-        val zoneId = ZoneId.systemDefault() // Use system's default time zone
-        val zonedDateTime = localDateTime.atZone(zoneId) // Convert to ZonedDateTime
-        return zonedDateTime.toInstant().toEpochMilli()  // Convert to milliseconds
-    }
-
-//    private fun addSwipeFunctionality() {
-//        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-//            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-//                return false
-//            }
-//
-//            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//                val position = viewHolder.adapterPosition
-//                when (direction) {
-//                    ItemTouchHelper.LEFT -> {
-//
-//                        displayMessage("Swiped left")
-//
-//                    }
-//                    ItemTouchHelper.RIGHT -> {
-//                        displayMessage("Swiped right")
-//                    }
-//
-//                }
-//                adapter.notifyItemChanged(position)
-//
-//            }
-//        })
-//        itemTouchHelper.attachToRecyclerView(binding.medicationsRecyclerView)
-//    }
 
     private fun addSwipeFunctionality() {
-
         val swipeCallback = MaterialSwipeCallback(
             context = requireContext(),
             swipeLeftAction = MaterialSwipeCallback.SwipeAction(
@@ -231,36 +159,7 @@ class HomeFragment : Fragment() {
 
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
     }
-    private fun showUndoSnackbar(medication: Medication, position: Int) {
-        // Create a copy of the current list
-        val currentList = adapter.getMedicationList().toMutableList()
-        val removedItem = currentList.removeAt(position)
 
-        // Update adapter with new list using DiffUtil
-        adapter.updateMedicationList(currentList)
-
-        Snackbar.make(binding.root, "${medication.name} deleted", Snackbar.LENGTH_LONG)
-            .setAction("UNDO") {
-                // Re-insert at original position
-                currentList.add(position, removedItem)
-                adapter.updateMedicationList(currentList)
-                adapter.notifyItemChanged(position)
-
-            }
-            .addCallback(object : Snackbar.Callback() {
-                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    if (event != DISMISS_EVENT_ACTION) {
-                        // Delete from ViewModel after confirmation
-                        medication.id?.let {
-                            viewModel.deleteMedication(uid, it) {
-                                viewModel.getMedications(uid)
-                            }
-                        }
-                    }
-                }
-            })
-            .show()
-    }
 
     private fun showUndoMedicationSnackbar(medication: Medication,position: Int) {
         val currentList = adapter.getMedicationList().toMutableList()
@@ -275,10 +174,7 @@ class HomeFragment : Fragment() {
             .addCallback(object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION) {
-                        // update firestore with new date
-
                         viewModel.markMedicationAsTaken(uid,medication)
-
                         if(medication.schedule is MedicationSchedule.WeeklySchedule) {
                             viewModel.testDateAdvanceMedication(uid,medication)
                         }
@@ -289,9 +185,6 @@ class HomeFragment : Fragment() {
             })
             .show()
     }
-
-
-
 
 
     /**
@@ -312,13 +205,7 @@ class HomeFragment : Fragment() {
         // Logic for updating the next medication card goes here
     }
 
-    /**
-     * Displays details of the selected medication using a Snackbar.
-     * @param medication The medication whose details are to be displayed.
-     */
-    private fun showMedicationDetails(medication: MedicationInfo) {
-        // For now, just show details in a Snackbar
-    }
+
 
     /**
      * Displays a message in a Snackbar at the bottom of the screen.
