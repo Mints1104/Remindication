@@ -28,6 +28,8 @@ import java.time.temporal.TemporalAdjusters
         }
 
         val medicationName: LiveData<String> = _medicationName
+        private val _medicationId = MutableLiveData("")
+        val medicationId: LiveData<String> = _medicationId
 
         private val _dosage = MutableLiveData("")
         val dosage: LiveData<String> = _dosage
@@ -67,6 +69,7 @@ import java.time.temporal.TemporalAdjusters
 
         private val _isEditing = MutableLiveData(false)
         val isEditing: LiveData<Boolean> = _isEditing
+
 
 
         private val _validationState = MutableLiveData<ValidationState>(ValidationState.Initial)
@@ -266,6 +269,7 @@ import java.time.temporal.TemporalAdjusters
                 updateNotes(med.notes)
                 updateFrequency(med.schedule.formattedFrequency)
                 updateFrequencyType(med.schedule.frequencyType)
+                updateMedicationId(med.id!!)
 
 
 
@@ -293,12 +297,18 @@ import java.time.temporal.TemporalAdjusters
         fun updateMedication(userId: String) {
             viewModelScope.launch {
                 try {
+                    Log.d("AddMedicationVM", "Attempting to update medication for user: $userId")
                     val medication = createMedication()
+                    medication.id = getMedicationId()
+                    Log.d("AddMedicationVM", "Medication created: ${medication.id}")
+
                     val success = FireStoreRepository.updateMedication(userId, medication)
+                    Log.d("AddMedicationVM", "Update result: $success")
+
                     saveResult.postValue(success)
                     if (success) resetAllData()
                 } catch (e: Exception) {
-                    Log.e("AddMedicationVM", "Update failed", e)
+                    Log.e("AddMedicationVM", "Update failed for user: $userId", e)
                     saveResult.postValue(false)
                 }
             }
@@ -505,6 +515,7 @@ import java.time.temporal.TemporalAdjusters
         }
 
         fun getFrequencyType(): String? = _frequencyType.value
+        fun getMedicationId(): String? = _medicationId.value
 
 
 
@@ -512,6 +523,12 @@ import java.time.temporal.TemporalAdjusters
         fun updateMedicationName(name: String) {
             _medicationName.value = name
         }
+
+        fun updateMedicationId(medicationId:String) {
+            _medicationId.value = medicationId
+        }
+
+
 
         fun updateDosage(dosage: String) {
             _dosage.value = dosage

@@ -97,7 +97,12 @@ object FireStoreRepository {
 
     suspend fun updateMedication(userId: String, medication: Medication): Boolean {
         return try {
-            val medicationId = medication.id ?: return false
+            val medicationId = medication.id ?: run {
+                Log.e("FireStoreRepo", "Update failed: medicationId is null for user: $userId")
+                return false
+            }
+
+            Log.d("FireStoreRepo", "Updating medication [$medicationId] for user [$userId]")
 
             val medicationData = hashMapOf(
                 "name" to medication.name,
@@ -108,6 +113,8 @@ object FireStoreRepository {
                 "notes" to medication.notes
             )
 
+            Log.d("FireStoreRepo", "Medication data: ${medicationData.keys}")
+
             db.collection("users")
                 .document(userId)
                 .collection("medications")
@@ -115,10 +122,13 @@ object FireStoreRepository {
                 .update(medicationData)
                 .await()
 
+            Log.d("FireStoreRepo", "Successfully updated medication [$medicationId] for user [$userId]")
             true
         } catch (e: FirebaseFirestoreException) {
+            Log.e("FireStoreRepo", "Firestore update failed for [$userId/${medication.id}]: ${e.code} - ${e.message}", e)
             false
         } catch (e: Exception) {
+            Log.e("FireStoreRepo", "Unexpected error updating medication [$userId/${medication.id}]: ${e.javaClass.simpleName} - ${e.message}", e)
             false
         }
     }

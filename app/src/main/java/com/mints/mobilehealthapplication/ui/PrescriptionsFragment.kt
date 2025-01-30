@@ -166,11 +166,9 @@ class PrescriptionsFragment : Fragment() {
                 showUndoSnackbar(medication, position)
             },
             onSwipeRight = { position ->
-                displayMessage("Test for editing medication")
                 adapter.notifyItemChanged(position)
                 val medication = adapter.getMedicationAt(position)
-                // Navigate to AddMedicationBasicInfoFragment with the medicationId argument
-                val medicationId = medication.id // Replace with your data
+                val medicationId = medication.id
                 val action = PrescriptionsFragmentDirections
                     .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
                 findNavController().navigate(action)

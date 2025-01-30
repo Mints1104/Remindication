@@ -60,11 +60,11 @@ class AddMedicationScheduleFragment : Fragment() {
         handleIsEditing()
         setUpTimePicker()
         setUpDaySelection()
-        setUpSaveButton()
     }
 
     private fun handleIsEditing() {
         if (viewModel.getIsEditing() == true) {
+            displayMessage("We are editing")
             val test = viewModel.getFrequency()
 
             Log.d(tag, "Get Frequency: $test")
@@ -94,6 +94,8 @@ class AddMedicationScheduleFragment : Fragment() {
             }
 
         } else {
+            displayMessage("We are not editing")
+
             setUpSaveButton()
         }
     }
@@ -397,11 +399,11 @@ class AddMedicationScheduleFragment : Fragment() {
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             if (success) {
                 Log.d(tag,"Successfully saved medication")
+                displayMessage("Successfully saved medication")
 
                 navigateToNextFragment()
             } else {
                 Log.d(tag,"Failed to save medication")
-
                 showError("Failed to save medication")
             }
         }
@@ -409,17 +411,18 @@ class AddMedicationScheduleFragment : Fragment() {
 
     private fun updateMedication(userId: String) {
 
-        Log.d(tag,"Saving medication!")
 
         viewModel.updateMedication(userId)
 
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             if (success) {
                 Log.d(tag,"Successfully updated medication")
+                displayMessage("Successfully updated medication")
 
                 navigateToNextFragment()
             } else {
                 Log.d(tag,"Failed to updated medication")
+                displayMessage("Failed to  update medication")
 
                 showError("Failed to updated medication")
             }
@@ -432,6 +435,16 @@ class AddMedicationScheduleFragment : Fragment() {
                 R.id.action_addMedicationScheduleFragment_to_homeFragment
             )
         }
+    }
+
+    /**
+     * Displays a message in a Snackbar at the bottom of the screen.
+     */
+    private fun displayMessage(msgTxt: String) {
+        Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+            .show()
+
     }
 
     private fun showError(message: String) {
