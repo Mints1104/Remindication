@@ -30,6 +30,7 @@ class AddMedicationScheduleFragment : Fragment() {
     private val viewModel: AddMedicationViewModel by activityViewModels()
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     private val tag = "M.ScheduleFragment"
+    private var userId = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,6 +45,7 @@ class AddMedicationScheduleFragment : Fragment() {
         setupViews()
         setupObservers()
         Log.d(tag,"In MedicationScheduleFragment...")
+        userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     }
 
     private fun setupViews() {
@@ -53,18 +55,22 @@ class AddMedicationScheduleFragment : Fragment() {
             hideBottomNav()
         }
 
-        // Initialize container visibility
         resetContainerVisibility()
         setContainerVisibility()
+        handleIsEditing()
+        setUpTimePicker()
+        setUpDaySelection()
+        setUpSaveButton()
+    }
 
-
-        if(viewModel.getIsEditing() == true) {
+    private fun handleIsEditing() {
+        if (viewModel.getIsEditing() == true) {
             val test = viewModel.getFrequency()
 
-            Log.d(tag,"Get Frequency: $test")
+            Log.d(tag, "Get Frequency: $test")
+            setUpUpdateButton()
 
-
-            if(viewModel.getFrequencyType() == "Weekly") {
+            if (viewModel.getFrequencyType() == "Weekly") {
                 val frequencyString = viewModel.getFrequency() ?: ""
 
                 val selectedDays = frequencyString.split(",")
@@ -87,9 +93,12 @@ class AddMedicationScheduleFragment : Fragment() {
                 }
             }
 
+        } else {
+            setUpSaveButton()
         }
+    }
 
-        // Set up time pickers
+    private fun setUpTimePicker() {
         listOf(
             binding.dailyTimeInput,
             binding.weeklyTimeInput,
@@ -101,8 +110,9 @@ class AddMedicationScheduleFragment : Fragment() {
                 showTimePicker(editText)
             }
         }
+    }
 
-        // Set up day selection
+    private fun setUpDaySelection() {
         binding.daysChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             val days = mutableSetOf<DayOfWeek>()
             checkedIds.forEach { chipId ->
@@ -118,40 +128,89 @@ class AddMedicationScheduleFragment : Fragment() {
             }
             viewModel.setSelectedDays(days)
         }
+    }
 
-        // Set up save button
+    private fun setUpUpdateButton() {
+
+        binding.saveButton.text = getString(R.string.update_txt)
         binding.saveButton.setOnClickListener {
             when (viewModel.getFrequencyType()) {
                 "Once Daily", "Twice Daily" -> {
                     if (validateDailySchedule()) {
-                        Log.d(tag,"Attempting to save medication daily")
+                        Log.d(tag, "Attempting to update medication daily")
+                        updateMedication(userId)
+                    }
+                }
+
+                "Weekly" -> {
+                    if (validateWeeklySchedule()) {
+                        Log.d(tag, "Attempting to update medication weekly")
+
+                        updateMedication(userId)
+                    } else {
+                        Log.d(tag, "Failed  to update medication weekly")
+
+                    }
+                }
+
+                "Cyclic" -> {
+                    if (validateCyclicSchedule()) {
+                        Log.d(tag, "Attempting to update medication cyclic")
+
+                        updateMedication(userId)
+                    }
+                }
+
+                "On Demand" -> {
+                    if (validateOnDemand()) {
+                        Log.d(tag, "Attempting to update medication on demand")
+
+                        updateMedication(userId)
+                    }
+                }
+
+                else -> showError("Invalid schedule type")
+            }
+        }
+    }
+
+    private fun setUpSaveButton() {
+        binding.saveButton.setOnClickListener {
+            when (viewModel.getFrequencyType()) {
+                "Once Daily", "Twice Daily" -> {
+                    if (validateDailySchedule()) {
+                        Log.d(tag, "Attempting to save medication daily")
                         saveMedication()
                     }
                 }
+
                 "Weekly" -> {
                     if (validateWeeklySchedule()) {
-                        Log.d(tag,"Attempting to save medication weekly")
+                        Log.d(tag, "Attempting to save medication weekly")
 
                         saveMedication()
                     } else {
-                        Log.d(tag,"Failed  to save medication weekly")
+                        Log.d(tag, "Failed  to save medication weekly")
 
                     }
                 }
+
                 "Cyclic" -> {
                     if (validateCyclicSchedule()) {
-                        Log.d(tag,"Attempting to save medication cyclic")
+                        Log.d(tag, "Attempting to save medication cyclic")
 
                         saveMedication()
                     }
                 }
+
                 "On Demand" -> {
                     if (validateOnDemand()) {
-                        Log.d(tag,"Attempting to save medication on demand")
+                        Log.d(tag, "Attempting to save medication on demand")
 
                         saveMedication()
                     }
                 }
+
                 else -> showError("Invalid schedule type")
             }
         }
@@ -344,6 +403,25 @@ class AddMedicationScheduleFragment : Fragment() {
                 Log.d(tag,"Failed to save medication")
 
                 showError("Failed to save medication")
+            }
+        }
+    }
+
+    private fun updateMedication(userId: String) {
+
+        Log.d(tag,"Saving medication!")
+
+        viewModel.updateMedication(userId)
+
+        viewModel.saveResult.observe(viewLifecycleOwner) { success ->
+            if (success) {
+                Log.d(tag,"Successfully updated medication")
+
+                navigateToNextFragment()
+            } else {
+                Log.d(tag,"Failed to updated medication")
+
+                showError("Failed to updated medication")
             }
         }
     }

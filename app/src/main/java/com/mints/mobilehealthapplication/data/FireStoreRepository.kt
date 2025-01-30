@@ -5,6 +5,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
@@ -91,6 +92,34 @@ object FireStoreRepository {
             }
         } catch (e: Exception) {
             throw Exception("Error fetching medication details: ${e.message}")
+        }
+    }
+
+    suspend fun updateMedication(userId: String, medication: Medication): Boolean {
+        return try {
+            val medicationId = medication.id ?: return false
+
+            val medicationData = hashMapOf(
+                "name" to medication.name,
+                "dosage" to medication.dosage,
+                "schedule" to convertScheduleToMap(medication.schedule),
+                "active" to medication.active,
+                "lastModified" to medication.lastModified,
+                "notes" to medication.notes
+            )
+
+            db.collection("users")
+                .document(userId)
+                .collection("medications")
+                .document(medicationId)
+                .update(medicationData)
+                .await()
+
+            true
+        } catch (e: FirebaseFirestoreException) {
+            false
+        } catch (e: Exception) {
+            false
         }
     }
 
@@ -315,6 +344,8 @@ object FireStoreRepository {
             false
         }
     }
+
+
 
     private fun parseRefillInfo(refillMap: Map<String, Any>?): RefillInfo? {
         if (refillMap == null) return null

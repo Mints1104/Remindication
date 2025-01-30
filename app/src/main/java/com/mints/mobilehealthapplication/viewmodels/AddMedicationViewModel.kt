@@ -254,6 +254,8 @@ import java.time.temporal.TemporalAdjusters
             Log.d("HomeFragmentViewModel", "Fetched ${med.createdAt}")
             Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.formattedFrequency}")
             Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.frequencyType}")
+            Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.formattedTimes}")
+
 
             // Update mutable states
 
@@ -283,6 +285,20 @@ import java.time.temporal.TemporalAdjusters
                     if (success) resetAllData()
                 } catch (e: Exception) {
                     Log.e("AddMedicationVM", "Save failed", e)
+                    saveResult.postValue(false)
+                }
+            }
+        }
+
+        fun updateMedication(userId: String) {
+            viewModelScope.launch {
+                try {
+                    val medication = createMedication()
+                    val success = FireStoreRepository.updateMedication(userId, medication)
+                    saveResult.postValue(success)
+                    if (success) resetAllData()
+                } catch (e: Exception) {
+                    Log.e("AddMedicationVM", "Update failed", e)
                     saveResult.postValue(false)
                 }
             }
@@ -494,15 +510,10 @@ import java.time.temporal.TemporalAdjusters
 
 
         fun updateMedicationName(name: String) {
-            Log.d("Update medication name","Updated name: $name")
             _medicationName.value = name
-
-            val test = getName()
-            Log.d("Test","Get name just after update: $test")
         }
 
         fun updateDosage(dosage: String) {
-            Log.d("AddMedicationViewModel","Updating dosage: $dosage")
             _dosage.value = dosage
         }
 
@@ -511,22 +522,13 @@ import java.time.temporal.TemporalAdjusters
         }
 
         fun getFrequency(): String? = _frequency.value
-        fun getName(): String? {
-            Log.d("AddMedicationViewModel", "getName() called, current value: ${_medicationName.value}")
-            return _medicationName.value
-        }
+
+        fun getName(): String? =  _medicationName.value
 
         fun getNotes(): String? = _notes.value
         fun getDosage(): String? = _dosage.value
 
         fun validateBasicInfo(): Boolean {
-
-            val name =   getName()
-            Log.d("Validating basic info","Name: $name")
-            getNotes()
-            getDosage()
-
-
             return when {
                 _medicationName.value.isNullOrBlank() -> {
                     _validationState.value = ValidationState.Invalid("Medication name is required")

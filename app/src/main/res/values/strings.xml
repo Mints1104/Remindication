@@ -140,6 +140,7 @@
     <string name="days">Days: %s</string>
     <string name="medication_date">Day: %s</string>
     <string name="prescriptions_tab">Prescriptions</string>
+    <string name="update_txt">Update</string>
 
 
 </resources>
