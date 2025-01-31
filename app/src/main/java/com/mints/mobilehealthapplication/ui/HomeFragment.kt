@@ -186,6 +186,31 @@ class HomeFragment : Fragment() {
             .show()
     }
 
+    private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {
+        val currentList = adapter.getMedicationList().toMutableList()
+
+        Snackbar.make(binding.root,"${medication.name} taken", Snackbar.LENGTH_LONG)
+            .setAction("UNDO") {
+                viewModel.undoLastTaken(medication)
+                adapter.updateMedicationList(currentList)
+                adapter.notifyItemChanged(position)
+
+            }
+            .addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION) {
+                        viewModel.markMedicationAsTaken(uid,medication)
+                        if(medication.schedule is MedicationSchedule.WeeklySchedule) {
+                            viewModel.testDateAdvanceMedication(uid,medication)
+                        }
+                        adapter.updateMedicationList(currentList)
+                        adapter.notifyItemChanged(position)
+                    }
+                }
+            })
+            .show()
+    }
+
 
     /**
      * Sets up the Floating Action Button (FAB) to navigate to the AddMedicationBasicInfoFragment.

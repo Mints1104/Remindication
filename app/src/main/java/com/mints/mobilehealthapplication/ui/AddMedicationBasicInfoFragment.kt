@@ -62,6 +62,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     private fun checkIfEditingMedication(mainActivity: MainActivity) {
         val args: AddMedicationBasicInfoFragmentArgs by navArgs()
+
         val medicationId = args.medicationId
         viewModel.setIsEditing(true)
         if (medicationId.isNotEmpty()) {

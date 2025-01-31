@@ -228,6 +228,8 @@ class AddMedicationScheduleFragment : Fragment() {
         val picker = MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
             .setTitleText("Select Time")
+            .setTheme(R.style.ThemeOverlay_App_TimePicker)
+            .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
             .build()
         picker.addOnPositiveButtonClickListener {
             val time = LocalTime.of(picker.hour, picker.minute)
