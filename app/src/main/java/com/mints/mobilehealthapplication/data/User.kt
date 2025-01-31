@@ -2,6 +2,7 @@ package com.mints.mobilehealthapplication.data
 
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -16,7 +17,130 @@ data class Medication(
     val active: Boolean = true,
     val lastModified: Timestamp = Timestamp.now(),
     val refillReminder: RefillInfo? = null,
-)
+    val medicationHistory: MedicationHistory = MedicationHistory()
+) {
+    fun markAsTaken(notes: String = "", dateTime: LocalDateTime = LocalDateTime.now()) {
+        medicationHistory.addEvent(MedicationEvent.Taken(date = dateTime, notes = notes))
+    }
+
+    fun markAsSkipped(notes: String = "", dateTime: LocalDateTime = LocalDateTime.now()) {
+        medicationHistory.addEvent(MedicationEvent.Skipped(date = dateTime, notes = notes))
+    }
+
+    // You could also add a convenience method for marking missed if needed
+    fun markAsMissed(notes: String = "", dateTime: LocalDateTime = LocalDateTime.now()) {
+        medicationHistory.addEvent(MedicationEvent.Missed(date = dateTime, notes = notes))
+    }
+}
+
+
+sealed class MedicationEvent {
+    abstract val date: LocalDateTime
+    abstract val notes: String
+
+    abstract val type: EventType
+
+    enum class EventType {
+        TAKEN, SKIPPED, MISSED
+    }
+
+    data class Taken(
+        override val date: LocalDateTime = LocalDateTime.now(),
+        override val notes: String = ""
+    ) : MedicationEvent() {
+        override val type = EventType.TAKEN
+    }
+
+    data class Skipped(
+        override val date: LocalDateTime = LocalDateTime.now(),
+        override val notes: String = ""
+    ) : MedicationEvent() {
+        override val type = EventType.SKIPPED
+    }
+
+    data class Missed(
+        override val date: LocalDateTime = LocalDateTime.now(),
+        override val notes: String = ""
+    ) : MedicationEvent() {
+        override val type = EventType.MISSED
+    }
+}
+
+data class MedicationHistory(
+    val events: MutableList<MedicationEvent> = mutableListOf()
+) {
+    // Add a new event to the history
+    fun addEvent(event: MedicationEvent) {
+        events.add(event)
+        // Sort events by date to ensure proper ordering
+        events.sortByDescending { it.date }
+    }
+
+    // Get all events for a specific status using the new EventType
+    fun getEventsByType(type: MedicationEvent.EventType): List<MedicationEvent> {
+        return events.filter { it.type == type }
+    }
+
+    // Get events within a specific date range
+    fun getEventsInDateRange(start: LocalDateTime, end: LocalDateTime): List<MedicationEvent> {
+        return events.filter {
+            (it.date.isEqual(start) || it.date.isAfter(start)) &&
+                    (it.date.isEqual(end) || it.date.isBefore(end))
+        }
+    }
+
+    // Get the latest event if available
+    fun getLastEvent(): MedicationEvent? {
+        return events.firstOrNull() // Since we keep the list sorted, first is most recent
+    }
+
+    // Get the last event of a specific type
+    fun getLastEventOfType(type: MedicationEvent.EventType): MedicationEvent? {
+        return events.firstOrNull { it.type == type }
+    }
+
+    // Get events from the last n days
+    fun getEventsFromLastDays(days: Int): List<MedicationEvent> {
+        val startDate = LocalDateTime.now().minusDays(days.toLong())
+        return events.filter { it.date.isAfter(startDate) }
+    }
+
+    // Get compliance rate (percentage of taken vs. total events)
+    fun getComplianceRate(): Double {
+        if (events.isEmpty()) return 0.0
+        val takenCount = events.count { it.type == MedicationEvent.EventType.TAKEN }
+        return (takenCount.toDouble() / events.size) * 100
+    }
+
+    // Get count of events by type
+    fun getEventCount(type: MedicationEvent.EventType): Int {
+        return events.count { it.type == type }
+    }
+
+    // Clear events older than a certain date
+    fun clearEventsOlderThan(date: LocalDateTime) {
+        events.removeAll { it.date.isBefore(date) }
+    }
+
+    // Check if medication was taken today
+    fun wasTakenToday(): Boolean {
+        val today = LocalDate.now()
+        return events.any {
+            it.type == MedicationEvent.EventType.TAKEN &&
+                    it.date.toLocalDate() == today
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
 
 sealed class MedicationSchedule {
     data class Daily(

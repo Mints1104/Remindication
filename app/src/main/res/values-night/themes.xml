@@ -116,14 +116,17 @@
 
     <style name="ThemeOverlay.App.TimePicker" parent="@style/ThemeOverlay.Material3.MaterialTimePicker">
         <item name="android:backgroundTint">@color/current_app_background_dark</item>
-
-
         <item name="colorPrimary">@color/md_theme_primaryFixedDim</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSurface">@color/current_app_background_dark</item>
         <item name="colorOnSurface">@color/white</item>
         <item name="tabStyle">@style/Widget.App.TimePicker.Tab</item>
         <item name="materialTimePickerStyle">@style/Widget.App.TimePicker</item>
+
+        <!-- Clock specific colors -->
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
     </style>
 
     <style name="Widget.App.TimePicker" parent="Widget.Material3.MaterialTimePicker">
@@ -133,6 +136,9 @@
     <style name="TextAppearance.App.TimePicker.Tab" parent="TextAppearance.Material3.LabelLarge">
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">16sp</item>
+        <item name="tabTextColor">@color/white</item>  <!-- Add this for unselected text -->
+        <item name="tabSelectedTextColor">@color/white</item>  <!-- Make sure this is set -->
+        <item name="tabRippleColor">@android:color/transparent</item>  <!-- Optional: removes ripple effect -->
     </style>
 
     <style name="Widget.App.TimePicker.Tab" parent="Widget.Material3.TabLayout">
@@ -148,6 +154,12 @@
         <item name="clockHandColor">@color/md_theme_primaryFixedDim</item>
         <item name="clockNumberTextColor">@color/md_theme_inverseOnSurface</item>
         <item name="clockFaceBackgroundColor">@color/current_app_background_dark</item>
+        <item name="colorOnSurface">@color/white</item>
+        <!-- Add these lines -->
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorAccent">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
     </style>
 
 

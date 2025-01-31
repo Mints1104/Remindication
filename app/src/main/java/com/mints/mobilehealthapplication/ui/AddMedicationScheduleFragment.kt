@@ -246,7 +246,7 @@ class AddMedicationScheduleFragment : Fragment() {
             "Once Daily" -> binding.dailyScheduleContainer.isVisible = true
             "Weekly" -> binding.weeklyScheduleContainer.isVisible = true
             "Cyclic" -> binding.cyclicScheduleContainer.isVisible = true
-            "On demand" -> binding.onDemandContainer.isVisible = true
+            "On Demand" -> binding.onDemandContainer.isVisible = true
             "Twice Daily" -> binding.twiceDailyScheduleContainer.isVisible = true
             else -> displayMessage("Unknown schedule type")
         }

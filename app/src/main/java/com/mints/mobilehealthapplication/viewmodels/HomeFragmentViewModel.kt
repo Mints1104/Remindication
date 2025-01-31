@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
+import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -111,6 +112,38 @@ class HomeFragmentViewModel : ViewModel() {
         }
     }
 
+    fun updateMedicationHistory(uid: String, medicationId: String, event: MedicationEvent) {
+        viewModelScope.launch {
+            try {
+                val success = FireStoreRepository.updateMedicationHistory(
+                    userId = uid,
+                    medicationId = medicationId,
+                    event = event
+                )
+                if (success) {
+                    // Update the local medication list to reflect the new history
+                    _medications.value = _medications.value?.map { medication ->
+                        if (medication.id == medicationId) {
+                            // Create a new medication history with the added event
+                            val updatedHistory = medication.medicationHistory.apply {
+                                addEvent(event)
+                            }
+                            // Return the medication with updated history
+                            medication.copy(medicationHistory = updatedHistory)
+                        } else {
+                            medication
+                        }
+                    }
+                    Log.d("HomeViewModel", "Successfully updated medication history for $medicationId")
+                } else {
+                    Log.e("HomeViewModel", "Failed to update medication history for $medicationId")
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error updating medication history: ${e.message}")
+            }
+        }
+    }
+
 
     fun deleteMedication(uid: String, medicationId: String, onComplete: () -> Unit) {
         viewModelScope.launch {
@@ -159,26 +192,35 @@ class HomeFragmentViewModel : ViewModel() {
     fun markMedicationAsTaken(userId: String, medication: Medication) {
         val updatedMedication = debugAdvanceDates(medication)
 
+
         viewModelScope.launch {
             updatedMedication.id?.let { medId ->
                 if (updatedMedication.schedule is MedicationSchedule.Daily) {
-                    val success = FireStoreRepository.updateMedicationDates(
-                        userId = userId,
-                        medicationId = medId,
-                        newDates = updatedMedication.schedule.nextDueDates
-                    )
 
-                    if (success) {
-                        // Update local list
-                        _medications.value = _medications.value?.map {
-                            if (it.id == medication.id) updatedMedication else it
+                    if (medication.schedule is MedicationSchedule.Daily) {
+                        updatedMedication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
+
+
+
+
+                        val success = FireStoreRepository.updateMedicationDates(
+                            userId = userId,
+                            medicationId = medId,
+                            newDates = updatedMedication.schedule.nextDueDates
+                        )
+
+                        if (success) {
+                            // Update local list
+                            _medications.value = _medications.value?.map {
+                                if (it.id == medication.id) updatedMedication else it
+                            }
+                        } else {
+                            Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
                         }
-                    } else {
-                    Log.e("HomeViewModel","Error marking ${medication.name} as taken")
                     }
+
+
                 }
-
-
             }
         }
     }

@@ -18,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
+import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationInfo
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
@@ -25,6 +26,7 @@ import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 
@@ -80,7 +82,6 @@ class HomeFragment : Fragment() {
         } else {
             viewModel.getMedications(uid)
             medicationList = viewModel.getMedicationList()
-
         }
     }
 
@@ -96,6 +97,36 @@ class HomeFragment : Fragment() {
             viewModel.onMedicationClicked(medication)
              when (val schedule = medication.schedule) {
                  is MedicationSchedule.Daily -> {
+                     getClosestDate()
+
+                     val history = medication.medicationHistory
+                    Log.d("MED_TEST","History: ${medication.medicationHistory}")
+                     val newEvent = MedicationEvent.Skipped(
+                         date = LocalDateTime.now(),
+                         notes = "Test dose taken"
+                     )
+
+                     medication.medicationHistory.addEvent(newEvent)
+                    /* viewModel.updateMedicationHistory(
+                         uid = uid,
+                         medicationId = medication.id!!,
+                         event = newEvent
+                     )*/
+
+                     history.getLastEventOfType(MedicationEvent.EventType.TAKEN)?.let { lastTaken ->
+                         Log.d("MedicationHistory", "Last taken: ${lastTaken.date}")
+                     }
+
+                     val compliance = history.getComplianceRate()
+                     Log.d("MedicationHistory", "Compliance rate: $compliance%")
+
+                     if (history.wasTakenToday()) {
+                         Log.d("MedicationHistory", "Medication already taken today")
+                     }
+
+                     val recentEvents = history.getEventsFromLastDays(7)
+                     Log.d("MedicationHistory", "Events in last 7 days: ${recentEvents.size}")
+
                      Log.d("MED_TEST", "Times: ${schedule.times}")
                      Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
                      val nextDueTimeMillis = schedule.nextDueDates[0]
@@ -125,6 +156,9 @@ class HomeFragment : Fragment() {
             Log.d("HomeFragment", "Observed ${medications.size} medications in LiveData")
             adapter.updateMedicationList(medications)
         }
+
+
+
 
         Log.d("HomeFragment", "RecyclerView setup complete")
     }
@@ -185,6 +219,35 @@ class HomeFragment : Fragment() {
             })
             .show()
     }
+
+    private fun getClosestDate() {
+        val currentList = adapter.getMedicationList()
+        val dailySchedList = currentList.filter { it.schedule is MedicationSchedule.Daily }
+
+        // Get the current time
+        val now = LocalDateTime.now()
+
+        // Find the medication with the earliest upcoming date
+        val closestMedication = dailySchedList
+            .filter { it.schedule is MedicationSchedule.Daily }
+            .minByOrNull { medication ->
+                val schedule = medication.schedule as MedicationSchedule.Daily
+                schedule.nextDueDates
+                    .filter { it.isAfter(now) }
+                    .minOrNull() ?: LocalDateTime.MAX
+            }
+
+        // Display result if found
+        closestMedication?.let {
+            val schedule = it.schedule as MedicationSchedule.Daily
+            val closestDueDate = schedule.nextDueDates.filter { it.isAfter(now) }.minOrNull()
+            Log.d(tag,"Closest due date: $closestDueDate for medication: ${it.name}")
+            binding.nextMedicationName.text = getString(R.string.name_of_next_med,it.name)
+            binding.nextMedicationTime.text = getString(R.string.time_of_medication,
+                it.schedule.nextDueDates.toString())
+        } ?: Log.d(tag,"No future due dates found.")
+    }
+
 
     private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {
         val currentList = adapter.getMedicationList().toMutableList()

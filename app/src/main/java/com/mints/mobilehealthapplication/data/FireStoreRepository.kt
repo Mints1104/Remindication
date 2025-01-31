@@ -13,9 +13,13 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+
+
 
 object FireStoreRepository {
     private val db by lazy { FirebaseFirestore.getInstance() }
+    private val mappers = FireStoreMappers()
 
     suspend fun saveUserData(uid: String, data: RegistrationViewModel.RegistrationData): Boolean {
         return try {
@@ -61,7 +65,9 @@ object FireStoreRepository {
                     createdAt = document.getTimestamp("createdAt") ?: Timestamp.now(),
                     active = document.getBoolean("active") ?: true,
                     lastModified = document.getTimestamp("lastModified") ?: Timestamp.now(),
-                    refillReminder = parseRefillInfo(document.get("refillReminder") as? Map<String, Any>)
+                    refillReminder = parseRefillInfo(document.get("refillReminder") as? Map<String, Any>),
+                    medicationHistory = parseMedicationHistory(document.get("medicationHistory") as? Map<String, Any>)
+
                 )
             }
     }
@@ -94,6 +100,68 @@ object FireStoreRepository {
             throw Exception("Error fetching medication details: ${e.message}")
         }
     }
+
+    suspend fun updateMedicationHistory(
+        userId: String,
+        medicationId: String,
+        event: MedicationEvent
+    ): Boolean {
+        return try {
+            val documentPath = "users/$userId/medications/$medicationId"
+            Log.d("FireStoreRepo", "Updating medication history at path: [$documentPath] with event type: ${event::class.simpleName}")
+
+            // Use the mapper's extension function:
+            val eventMap = with(mappers) { event.toMap() }
+
+            db.collection("users")
+                .document(userId)
+                .collection("medications")
+                .document(medicationId)
+                .update("medicationHistory.events", FieldValue.arrayUnion(eventMap))
+                .await()
+
+            Log.d("FireStoreRepo", "Successfully updated medication history at path: [$documentPath]")
+            true
+        } catch (e: FirebaseFirestoreException) {
+            Log.e("FireStoreRepo", "Firestore update failed at path [$userId/$medicationId]: ${e.code} - ${e.message}", e)
+            false
+        } catch (e: Exception) {
+            Log.e("FireStoreRepo", "Unexpected error updating medication history at path [$userId/$medicationId]: ${e.message}", e)
+            false
+        }
+    }
+
+
+
+
+
+
+    // Update the parsing method to handle potential null cases
+    private fun parseMedicationHistory(historyMap: Map<String, Any>?): MedicationHistory {
+        if (historyMap == null) return MedicationHistory()
+
+        val events = (historyMap["events"] as? List<Map<String, Any>> ?: emptyList()).mapNotNull { eventMap ->
+            val date = (eventMap["date"] as? Timestamp)?.let { timestamp ->
+                LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+            } ?: LocalDateTime.now()
+
+            val notes = eventMap["notes"] as? String ?: ""
+            val type = eventMap["type"] as? String
+
+            when (type) {
+                "taken" -> MedicationEvent.Taken(date, notes)
+                "skipped" -> MedicationEvent.Skipped(date, notes)
+                "missed" -> MedicationEvent.Missed(date, notes)
+                else -> null
+            }
+        }
+
+        return MedicationHistory(events.toMutableList())
+    }
+
+
+
+
 
     suspend fun updateMedication(userId: String, medication: Medication): Boolean {
         return try {
@@ -328,13 +396,16 @@ object FireStoreRepository {
         }
     }
 
+
+
     suspend fun updateMedicationDates(
         userId: String,
         medicationId: String,
         newDates: List<LocalDateTime>
     ): Boolean {
         return try {
-            val firestoreDates = newDates.map { it.toFirestoreTimestamp() }
+            // Use our mapper's extension function for each date.
+            val firestoreDates = newDates.map { with(mappers) { it.toFirebaseTimestamp() } }
 
             db.collection("users")
                 .document(userId)
@@ -343,10 +414,9 @@ object FireStoreRepository {
                 .update("schedule.nextDueDates", firestoreDates)
                 .await()
 
-           newDates.forEach{date ->
-               Log.d("FIRESTORE_UPDATE","Success, new date: $date")
-           }
-
+            newDates.forEach { date ->
+                Log.d("FIRESTORE_UPDATE", "Success, new date: $date")
+            }
 
             true
         } catch (e: Exception) {
@@ -354,6 +424,7 @@ object FireStoreRepository {
             false
         }
     }
+
 
 
 
