@@ -298,53 +298,54 @@ class HomeFragmentViewModel( private val notificationHelper: NotificationHelper)
         }
     }
 
+    /*
+    User marks medication as taken should update the history saying the medication was taken
+    If the user did not take the medication and it hit midnight then that medication should be
+    set to missed
+     */
+
     fun markMedicationAsTaken(userId: String, medication: Medication) {
-        val updatedMedication = debugAdvanceDates(medication)
         viewModelScope.launch {
-            updatedMedication.id?.let { medId ->
-                if (updatedMedication.schedule is MedicationSchedule.Daily) {
+            medication.id?.let { medId ->
+                if (medication.schedule is MedicationSchedule.Daily) {
 
-                    if (medication.schedule is MedicationSchedule.Daily) {
-                        updatedMedication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
-                        val success = FireStoreRepository.updateMedicationDates(
-                            userId = userId,
-                            medicationId = medId,
-                            newDates = updatedMedication.schedule.nextDueDates
-                        )
-                        if (success) {
-                            // Update local list
-                            _medications.value = _medications.value?.map {
-                                if (it.id == medication.id) updatedMedication else it
-                            }
-                            scheduleNextNotification(updatedMedication)
-
-                        } else {
-                            Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
+                    medication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
+                    val success = FireStoreRepository.updateMedicationDates(
+                        userId = userId,
+                        medicationId = medId,
+                        newDates = medication.schedule.nextDueDates
+                    )
+                    if (success) {
+                        // Update local list
+                        _medications.value = _medications.value?.map {
+                            if (it.id == medication.id) medication else it
                         }
+                        scheduleNextNotification(medication)
+
+                    } else {
+                        Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
                     }
 
 
                 }
 
-                if (updatedMedication.schedule is MedicationSchedule.WeeklySchedule) {
+                if (medication.schedule is MedicationSchedule.WeeklySchedule) {
 
-                    if (medication.schedule is MedicationSchedule.WeeklySchedule) {
-                        updatedMedication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
-                        val success = FireStoreRepository.updateMedicationDates(
-                            userId = userId,
-                            medicationId = medId,
-                            newDates = updatedMedication.schedule.nextDueDates
-                        )
-                        if (success) {
-                            // Update local list
-                            _medications.value = _medications.value?.map {
-                                if (it.id == medication.id) updatedMedication else it
-                            }
-                            scheduleNextNotification(updatedMedication)
-
-                        } else {
-                            Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
+                    medication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
+                    val success = FireStoreRepository.updateMedicationDates(
+                        userId = userId,
+                        medicationId = medId,
+                        newDates = medication.schedule.nextDueDates
+                    )
+                    if (success) {
+                        // Update local list
+                        _medications.value = _medications.value?.map {
+                            if (it.id == medication.id) medication else it
                         }
+                        scheduleNextNotification(medication)
+
+                    } else {
+                        Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
                     }
 
 

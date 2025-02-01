@@ -124,6 +124,8 @@ class HomeFragment : Fragment() {
              when (val schedule = medication.schedule) {
                  is MedicationSchedule.Daily -> {
 
+
+
                      testReceivingMedicationHistory(medication)
                  }
                  is MedicationSchedule.WeeklySchedule -> {
