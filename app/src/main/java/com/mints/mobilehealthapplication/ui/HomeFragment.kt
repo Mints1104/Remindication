@@ -26,6 +26,7 @@ import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
+import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -74,7 +75,10 @@ class HomeFragment : Fragment() {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
+        notificationHelper = NotificationHelper(requireContext())
+
+        val factory = HomeFragmentViewModelFactory(notificationHelper)
+        viewModel = ViewModelProvider(this, factory)[HomeFragmentViewModel::class.java]
         val mainActivity = requireActivity() as MainActivity
         mainActivity.showAllUI()
         setupFAB()
@@ -83,7 +87,6 @@ class HomeFragment : Fragment() {
 
         fetchUserMedication()
         viewModel.getCurrentDay()
-        notificationHelper = NotificationHelper(requireContext())
     }
 
 
@@ -123,7 +126,7 @@ class HomeFragment : Fragment() {
                  is MedicationSchedule.Daily -> {
 
                      testReceivingMedicationHistory(medication)
-                     testNotificationSchedule(schedule, medication)
+                     testNotificationSchedule(medication)
                  }
                  is MedicationSchedule.WeeklySchedule -> {
                      Log.d("MED_TEST", "Times: ${schedule.times}")
@@ -147,21 +150,36 @@ class HomeFragment : Fragment() {
         Log.d("HomeFragment", "RecyclerView setup complete")
     }
 
-    private fun testNotificationSchedule(
-        schedule: MedicationSchedule.Daily,
-        medication: Medication
-    ) {
-        Log.d("MED_TEST", "Times: ${schedule.times}")
-        Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
-        val nextDueTimeMillis = schedule.nextDueDates[0]
-            .atZone(ZoneId.systemDefault())  // Use device's timezone
-            .toInstant()
-            .toEpochMilli()
-        notificationHelper.scheduleNotification(
-            medication.name,
-            medication.dosage,
-            nextDueTimeMillis
-        )
+    private fun testNotificationSchedule(medication: Medication) {
+        when(val schedule = medication.schedule) {
+            is MedicationSchedule.Daily -> {
+                Log.d("MED_TEST", "Times Daily: ${schedule.times}")
+                Log.d("MED_TEST", "Calculated Dates Daily: ${schedule.nextDueDates}")
+                val nextDueTimeMillis = schedule.nextDueDates[0]
+                    .atZone(ZoneId.systemDefault())  // Use device's timezone
+                    .toInstant()
+                    .toEpochMilli()
+                notificationHelper.scheduleNotification(
+                    medication.name,
+                    medication.dosage,
+                    nextDueTimeMillis
+                )
+            }
+            is MedicationSchedule.WeeklySchedule -> {
+                Log.d("MED_TEST", "Times Weekly: ${schedule.times}")
+                Log.d("MED_TEST", "Calculated Dates Weekly: ${schedule.nextDueDates}")
+                val nextDueTimeMillis = schedule.nextDueDates[0]
+                    .atZone(ZoneId.systemDefault())  // Use device's timezone
+                    .toInstant()
+                    .toEpochMilli()
+                notificationHelper.scheduleNotification(
+                    medication.name,
+                    medication.dosage,
+                    nextDueTimeMillis
+                )
+            }
+            else -> Log.d(tag,"Yet to complete.")
+        }
     }
 
     private fun testReceivingMedicationHistory(medication: Medication) {
@@ -241,6 +259,7 @@ class HomeFragment : Fragment() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION) {
                         viewModel.markMedicationAsTaken(uid,medication)
+                        testNotificationSchedule(medication)
                         if(medication.schedule is MedicationSchedule.WeeklySchedule) {
                             viewModel.testDateAdvanceMedication(uid,medication)
                         }

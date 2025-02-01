@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation (libs.material)
     implementation(libs.shimmer)
+    implementation(libs.play.services.auth)
 
 
 

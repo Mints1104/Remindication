@@ -82,7 +82,8 @@
                 android:text="@string/name_of_next_med"
                 android:textColor="?attr/colorOnPrimaryContainer"
                 android:layout_marginTop="8dp"
-                android:textSize="16sp"/>
+                android:textSize="16sp"
+                />
 
             <TextView
                 android:id="@+id/next_medication_time"
@@ -91,7 +92,8 @@
                 android:text="@string/time_of_medication"
                 android:layout_marginTop="4dp"
                 android:textColor="?attr/colorOnPrimaryContainer"
-                android:textSize="14sp"/>
+                android:textSize="16sp"
+                />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

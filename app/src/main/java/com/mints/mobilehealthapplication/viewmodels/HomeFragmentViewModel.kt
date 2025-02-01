@@ -9,13 +9,15 @@ import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
+import com.mints.mobilehealthapplication.data.NotificationHelper
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 
-class HomeFragmentViewModel : ViewModel() {
+class HomeFragmentViewModel(    private val notificationHelper: NotificationHelper) : ViewModel() {
 
-     val _medications = MutableLiveData<List<Medication>>()
+     private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
     private val _navigateToDetails = MutableLiveData<Medication?>()
     val navigateToDetails: LiveData<Medication?> get() = _navigateToDetails
@@ -199,6 +201,34 @@ class HomeFragmentViewModel : ViewModel() {
 
     }
 
+    private fun scheduleNextNotification(medication: Medication) {
+        when (val schedule = medication.schedule) {
+            is MedicationSchedule.Daily -> {
+                val nextDueTimeMillis = schedule.nextDueDates[0]
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+                notificationHelper.scheduleNotification(
+                    medication.name,
+                    medication.dosage,
+                    nextDueTimeMillis
+                )
+            }
+            is MedicationSchedule.WeeklySchedule -> {
+                val nextDueTimeMillis = schedule.nextDueDates[0]
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+                notificationHelper.scheduleNotification(
+                    medication.name,
+                    medication.dosage,
+                    nextDueTimeMillis
+                )
+            }
+            else -> Log.d("HomeViewModel", "Schedule type not supported for notifications")
+        }
+    }
+
     fun markMedicationAsTaken(userId: String, medication: Medication) {
         val updatedMedication = debugAdvanceDates(medication)
         viewModelScope.launch {
@@ -217,6 +247,8 @@ class HomeFragmentViewModel : ViewModel() {
                             _medications.value = _medications.value?.map {
                                 if (it.id == medication.id) updatedMedication else it
                             }
+                            scheduleNextNotification(updatedMedication)
+
                         } else {
                             Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
                         }
@@ -228,6 +260,12 @@ class HomeFragmentViewModel : ViewModel() {
         }
     }
 
+    /*
+    we create an updated medication object
+    we mark it as taken/skipped
+    we save that up[dated value to firestore
+
+     */
     fun markMedicationAsSkipped(userId: String, medication: Medication) {
         val updatedMedication = debugAdvanceDates(medication)
         viewModelScope.launch {
@@ -254,6 +292,8 @@ class HomeFragmentViewModel : ViewModel() {
             }
         }
     }
+
+
 
     fun testDateAdvanceMedication(userId: String, medication: Medication) {
         val currentDate = LocalDate.now()

@@ -12,7 +12,20 @@
           "package_name": "com.mints.mobilehealthapplication"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "955997320600-p2h3n6f39qvooa9585p1t0m9a6jopvt8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mints.mobilehealthapplication",
+            "certificate_hash": "605ab0c1f3869940a81edc342769fc31f27aac19"
+          }
+        },
+        {
+          "client_id": "955997320600-4vg2nj2cg957lhnsj3v8otgtb018i483.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAToz1DKjynS58uH1pNoI7f2DNJ54tztmI"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "955997320600-4vg2nj2cg957lhnsj3v8otgtb018i483.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

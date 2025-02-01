@@ -49,7 +49,7 @@ class LoginFragment : Fragment() {
         forgotPasswordText.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_resetPasswordFragment)
         }
-        loginButton.setOnClickListener { view ->
+        loginButton.setOnClickListener {
             loginClick()
         }
         signUpText.setOnClickListener {
