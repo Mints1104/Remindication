@@ -201,24 +201,17 @@ class HomeFragmentViewModel : ViewModel() {
 
     fun markMedicationAsTaken(userId: String, medication: Medication) {
         val updatedMedication = debugAdvanceDates(medication)
-
-
         viewModelScope.launch {
             updatedMedication.id?.let { medId ->
                 if (updatedMedication.schedule is MedicationSchedule.Daily) {
 
                     if (medication.schedule is MedicationSchedule.Daily) {
                         updatedMedication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
-
-
-
-
                         val success = FireStoreRepository.updateMedicationDates(
                             userId = userId,
                             medicationId = medId,
                             newDates = updatedMedication.schedule.nextDueDates
                         )
-
                         if (success) {
                             // Update local list
                             _medications.value = _medications.value?.map {
@@ -230,6 +223,33 @@ class HomeFragmentViewModel : ViewModel() {
                     }
 
 
+                }
+            }
+        }
+    }
+
+    fun markMedicationAsSkipped(userId: String, medication: Medication) {
+        val updatedMedication = debugAdvanceDates(medication)
+        viewModelScope.launch {
+            updatedMedication.id?.let { medId ->
+                if (updatedMedication.schedule is MedicationSchedule.Daily) {
+
+                    if (medication.schedule is MedicationSchedule.Daily) {
+                        updatedMedication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
+                        val success = FireStoreRepository.updateMedicationDates(
+                            userId = userId,
+                            medicationId = medId,
+                            newDates = updatedMedication.schedule.nextDueDates
+                        )
+                        if (success) {
+                            // Update local list
+                            _medications.value = _medications.value?.map {
+                                if (it.id == medication.id) updatedMedication else it
+                            }
+                        } else {
+                            Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
+                        }
+                    }
                 }
             }
         }

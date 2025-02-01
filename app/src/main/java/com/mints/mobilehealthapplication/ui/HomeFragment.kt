@@ -57,6 +57,18 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    private fun showLoadingState() {
+        binding.shimmerLayout.startShimmer()
+        binding.shimmerLayout.visibility = View.VISIBLE
+        binding.nextMedicationCard.visibility = View.INVISIBLE
+    }
+
+    private fun showContent() {
+        binding.shimmerLayout.stopShimmer()
+        binding.shimmerLayout.visibility = View.GONE
+        binding.nextMedicationCard.visibility = View.VISIBLE
+    }
+
     /**
      * Initializes UI components, sets up RecyclerView, and fetches medication data after the view is created.
      */
@@ -67,6 +79,8 @@ class HomeFragment : Fragment() {
         mainActivity.showAllUI()
         setupFAB()
         setUpRecyclerView()
+        showLoadingState()
+
         fetchUserMedication()
         viewModel.getCurrentDay()
         notificationHelper = NotificationHelper(requireContext())
@@ -74,18 +88,21 @@ class HomeFragment : Fragment() {
 
 
     private fun fetchUserMedication() {
-         uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         Log.d("HomeFragment", "Current user UID: $uid")
         if (uid.isEmpty()) {
             Log.e("HomeFragment", "User is not authenticated")
             Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+            showContent() // Hide shimmer if there's an error
         } else {
             viewModel.getMedications(uid) {
                 viewModel.medications.observe(viewLifecycleOwner) { list ->
                     if (list != null) {
                         getClosestDate(list)
+                        showContent() // Show content when data is loaded
                     } else {
                         Log.d(tag, "No medications found")
+                        showContent() // Hide shimmer even if no medications found
                     }
                 }
             }
@@ -105,41 +122,8 @@ class HomeFragment : Fragment() {
              when (val schedule = medication.schedule) {
                  is MedicationSchedule.Daily -> {
 
-                     val history = medication.medicationHistory
-                    Log.d("MED_TEST","History: ${medication.medicationHistory}")
-                     val newEvent = MedicationEvent.Skipped(
-                         date = LocalDateTime.now(),
-                         notes = "Test dose taken"
-                     )
-
-                     medication.medicationHistory.addEvent(newEvent)
-                    /* viewModel.updateMedicationHistory(
-                         uid = uid,
-                         medicationId = medication.id!!,
-                         event = newEvent
-                     )*/
-
-                     history.getLastEventOfType(MedicationEvent.EventType.TAKEN)?.let { lastTaken ->
-                         Log.d("MedicationHistory", "Last taken: ${lastTaken.date}")
-                     }
-
-                     val compliance = history.getComplianceRate()
-                     Log.d("MedicationHistory", "Compliance rate: $compliance%")
-
-                     if (history.wasTakenToday()) {
-                         Log.d("MedicationHistory", "Medication already taken today")
-                     }
-
-                     val recentEvents = history.getEventsFromLastDays(7)
-                     Log.d("MedicationHistory", "Events in last 7 days: ${recentEvents.size}")
-
-                     Log.d("MED_TEST", "Times: ${schedule.times}")
-                     Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
-                     val nextDueTimeMillis = schedule.nextDueDates[0]
-                         .atZone(ZoneId.systemDefault())  // Use device's timezone
-                         .toInstant()
-                         .toEpochMilli()
-                     notificationHelper.scheduleNotification(medication.name, medication.dosage,nextDueTimeMillis)
+                     testReceivingMedicationHistory(medication)
+                     testNotificationSchedule(schedule, medication)
                  }
                  is MedicationSchedule.WeeklySchedule -> {
                      Log.d("MED_TEST", "Times: ${schedule.times}")
@@ -147,13 +131,7 @@ class HomeFragment : Fragment() {
                  }
                  else -> Log.d(tag,"N/A")
                  }
-             if (medication.notes.isNotEmpty()) {
-                val addMedicationNotesBottomSheet = MedicationNotesBottomSheet.newInstance(medication.notes)
-                addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
-
-            } else {
-                displayMessage("No notes available for ${medication.name}")
-            }
+             handleDisplayingNotes(medication)
         }
         binding.medicationsRecyclerView.adapter = adapter
         binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -167,6 +145,52 @@ class HomeFragment : Fragment() {
 
 
         Log.d("HomeFragment", "RecyclerView setup complete")
+    }
+
+    private fun testNotificationSchedule(
+        schedule: MedicationSchedule.Daily,
+        medication: Medication
+    ) {
+        Log.d("MED_TEST", "Times: ${schedule.times}")
+        Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
+        val nextDueTimeMillis = schedule.nextDueDates[0]
+            .atZone(ZoneId.systemDefault())  // Use device's timezone
+            .toInstant()
+            .toEpochMilli()
+        notificationHelper.scheduleNotification(
+            medication.name,
+            medication.dosage,
+            nextDueTimeMillis
+        )
+    }
+
+    private fun testReceivingMedicationHistory(medication: Medication) {
+        val history = medication.medicationHistory
+        Log.d("MED_TEST", "History: $history")
+        history.getLastEventOfType(MedicationEvent.EventType.TAKEN)?.let { lastTaken ->
+            Log.d("MedicationHistory", "Last taken: ${lastTaken.date}")
+        }
+
+        val compliance = history.getComplianceRate()
+        Log.d("MedicationHistory", "Compliance rate: $compliance%")
+
+        if (history.wasTakenToday()) {
+            Log.d("MedicationHistory", "Medication already taken today")
+        }
+
+        val recentEvents = history.getEventsFromLastDays(7)
+        Log.d("MedicationHistory", "Events in last 7 days: ${recentEvents.size}")
+    }
+
+    private fun handleDisplayingNotes(medication: Medication) {
+        if (medication.notes.isNotEmpty()) {
+            val addMedicationNotesBottomSheet =
+                MedicationNotesBottomSheet.newInstance(medication.notes)
+            addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
+
+        } else {
+            displayMessage("No notes available for ${medication.name}")
+        }
     }
 
 
@@ -187,6 +211,8 @@ class HomeFragment : Fragment() {
             onSwipeLeft = { position ->
                 val medication = adapter.getMedicationAt(position)
                 displayMessage("Mark ${medication.name} as skipped")
+                showUndoSkipMedicationSnackbar(medication,position)
+                adapter.notifyItemChanged(position)
             },
             onSwipeRight = { position ->
                 val medication = adapter.getMedicationAt(position)
@@ -215,6 +241,32 @@ class HomeFragment : Fragment() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION) {
                         viewModel.markMedicationAsTaken(uid,medication)
+                        if(medication.schedule is MedicationSchedule.WeeklySchedule) {
+                            viewModel.testDateAdvanceMedication(uid,medication)
+                        }
+                        adapter.updateMedicationList(currentList)
+                        adapter.notifyItemChanged(position)
+                    }
+                }
+            })
+            .show()
+    }
+
+
+    private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {
+        val currentList = adapter.getMedicationList().toMutableList()
+
+        Snackbar.make(binding.root,"${medication.name} skipped", Snackbar.LENGTH_LONG)
+            .setAction("UNDO") {
+                viewModel.undoLastTaken(medication)
+                adapter.updateMedicationList(currentList)
+                adapter.notifyItemChanged(position)
+
+            }
+            .addCallback(object : Snackbar.Callback() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION) {
+                        viewModel.markMedicationAsSkipped(uid,medication)
                         if(medication.schedule is MedicationSchedule.WeeklySchedule) {
                             viewModel.testDateAdvanceMedication(uid,medication)
                         }
@@ -267,30 +319,6 @@ class HomeFragment : Fragment() {
 
 
 
-    private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {
-        val currentList = adapter.getMedicationList().toMutableList()
-
-        Snackbar.make(binding.root,"${medication.name} taken", Snackbar.LENGTH_LONG)
-            .setAction("UNDO") {
-                viewModel.undoLastTaken(medication)
-                adapter.updateMedicationList(currentList)
-                adapter.notifyItemChanged(position)
-
-            }
-            .addCallback(object : Snackbar.Callback() {
-                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    if (event != DISMISS_EVENT_ACTION) {
-                        viewModel.markMedicationAsTaken(uid,medication)
-                        if(medication.schedule is MedicationSchedule.WeeklySchedule) {
-                            viewModel.testDateAdvanceMedication(uid,medication)
-                        }
-                        adapter.updateMedicationList(currentList)
-                        adapter.notifyItemChanged(position)
-                    }
-                }
-            })
-            .show()
-    }
 
 
     /**
@@ -322,6 +350,17 @@ class HomeFragment : Fragment() {
             .show()
 
     }
+
+    override fun onResume() {
+        super.onResume()
+        binding.shimmerLayout.startShimmer()
+    }
+
+    override fun onPause() {
+        binding.shimmerLayout.stopShimmer()
+        super.onPause()
+    }
+
 
     /**
      * Cleans up ViewBinding to prevent memory leaks.

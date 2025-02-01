@@ -19,6 +19,7 @@ firebaseAuthKtx = "23.1.0"
 navigationFragmentKtx = "2.8.5"
 retrofit = "2.9.0"
 preference = "1.2.1"
+shimmer = "0.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
+shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
