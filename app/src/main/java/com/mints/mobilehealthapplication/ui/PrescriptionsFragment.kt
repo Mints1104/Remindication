@@ -23,6 +23,7 @@ import com.mints.mobilehealthapplication.databinding.FragmentPrescriptionsBindin
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
+import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
 import java.time.ZoneId
 
 
@@ -58,11 +59,12 @@ class PrescriptionsFragment : Fragment() {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
+        notificationHelper = NotificationHelper(requireContext())
+        val factory = HomeFragmentViewModelFactory(notificationHelper)
+        viewModel = ViewModelProvider(this, factory)[HomeFragmentViewModel::class.java]
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()
-        notificationHelper = NotificationHelper(requireContext())
 
         val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()

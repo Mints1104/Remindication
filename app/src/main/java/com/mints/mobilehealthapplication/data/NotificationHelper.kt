@@ -89,5 +89,9 @@ class NotificationHelper(private val context: Context) {
             pendingIntent
         )
     }
+
+    fun getContext(): Context {
+        return context
+    }
 }
 

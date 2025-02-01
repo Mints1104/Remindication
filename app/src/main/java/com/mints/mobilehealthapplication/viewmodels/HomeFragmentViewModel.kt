@@ -10,15 +10,23 @@ import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
+import com.mints.mobilehealthapplication.workers.MidnightWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class HomeFragmentViewModel(    private val notificationHelper: NotificationHelper) : ViewModel() {
+class HomeFragmentViewModel( private val notificationHelper: NotificationHelper) : ViewModel() {
 
      private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
+    // Add context parameter
+
+    private val _todaysMedications = MutableLiveData<List<Medication>>()
+    val todaysMedications: LiveData<List<Medication>> get() = _todaysMedications
+
+
+
     private val _navigateToDetails = MutableLiveData<Medication?>()
     val navigateToDetails: LiveData<Medication?> get() = _navigateToDetails
 
@@ -36,6 +44,10 @@ class HomeFragmentViewModel(    private val notificationHelper: NotificationHelp
 
 
      */
+    init {
+        // Initialize the midnight worker using the context from notificationHelper
+        MidnightWorker.initialize(notificationHelper.getContext())
+    }
 
 
      private fun clearUndoState(medication: Medication) {
@@ -169,9 +181,65 @@ class HomeFragmentViewModel(    private val notificationHelper: NotificationHelp
         }
     }
 
+    private fun getClosestDate(currentList: List<Medication>) {
+
+
+        // Filter daily schedules
+        val dailySchedList = currentList.filter { it.schedule is MedicationSchedule.Daily }
+
+        // Get the current time
+        val now = LocalDateTime.now()
+
+        // Find the medication with the earliest upcoming date
+        val closestMedication = dailySchedList
+            .filter { it.schedule is MedicationSchedule.Daily }
+            .minByOrNull { medication ->
+                val schedule = medication.schedule as MedicationSchedule.Daily
+                val closestDate = schedule.nextDueDates
+                    .filter { it.isAfter(now) }
+                    .minOrNull()
+                closestDate ?: LocalDateTime.MAX
+            }
+
+        if (closestMedication != null) {
+            val schedule = closestMedication.schedule as MedicationSchedule.Daily
+            val closestDueDate = schedule.nextDueDates.filter { it.isAfter(now) }.minOrNull()
+
+        }
+    }
+
+
     private fun debugAdvanceDates(medication: Medication): Medication {
+        val now = LocalDateTime.now()
         return when (val schedule = medication.schedule) {
             is MedicationSchedule.Daily -> {
+                // Handle "Twice Daily" separately
+                if (medication.schedule.frequencyType == "Twice Daily") {
+                    val closestDate = schedule.nextDueDates
+                        .filter { it.isAfter(now) }
+                        .minByOrNull { it }
+
+                    if (closestDate != null) {
+                        Log.d("DEBUG_DATES", "CLOSEST DATE (TWICE DAILY): $closestDate")
+
+                        // Calculate the new date (add 1 day to the closest date)
+                        val newDate = closestDate.plusDays(1)
+                        Log.d("DEBUG_DATES", "CLOSEST DATE UPDATED (TWICE DAILY): $newDate")
+
+                        // Replace the old closest date with the new one in the list
+                        val newDates = schedule.nextDueDates.toMutableList()
+                        newDates[newDates.indexOf(closestDate)] = newDate  // Update the closest date
+
+                        // Update the medication schedule with the new list of dates
+                        return medication.copy(
+                            schedule = schedule.copy(nextDueDates = newDates)
+                        )
+                    } else {
+                        Log.d("DEBUG_DATES", "No upcoming dates found for this medication.")
+                    }
+                }
+
+                // Handle the general "Daily" case (after Twice Daily if applicable)
                 val newDates = schedule.nextDueDates.map { it.plusDays(1) }
                 Log.d("DEBUG_DATES", "OLD DATES: ${schedule.nextDueDates}")
                 Log.d("DEBUG_DATES", "NEW DATES: $newDates")
@@ -189,6 +257,7 @@ class HomeFragmentViewModel(    private val notificationHelper: NotificationHelp
             }
         }
     }
+
 
 
 

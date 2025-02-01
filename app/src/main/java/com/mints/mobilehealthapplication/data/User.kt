@@ -132,16 +132,6 @@ data class MedicationHistory(
     }
 }
 
-
-
-
-
-
-
-
-
-
-
 sealed class MedicationSchedule {
     data class Daily(
         val frequency: DailyFrequency,
