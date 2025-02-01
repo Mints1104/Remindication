@@ -256,15 +256,37 @@ class HomeFragmentViewModel(    private val notificationHelper: NotificationHelp
 
 
                 }
+
+                if (updatedMedication.schedule is MedicationSchedule.WeeklySchedule) {
+
+                    if (medication.schedule is MedicationSchedule.WeeklySchedule) {
+                        updatedMedication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
+                        val success = FireStoreRepository.updateMedicationDates(
+                            userId = userId,
+                            medicationId = medId,
+                            newDates = updatedMedication.schedule.nextDueDates
+                        )
+                        if (success) {
+                            // Update local list
+                            _medications.value = _medications.value?.map {
+                                if (it.id == medication.id) updatedMedication else it
+                            }
+                            scheduleNextNotification(updatedMedication)
+
+                        } else {
+                            Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
+                        }
+                    }
+
+
+                }
             }
         }
     }
-
     /*
     we create an updated medication object
     we mark it as taken/skipped
     we save that up[dated value to firestore
-
      */
     fun markMedicationAsSkipped(userId: String, medication: Medication) {
         val updatedMedication = debugAdvanceDates(medication)
@@ -284,10 +306,38 @@ class HomeFragmentViewModel(    private val notificationHelper: NotificationHelp
                             _medications.value = _medications.value?.map {
                                 if (it.id == medication.id) updatedMedication else it
                             }
+                            scheduleNextNotification(updatedMedication)
+
                         } else {
                             Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
                         }
                     }
+
+
+                }
+
+                if (updatedMedication.schedule is MedicationSchedule.WeeklySchedule) {
+
+                    if (medication.schedule is MedicationSchedule.WeeklySchedule) {
+                        updatedMedication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
+                        val success = FireStoreRepository.updateMedicationDates(
+                            userId = userId,
+                            medicationId = medId,
+                            newDates = updatedMedication.schedule.nextDueDates
+                        )
+                        if (success) {
+                            // Update local list
+                            _medications.value = _medications.value?.map {
+                                if (it.id == medication.id) updatedMedication else it
+                            }
+                            scheduleNextNotification(updatedMedication)
+
+                        } else {
+                            Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
+                        }
+                    }
+
+
                 }
             }
         }
