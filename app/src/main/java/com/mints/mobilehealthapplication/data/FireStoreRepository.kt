@@ -2,6 +2,8 @@ package com.mints.mobilehealthapplication.data
 
 import android.util.Log
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,8 +15,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-
 
 
 object FireStoreRepository {
@@ -425,7 +425,7 @@ object FireStoreRepository {
         }
     }
 
-
+    fun getUser(): FirebaseUser? = FirebaseAuth.getInstance().currentUser
 
 
     private fun parseRefillInfo(refillMap: Map<String, Any>?): RefillInfo? {

@@ -16,7 +16,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class HomeFragmentViewModel( private val notificationHelper: NotificationHelper) : ViewModel() {
+class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) : ViewModel() {
 
      private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
@@ -45,9 +45,9 @@ class HomeFragmentViewModel( private val notificationHelper: NotificationHelper)
 
      */
     init {
-        // Initialize the midnight worker using the context from notificationHelper
         MidnightWorker.initialize(notificationHelper.getContext())
     }
+
 
 
      private fun clearUndoState(medication: Medication) {
@@ -320,13 +320,10 @@ class HomeFragmentViewModel( private val notificationHelper: NotificationHelper)
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
-                        scheduleNextNotification(medication)
 
                     } else {
                         Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
                     }
-
-
                 }
 
                 if (medication.schedule is MedicationSchedule.WeeklySchedule) {
@@ -342,7 +339,6 @@ class HomeFragmentViewModel( private val notificationHelper: NotificationHelper)
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
-                        scheduleNextNotification(medication)
 
                     } else {
                         Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
@@ -359,55 +355,44 @@ class HomeFragmentViewModel( private val notificationHelper: NotificationHelper)
     we save that up[dated value to firestore
      */
     fun markMedicationAsSkipped(userId: String, medication: Medication) {
-        val updatedMedication = debugAdvanceDates(medication)
         viewModelScope.launch {
-            updatedMedication.id?.let { medId ->
-                if (updatedMedication.schedule is MedicationSchedule.Daily) {
+            medication.id?.let { medId ->
+                if (medication.schedule is MedicationSchedule.Daily) {
 
-                    if (medication.schedule is MedicationSchedule.Daily) {
-                        updatedMedication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
-                        val success = FireStoreRepository.updateMedicationDates(
-                            userId = userId,
-                            medicationId = medId,
-                            newDates = updatedMedication.schedule.nextDueDates
-                        )
-                        if (success) {
-                            // Update local list
-                            _medications.value = _medications.value?.map {
-                                if (it.id == medication.id) updatedMedication else it
-                            }
-                            scheduleNextNotification(updatedMedication)
-
-                        } else {
-                            Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
+                    medication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
+                    val success = FireStoreRepository.updateMedicationDates(
+                        userId = userId,
+                        medicationId = medId,
+                        newDates = medication.schedule.nextDueDates
+                    )
+                    if (success) {
+                        _medications.value = _medications.value?.map {
+                            if (it.id == medication.id) medication else it
                         }
+
+                    } else {
+                        Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
                     }
 
 
                 }
 
-                if (updatedMedication.schedule is MedicationSchedule.WeeklySchedule) {
+                if (medication.schedule is MedicationSchedule.WeeklySchedule) {
 
-                    if (medication.schedule is MedicationSchedule.WeeklySchedule) {
-                        updatedMedication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
-                        val success = FireStoreRepository.updateMedicationDates(
-                            userId = userId,
-                            medicationId = medId,
-                            newDates = updatedMedication.schedule.nextDueDates
-                        )
-                        if (success) {
-                            // Update local list
-                            _medications.value = _medications.value?.map {
-                                if (it.id == medication.id) updatedMedication else it
-                            }
-                            scheduleNextNotification(updatedMedication)
-
-                        } else {
-                            Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
+                    medication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
+                    val success = FireStoreRepository.updateMedicationDates(
+                        userId = userId,
+                        medicationId = medId,
+                        newDates = medication.schedule.nextDueDates
+                    )
+                    if (success) {
+                        // Update local list
+                        _medications.value = _medications.value?.map {
+                            if (it.id == medication.id) medication else it
                         }
+                    } else {
+                        Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
                     }
-
-
                 }
             }
         }

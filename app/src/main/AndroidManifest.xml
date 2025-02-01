@@ -17,10 +17,19 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".application.MedicationApp"
+
+
 
         android:theme="@style/Theme.MobileHealthApplication"
 
         tools:targetApi="31">
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
+
+
         <receiver android:name=".data.NotificationReceiver" android:exported="false" />
 
         <activity android:name=".ui.MainActivity"

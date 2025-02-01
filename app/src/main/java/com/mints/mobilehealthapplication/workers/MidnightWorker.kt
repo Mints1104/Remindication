@@ -8,28 +8,82 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.mints.mobilehealthapplication.data.FireStoreRepository
+import com.mints.mobilehealthapplication.data.MedicationSchedule
+import com.mints.mobilehealthapplication.data.NotificationHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
 class MidnightWorker(
     context: Context,
-    workerParams: WorkerParameters
+    workerParams: WorkerParameters,
+    private val notificationHelper: NotificationHelper
 ) : CoroutineWorker(context, workerParams) {
 
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            // Debug logging to verify execution time
-            val currentTime = LocalDateTime.now()
-            Log.d("MidnightWorker", "Worker executed at: $currentTime")
+            Log.d(TAG, "Starting midnight schedule update")
 
-            // Schedule the next run
+            // Get all medications from FireStore
+            val userId = FireStoreRepository.getUser()?.uid ?: ""
+            val medications = FireStoreRepository.getMedications(userId)
+
+            medications.forEach { medication ->
+                when (val schedule = medication.schedule) {
+                    is MedicationSchedule.Daily -> {
+                        val updatedDates = schedule.nextDueDates.map { it.plusDays(1) }
+
+                        medication.id?.let { medId ->
+                            val success = FireStoreRepository.updateMedicationDates(
+                                userId = userId,
+                                medicationId = medId,
+                                newDates = updatedDates
+                            )
+
+                            if (success) {
+                                // Schedule notification for the updated medication
+                                val nextDueTimeMillis = updatedDates[0]
+                                    .atZone(ZoneId.systemDefault())
+                                    .toInstant()
+                                    .toEpochMilli()
+                                notificationHelper.scheduleNotification(
+                                    medication.name,
+                                    medication.dosage,
+                                    nextDueTimeMillis
+                                )
+                                Log.d(TAG, "Successfully advanced schedule for medication: ${medication.name}")
+                            } else {
+                                Log.e(TAG, "Failed to advance schedule for medication: ${medication.name}")
+                            }
+                        }
+                    }
+                    is MedicationSchedule.WeeklySchedule -> {
+                        val nextDueTimeMillis = schedule.nextDueDates[0]
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant()
+                            .toEpochMilli()
+                        notificationHelper.scheduleNotification(
+                            medication.name,
+                            medication.dosage,
+                            nextDueTimeMillis
+                        )
+                    }
+                    else -> {
+                        Log.d(TAG, "Schedule type not handled for medication: ${medication.name}")
+                    }
+                }
+            }
+
+            // Schedule the next midnight update
             scheduleNextMidnightWork(applicationContext)
 
-            return Result.success()
+            Result.success()
         } catch (e: Exception) {
-            Log.e("MidnightWorker", "Error in midnight worker: ${e.message}")
-            return Result.retry()
+            Log.e(TAG, "Error in midnight worker: ${e.message}")
+            Result.retry()
         }
     }
 
@@ -44,17 +98,11 @@ class MidnightWorker(
 
         private fun scheduleNextMidnightWork(context: Context) {
             val now = LocalDateTime.now()
-          val nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay()
-          //  val nextMidnight = now.plusMinutes(1)
-
+            val nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay()
             val delayInMillis = nextMidnight
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli() - System.currentTimeMillis()
-
-            Log.d(TAG, "Scheduling next midnight work. Current time: $now")
-            Log.d(TAG, "Next scheduled time: $nextMidnight")
-            Log.d(TAG, "Delay in milliseconds: $delayInMillis")
 
             val workRequest = OneTimeWorkRequestBuilder<MidnightWorker>()
                 .setInitialDelay(delayInMillis, TimeUnit.MILLISECONDS)
@@ -67,11 +115,6 @@ class MidnightWorker(
                     ExistingWorkPolicy.REPLACE,
                     workRequest
                 )
-        }
-
-        fun cancelWork(context: Context) {
-            Log.d(TAG, "Cancelling midnight work")
-            WorkManager.getInstance(context).cancelUniqueWork(MIDNIGHT_WORK_NAME)
         }
     }
 }
