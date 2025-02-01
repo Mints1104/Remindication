@@ -80,8 +80,15 @@ class HomeFragment : Fragment() {
             Log.e("HomeFragment", "User is not authenticated")
             Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
         } else {
-            viewModel.getMedications(uid)
-            medicationList = viewModel.getMedicationList()
+            viewModel.getMedications(uid) {
+                viewModel.medications.observe(viewLifecycleOwner) { list ->
+                    if (list != null) {
+                        getClosestDate(list)
+                    } else {
+                        Log.d(tag, "No medications found")
+                    }
+                }
+            }
         }
     }
 
@@ -97,7 +104,6 @@ class HomeFragment : Fragment() {
             viewModel.onMedicationClicked(medication)
              when (val schedule = medication.schedule) {
                  is MedicationSchedule.Daily -> {
-                     getClosestDate()
 
                      val history = medication.medicationHistory
                     Log.d("MED_TEST","History: ${medication.medicationHistory}")
@@ -220,33 +226,45 @@ class HomeFragment : Fragment() {
             .show()
     }
 
-    private fun getClosestDate() {
-        val currentList = adapter.getMedicationList()
+    private fun getClosestDate(currentList: List<Medication>) {
+        Log.d(tag, "Starting getClosestDate function")
+
+        Log.d(tag, "Current medication list size: ${currentList.size}")
+
+        // Filter daily schedules
         val dailySchedList = currentList.filter { it.schedule is MedicationSchedule.Daily }
+        Log.d(tag, "Filtered daily schedules: ${dailySchedList.size} medications")
 
         // Get the current time
         val now = LocalDateTime.now()
+        Log.d(tag, "Current time: $now")
 
         // Find the medication with the earliest upcoming date
         val closestMedication = dailySchedList
             .filter { it.schedule is MedicationSchedule.Daily }
             .minByOrNull { medication ->
                 val schedule = medication.schedule as MedicationSchedule.Daily
-                schedule.nextDueDates
+                val closestDate = schedule.nextDueDates
                     .filter { it.isAfter(now) }
-                    .minOrNull() ?: LocalDateTime.MAX
+                    .minOrNull()
+                Log.d(tag, "Evaluating medication: ${medication.name}, closest due date: $closestDate")
+                closestDate ?: LocalDateTime.MAX
             }
 
-        // Display result if found
-        closestMedication?.let {
-            val schedule = it.schedule as MedicationSchedule.Daily
+        if (closestMedication != null) {
+            val schedule = closestMedication.schedule as MedicationSchedule.Daily
             val closestDueDate = schedule.nextDueDates.filter { it.isAfter(now) }.minOrNull()
-            Log.d(tag,"Closest due date: $closestDueDate for medication: ${it.name}")
-            binding.nextMedicationName.text = getString(R.string.name_of_next_med,it.name)
-            binding.nextMedicationTime.text = getString(R.string.time_of_medication,
-                it.schedule.nextDueDates.toString())
-        } ?: Log.d(tag,"No future due dates found.")
+            Log.d(tag, "Closest medication: ${closestMedication.name}, closest due date: $closestDueDate")
+
+            binding.nextMedicationName.text = getString(R.string.name_of_next_med, closestMedication.name)
+            binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toString())
+        } else {
+            Log.d(tag, "No future due dates found.")
+        }
+
+        Log.d(tag, "Completed getClosestDate function")
     }
+
 
 
     private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {

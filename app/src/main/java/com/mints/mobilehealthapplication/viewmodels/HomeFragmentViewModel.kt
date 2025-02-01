@@ -103,14 +103,7 @@ class HomeFragmentViewModel : ViewModel() {
         }
     }
 
-    fun getMedications(uid: String) {
-        Log.d("HomeFragmentViewModel", "Fetching medications for user: $uid")
-        viewModelScope.launch {
-            val meds = FireStoreRepository.getMedications(uid)
-            Log.d("HomeFragmentViewModel", "Fetched ${meds.size} medications")
-            _medications.postValue(meds)
-        }
-    }
+
 
     fun updateMedicationHistory(uid: String, medicationId: String, event: MedicationEvent) {
         viewModelScope.launch {
@@ -142,6 +135,23 @@ class HomeFragmentViewModel : ViewModel() {
                 Log.e("HomeViewModel", "Error updating medication history: ${e.message}")
             }
         }
+    }
+
+    fun getMedications(uid: String, onComplete: () -> Unit = {}) {
+        Log.d("HomeFragmentViewModel", "Fetching medications for user: $uid")
+        viewModelScope.launch {
+            try {
+            val meds = FireStoreRepository.getMedications(uid)
+            Log.d("HomeFragmentViewModel", "Fetched ${meds.size} medications")
+            _medications.postValue(meds)
+            onComplete()
+        } catch(e:Exception) {
+                Log.e("HomeFragmentVM", "Failed to get medications: ${e.message}")
+
+
+            }
+        }
+
     }
 
 
