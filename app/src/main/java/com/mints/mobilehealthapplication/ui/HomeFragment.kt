@@ -27,6 +27,7 @@ import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -102,7 +103,13 @@ class HomeFragment : Fragment() {
                 viewModel.medications.observe(viewLifecycleOwner) { list ->
                     if (list != null) {
                         getClosestDate(list)
-                        showContent() // Show content when data is loaded
+                        showContent()
+                      val medications =   getUncompletedMedicationsForToday(list)
+
+                        medications.forEach { medication ->
+                            Log.d("TestFilteredMeds","Uncompleted med: ${medication.name}")
+
+                        }
                     } else {
                         Log.d(tag, "No medications found")
                         showContent() // Hide shimmer even if no medications found
@@ -142,7 +149,9 @@ class HomeFragment : Fragment() {
         addSwipeFunctionality()
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
             Log.d(tag, "Observed ${medications.size} medications in LiveData")
-            adapter.updateMedicationList(medications)
+          //  adapter.updateMedicationList(medications)
+            val filteredMeds = getUncompletedMedicationsForToday(medications)
+            adapter.updateMedicationList(filteredMeds)
         }
 
 
@@ -181,6 +190,43 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun getUncompletedMedicationsForToday(medications: List<Medication>): List<Medication> {
+        val today = LocalDate.now()
+
+        return medications.filter { medication ->
+            when (val schedule = medication.schedule) {
+                is MedicationSchedule.Daily -> {
+                    // Get number of times taken today
+                    val takenToday = medication.medicationHistory.events
+                        .count { event ->
+                            event.type == MedicationEvent.EventType.TAKEN &&
+                                    event.date.toLocalDate() == today
+                        }
+
+                    // Compare with required frequency
+                    val requiredDoses = schedule.frequency.ordinal + 1
+                    takenToday < requiredDoses
+                }
+
+                is MedicationSchedule.WeeklySchedule -> {
+                    // Check if medication is scheduled for today
+                    if (schedule.days.contains(today.dayOfWeek)) {
+                        val takenToday = medication.medicationHistory.events
+                            .count { event ->
+                                event.type == MedicationEvent.EventType.TAKEN &&
+                                        event.date.toLocalDate() == today
+                            }
+
+                        // Compare with number of times scheduled for today
+                        takenToday < schedule.times.size
+                    }
+                    else false
+                }
+
+                else -> false // Handle other schedule types as needed
+            }
+        }
+    }
 
     private fun addSwipeFunctionality() {
         val swipeCallback = MaterialSwipeCallback(
