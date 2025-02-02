@@ -34,6 +34,8 @@ class MidnightWorker(
             medications.forEach { medication ->
                 when (val schedule = medication.schedule) {
                     is MedicationSchedule.Daily -> {
+                        Log.d(TAG,"Original date: ${schedule.nextDueDates}")
+
                         val updatedDates = schedule.nextDueDates.map { it.plusDays(1) }
 
                         medication.id?.let { medId ->

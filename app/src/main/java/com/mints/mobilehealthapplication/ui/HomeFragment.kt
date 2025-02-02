@@ -45,6 +45,7 @@ class HomeFragment : Fragment() {
     private val addMedicationViewModel: AddMedicationViewModel by activityViewModels()
     private lateinit var medToClear: Medication
     private lateinit var notificationHelper: NotificationHelper
+    private var tag = "HomeFragment"
 
     /**
      * Inflates the fragment layout using ViewBinding.
@@ -91,9 +92,9 @@ class HomeFragment : Fragment() {
 
     private fun fetchUserMedication() {
         uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        Log.d("HomeFragment", "Current user UID: $uid")
+        Log.d(tag, "Current user UID: $uid")
         if (uid.isEmpty()) {
-            Log.e("HomeFragment", "User is not authenticated")
+            Log.e(tag, "User is not authenticated")
             Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
             showContent() // Hide shimmer if there's an error
         } else {
@@ -117,7 +118,7 @@ class HomeFragment : Fragment() {
      * Observes LiveData from the ViewModel to update the medication list dynamically.
      */
     private fun setUpRecyclerView() {
-        Log.d("HomeFragment", "Setting up RecyclerView")
+        Log.d(tag, "Setting up RecyclerView")
 
          adapter = MedicationRecyclerView(emptyList()) { medication ->
             viewModel.onMedicationClicked(medication)
@@ -140,14 +141,14 @@ class HomeFragment : Fragment() {
         binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         addSwipeFunctionality()
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
-            Log.d("HomeFragment", "Observed ${medications.size} medications in LiveData")
+            Log.d(tag, "Observed ${medications.size} medications in LiveData")
             adapter.updateMedicationList(medications)
         }
 
 
 
 
-        Log.d("HomeFragment", "RecyclerView setup complete")
+        Log.d(tag, "RecyclerView setup complete")
     }
 
 

@@ -307,6 +307,44 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
     fun markMedicationAsTaken(userId: String, medication: Medication) {
         viewModelScope.launch {
             medication.id?.let { medId ->
+               try {
+                   //First mark the medication as taken locally
+                   val eventDateTime = when(val schedule = medication.schedule) {
+                       is MedicationSchedule.Daily -> schedule.nextDueDates.firstOrNull()
+                       is MedicationSchedule.WeeklySchedule -> schedule.nextDueDates.firstOrNull()
+                       else -> LocalDateTime.now()
+                   } ?: LocalDateTime.now()
+                   //Update the local medication object
+                   medication.markAsTaken(dateTime = eventDateTime)
+
+                   //Update the medication history in FireStore
+
+                   val success = FireStoreRepository.updateMedicationHistory(
+                       userId = userId,
+                       medicationId = medId,
+                       event = MedicationEvent.Taken(date = eventDateTime)
+                   )
+
+                 if(success) {
+                     //Update local list
+                     _medications.value = _medications.value?.map {
+                         if(it.id == medication.id) medication else it
+                     }
+
+                 } else {
+                     Log.e("HomeViewModel","Error marking ${medication.name} as taken")
+                 }
+
+                   } catch(e:Exception) {
+                       Log.e("HomeViewModel","Exception marking medication as taken",e)
+                   }
+               }
+        }
+    }
+
+    /*fun markMedicationAsTaken(userId: String, medication: Medication) {
+        viewModelScope.launch {
+            medication.id?.let { medId ->
                 if (medication.schedule is MedicationSchedule.Daily) {
 
                     medication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
@@ -348,13 +386,51 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                 }
             }
         }
-    }
+    }*/
     /*
     we create an updated medication object
     we mark it as taken/skipped
     we save that up[dated value to firestore
      */
+
     fun markMedicationAsSkipped(userId: String, medication: Medication) {
+
+        viewModelScope.launch {
+            medication.id?.let {medId ->
+                try {
+
+                    val eventDateTime = when(val schedule = medication.schedule) {
+                        is MedicationSchedule.Daily -> schedule.nextDueDates.firstOrNull()
+                        is MedicationSchedule.WeeklySchedule -> schedule.nextDueDates.firstOrNull()
+                        else -> LocalDateTime.now()
+                    } ?: LocalDateTime.now()
+
+                    //Mark medication as skipped locally with the correct due date
+                    medication.markAsSkipped(dateTime = eventDateTime)
+
+                    val success = FireStoreRepository.updateMedicationHistory(
+                        userId = userId,
+                        medicationId = medId,
+                        event = MedicationEvent.Skipped(date = eventDateTime)
+                    )
+
+                    if(success) {
+                        //Update local list
+                        _medications.value = _medications.value?.map {
+                            if (it.id == medication.id) medication else it
+                        }
+                    } else {
+                        Log.e("HomeViewModel","Error marking ${medication.name} as skipped")
+                    }
+                } catch(e:Exception) {
+                    Log.e("HomeViewModel","Exception marking medication as skipped",e)
+                }
+            }
+        }
+    }
+
+
+   /* fun markMedicationAsSkipped(userId: String, medication: Medication) {
         viewModelScope.launch {
             medication.id?.let { medId ->
                 if (medication.schedule is MedicationSchedule.Daily) {
@@ -396,7 +472,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                 }
             }
         }
-    }
+    }*/
 
 
 
