@@ -24,7 +24,6 @@ import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
-import java.time.ZoneId
 
 
 /**
@@ -102,18 +101,16 @@ class PrescriptionsFragment : Fragment() {
 
                     Log.d("MED_TEST", "Times: ${schedule.times}")
                     Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
-                    val nextDueTimeMillis = schedule.nextDueDates[0]
-                        .atZone(ZoneId.systemDefault())  // Use device's timezone
-                        .toInstant()
-                        .toEpochMilli()
 
-                    notificationHelper.scheduleNotification(medication.name, medication.dosage,nextDueTimeMillis)
+                    viewModel.testReceivingMedicationHistory(medication)
 
                 }
 
                 is MedicationSchedule.WeeklySchedule -> {
                     Log.d("MED_TEST", "Times: ${schedule.times}")
                     Log.d("MED_TEST", "Calculated Dates: ${schedule.nextDueDates}")
+                    viewModel.testReceivingMedicationHistory(medication)
+
                 }
                 else -> Log.d(tag,"N/A")
             }

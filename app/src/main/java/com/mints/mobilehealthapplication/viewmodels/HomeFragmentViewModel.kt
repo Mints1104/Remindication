@@ -342,6 +342,8 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         }
     }
 
+
+
     /*fun markMedicationAsTaken(userId: String, medication: Medication) {
         viewModelScope.launch {
             medication.id?.let { medId ->
@@ -392,6 +394,26 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
     we mark it as taken/skipped
     we save that up[dated value to firestore
      */
+
+    fun testReceivingMedicationHistory(medication: Medication) {
+        viewModelScope.launch {
+            val history = medication.medicationHistory
+            Log.d("MED_TEST", "History: $history")
+            history.getLastEventOfType(MedicationEvent.EventType.TAKEN)?.let { lastTaken ->
+                Log.d("MedicationHistory", "Last taken: ${lastTaken.date}")
+            }
+
+            val compliance = history.getComplianceRate()
+            Log.d("MedicationHistory", "Compliance rate: $compliance%")
+
+            if (history.wasTakenToday()) {
+                Log.d("MedicationHistory", "Medication already taken today")
+            }
+
+            val recentEvents = history.getEventsFromLastDays(7)
+            Log.d("MedicationHistory", "Events in last 7 days: ${recentEvents.size}")
+        }
+    }
 
     fun markMedicationAsSkipped(userId: String, medication: Medication) {
 

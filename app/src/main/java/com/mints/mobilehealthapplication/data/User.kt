@@ -27,7 +27,6 @@ data class Medication(
         medicationHistory.addEvent(MedicationEvent.Skipped(date = dateTime, notes = notes))
     }
 
-    // You could also add a convenience method for marking missed if needed
     fun markAsMissed(notes: String = "", dateTime: LocalDateTime = LocalDateTime.now()) {
         medicationHistory.addEvent(MedicationEvent.Missed(date = dateTime, notes = notes))
     }
@@ -127,6 +126,14 @@ data class MedicationHistory(
         val today = LocalDate.now()
         return events.any {
             it.type == MedicationEvent.EventType.TAKEN &&
+                    it.date.toLocalDate() == today
+        }
+    }
+
+    fun wasSkippedToday():Boolean {
+        val today = LocalDate.now()
+        return events.any {
+            it.type == MedicationEvent.EventType.SKIPPED &&
                     it.date.toLocalDate() == today
         }
     }

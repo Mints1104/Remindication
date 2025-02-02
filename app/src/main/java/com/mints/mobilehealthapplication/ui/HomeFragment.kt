@@ -133,7 +133,7 @@ class HomeFragment : Fragment() {
 
 
 
-                     testReceivingMedicationHistory(medication)
+                     viewModel.testReceivingMedicationHistory(medication)
                  }
                  is MedicationSchedule.WeeklySchedule -> {
                      Log.d("MED_TEST", "Times: ${schedule.times}")
@@ -162,23 +162,7 @@ class HomeFragment : Fragment() {
     }
 
 
-    private fun testReceivingMedicationHistory(medication: Medication) {
-        val history = medication.medicationHistory
-        Log.d("MED_TEST", "History: $history")
-        history.getLastEventOfType(MedicationEvent.EventType.TAKEN)?.let { lastTaken ->
-            Log.d("MedicationHistory", "Last taken: ${lastTaken.date}")
-        }
 
-        val compliance = history.getComplianceRate()
-        Log.d("MedicationHistory", "Compliance rate: $compliance%")
-
-        if (history.wasTakenToday()) {
-            Log.d("MedicationHistory", "Medication already taken today")
-        }
-
-        val recentEvents = history.getEventsFromLastDays(7)
-        Log.d("MedicationHistory", "Events in last 7 days: ${recentEvents.size}")
-    }
 
     private fun handleDisplayingNotes(medication: Medication) {
         if (medication.notes.isNotEmpty()) {
@@ -255,11 +239,15 @@ class HomeFragment : Fragment() {
                 val medication = adapter.getMedicationAt(position)
                 displayMessage("Mark ${medication.name} as skipped")
                 showUndoSkipMedicationSnackbar(medication,position)
+                adapter.notifyItemChanged(position)
+
             },
             onSwipeRight = { position ->
                 val medication = adapter.getMedicationAt(position)
                 displayMessage("Mark ${medication.name} as taken")
                 showUndoMedicationSnackbar(medication,position)
+                adapter.notifyItemChanged(position)
+
 
             }
         )
@@ -282,7 +270,6 @@ class HomeFragment : Fragment() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION) {
                         viewModel.markMedicationAsTaken(uid,medication)
-
                         adapter.updateMedicationList(currentList)
                         adapter.notifyItemChanged(position)
                     }
