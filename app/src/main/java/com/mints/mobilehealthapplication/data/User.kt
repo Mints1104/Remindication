@@ -132,6 +132,13 @@ data class MedicationHistory(
     }
 }
 
+data class MedicationDose(
+    val medication: Medication,
+    val dueTime: LocalTime,
+    val doseNumber: Int,
+    val totalDoses: Int
+)
+
 sealed class MedicationSchedule {
     data class Daily(
         val frequency: DailyFrequency,
