@@ -149,9 +149,9 @@ object FireStoreRepository {
             val type = eventMap["type"] as? String
 
             when (type) {
-                "taken" -> MedicationEvent.Taken(date, notes)
-                "skipped" -> MedicationEvent.Skipped(date, notes)
-                "missed" -> MedicationEvent.Missed(date, notes)
+                "taken" -> MedicationEvent.Taken(date)
+                "skipped" -> MedicationEvent.Skipped(date)
+                "missed" -> MedicationEvent.Missed(date)
                 else -> null
             }
         }

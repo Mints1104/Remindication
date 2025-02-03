@@ -1,64 +1,78 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <!-- Notification Settings for Medication Reminders -->
+    <PreferenceCategory app:title="@string/notification_settings">
 
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true" />
+        <!-- Enable notifications preference -->
+        <SwitchPreferenceCompat
+            app:key="enable_notifications"
+            app:title="@string/enable_notifications_title"
+            app:summary="@string/enable_notifications_summary"
+            app:defaultValue="true" />
 
+        <!-- Option to vibrate on reminder notifications -->
+        <SwitchPreferenceCompat
+            app:key="vibrate_on_reminder"
+            app:title="@string/vibrate_on_reminder_title"
+            app:defaultValue="true" />
+
+        <!-- Snooze duration for reminders -->
         <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
+            app:key="snooze_duration"
+            app:title="@string/snooze_duration_title"
+            app:entries="@array/snooze_duration_entries"
+            app:entryValues="@array/snooze_duration_values"
+            app:defaultValue="5"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/sync_header">
+    <!-- Medication Settings -->
+    <PreferenceCategory app:title="@string/medication_settings">
 
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
-
-    </PreferenceCategory>
-    <PreferenceCategory app:title="@string/messages_header">
-
+        <!-- Default dosage input (e.g., mg, ml) -->
         <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
+            app:key="default_dosage"
+            app:title="@string/default_dosage_title"
+            app:summary="@string/default_dosage_summary"
             app:useSimpleSummaryProvider="true" />
 
+        <!-- Time format for scheduling reminders -->
         <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
+            app:key="time_format"
+            app:title="@string/time_format_title"
+            app:entries="@array/time_format_entries"
+            app:entryValues="@array/time_format_values"
+            app:defaultValue="24"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
-    <PreferenceCategory app:title="@string/sync_header">
 
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
+    <!-- Accessibility Settings -->
+    <PreferenceCategory app:title="@string/accessibility_settings">
 
+        <!-- High Contrast Mode toggle -->
         <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
+            app:key="high_contrast_mode"
+            app:title="@string/high_contrast_mode_title"
+            app:summary="@string/high_contrast_mode_summary"
+            app:defaultValue="false" />
+
+        <!-- Text Size selection -->
+        <ListPreference
+            app:key="text_size"
+            app:title="@string/text_size_title"
+            app:entries="@array/text_size_entries"
+            app:entryValues="@array/text_size_values"
+            app:defaultValue="medium"
+            app:useSimpleSummaryProvider="true" />
+
+        <!-- Option for larger touch targets -->
+        <SwitchPreferenceCompat
+            app:key="large_touch_targets"
+            app:title="@string/large_touch_targets_title"
+            app:summary="@string/large_touch_targets_summary"
+            app:defaultValue="false" />
 
     </PreferenceCategory>
 

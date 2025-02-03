@@ -19,24 +19,22 @@ data class Medication(
     val refillReminder: RefillInfo? = null,
     val medicationHistory: MedicationHistory = MedicationHistory()
 ) {
-    fun markAsTaken(notes: String = "", dateTime: LocalDateTime = LocalDateTime.now()) {
-        medicationHistory.addEvent(MedicationEvent.Taken(date = dateTime, notes = notes))
+    fun markAsTaken(dateTime: LocalDateTime = LocalDateTime.now()) {
+        medicationHistory.addEvent(MedicationEvent.Taken(date = dateTime))
     }
 
-    fun markAsSkipped(notes: String = "", dateTime: LocalDateTime = LocalDateTime.now()) {
-        medicationHistory.addEvent(MedicationEvent.Skipped(date = dateTime, notes = notes))
+    fun markAsSkipped(dateTime: LocalDateTime = LocalDateTime.now()) {
+        medicationHistory.addEvent(MedicationEvent.Skipped(date = dateTime))
     }
 
-    fun markAsMissed(notes: String = "", dateTime: LocalDateTime = LocalDateTime.now()) {
-        medicationHistory.addEvent(MedicationEvent.Missed(date = dateTime, notes = notes))
+    fun markAsMissed(dateTime: LocalDateTime = LocalDateTime.now()) {
+        medicationHistory.addEvent(MedicationEvent.Missed(date = dateTime))
     }
 }
 
 
 sealed class MedicationEvent {
     abstract val date: LocalDateTime
-    abstract val notes: String
-
     abstract val type: EventType
 
     enum class EventType {
@@ -45,21 +43,18 @@ sealed class MedicationEvent {
 
     data class Taken(
         override val date: LocalDateTime = LocalDateTime.now(),
-        override val notes: String = ""
     ) : MedicationEvent() {
         override val type = EventType.TAKEN
     }
 
     data class Skipped(
         override val date: LocalDateTime = LocalDateTime.now(),
-        override val notes: String = ""
     ) : MedicationEvent() {
         override val type = EventType.SKIPPED
     }
 
     data class Missed(
         override val date: LocalDateTime = LocalDateTime.now(),
-        override val notes: String = ""
     ) : MedicationEvent() {
         override val type = EventType.MISSED
     }

@@ -152,7 +152,7 @@ class HomeFragment : Fragment() {
             val filteredMeds = getUncompletedMedicationsForToday(medications)
             adapter.updateMedicationList(filteredMeds)
             getClosestDate(filteredMeds)
-
+            printOutMedicationHistory(medications)
         }
 
 
@@ -161,6 +161,25 @@ class HomeFragment : Fragment() {
         Log.d(tag, "RecyclerView setup complete")
     }
 
+    private fun printOutMedicationHistory(currentList: List<Medication>) {
+
+        currentList.forEach { medication ->
+
+
+            val history = medication.medicationHistory.events
+
+            if (history.isNotEmpty()) {
+
+                history.forEach { event ->
+                    Log.d(tag, "${medication.name}: Event: $event")
+                }
+            } else {
+                Log.e(tag, "${medication.name}: History is empty!")
+
+            }
+
+        }
+    }
 
 
 
@@ -337,7 +356,9 @@ class HomeFragment : Fragment() {
             Log.d(tag, "Closest medication: ${closestMedication.name}, closest due date: $closestDueDate")
 
             binding.nextMedicationName.text = getString(R.string.name_of_next_med, closestMedication.name)
-            binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toString())
+            if (closestDueDate != null) {
+                binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toLocalTime().toString())
+            }
         } else {
             Log.d(tag, "No future due dates found.")
             binding.nextMedicationName.text = "No more medication left for today. Great job!"

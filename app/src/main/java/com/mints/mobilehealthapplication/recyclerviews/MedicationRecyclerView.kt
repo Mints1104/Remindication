@@ -41,7 +41,7 @@ class MedicationRecyclerView(
 
 
         if(medicationSchedule is MedicationSchedule.Daily) {
-            holder.binding.medicationDay.text = context.getString(R.string.medication_date,medicationSchedule.nextDueDates)
+            holder.binding.medicationDay.text = context.getString(R.string.medication_date,medicationSchedule.nextDueDates[0].dayOfWeek).lowercase()
 
         }
 
