@@ -305,7 +305,6 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.settings_tab -> {
-                Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
                 navController.navigate(R.id.action_homeFragment_to_settingsFragment)
                 true
             }

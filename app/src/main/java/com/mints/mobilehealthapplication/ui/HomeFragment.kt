@@ -118,31 +118,7 @@ class HomeFragment : Fragment() {
     }
 
 
-    private fun fetchUserMedication() {
-        uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        Log.d(tag, "Current user UID: $uid")
-        if (uid.isEmpty()) {
-            Log.e(tag, "User is not authenticated")
-            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
-            showContent() // Hide shimmer if there's an error
-        } else {
-            viewModel.getMedications(uid) {
-                viewModel.medications.observe(viewLifecycleOwner) { list ->
-                    if (list != null) {
-                        showContent()
-                        val medications =   getUncompletedMedicationsForToday(list)
-                        medications.forEach { medication ->
-                            Log.d("TestFilteredMeds","Uncompleted med: ${medication.name}")
 
-                        }
-                    } else {
-                        Log.d(tag, "No medications found")
-                        showContent() // Hide shimmer even if no medications found
-                    }
-                }
-            }
-        }
-    }
 
 
     /**
