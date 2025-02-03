@@ -30,7 +30,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.data.NotificationReceiver
+import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
 import java.util.Date
 
 class MainActivity : AppCompatActivity() {
@@ -45,6 +47,10 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_PERMISSION_CODE = 1001
 
     private var currentMenu: Int? = null
+
+    val homeFragmentViewModelFactory: HomeFragmentViewModelFactory by lazy {
+        HomeFragmentViewModelFactory(NotificationHelper(this))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -207,7 +213,7 @@ class MainActivity : AppCompatActivity() {
                     title = getString(R.string.app_name)
                 )
             }
-            R.id.healthInfoFragment -> {
+            R.id.healthInfoFragment,R.id.settingsFragment -> {
                 hideFAB()
                 hideBottomNav()
                 updateToolbar(
@@ -300,6 +306,7 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.settings_tab -> {
                 Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
+                navController.navigate(R.id.action_homeFragment_to_settingsFragment)
                 true
             }
             R.id.action_logout -> {

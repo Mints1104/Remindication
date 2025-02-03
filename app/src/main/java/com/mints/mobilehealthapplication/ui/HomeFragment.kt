@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,7 +25,6 @@ import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
-import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -37,7 +35,6 @@ import java.time.LocalDateTime
  */
 class HomeFragment : Fragment() {
 
-    private lateinit var viewModel: HomeFragmentViewModel
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: MedicationRecyclerView
@@ -47,6 +44,11 @@ class HomeFragment : Fragment() {
     private lateinit var medToClear: Medication
     private lateinit var notificationHelper: NotificationHelper
     private var tag = "HomeFragment"
+
+    private val viewModel: HomeFragmentViewModel by activityViewModels(
+        factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
+    )
+
 
     /**
      * Inflates the fragment layout using ViewBinding.
@@ -78,8 +80,7 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         notificationHelper = NotificationHelper(requireContext())
 
-        val factory = HomeFragmentViewModelFactory(notificationHelper)
-        viewModel = ViewModelProvider(this, factory)[HomeFragmentViewModel::class.java]
+
         val mainActivity = requireActivity() as MainActivity
         mainActivity.showAllUI()
         setupFAB()
@@ -103,8 +104,7 @@ class HomeFragment : Fragment() {
                 viewModel.medications.observe(viewLifecycleOwner) { list ->
                     if (list != null) {
                         showContent()
-                      val medications =   getUncompletedMedicationsForToday(list)
-
+                        val medications =   getUncompletedMedicationsForToday(list)
                         medications.forEach { medication ->
                             Log.d("TestFilteredMeds","Uncompleted med: ${medication.name}")
 

@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +22,6 @@ import com.mints.mobilehealthapplication.databinding.FragmentPrescriptionsBindin
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
-import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
 
 
 /**
@@ -32,7 +30,7 @@ import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
  */
 class PrescriptionsFragment : Fragment() {
 
-    private lateinit var viewModel: HomeFragmentViewModel
+   // private lateinit var viewModel: HomeFragmentViewModel
     private var _binding: FragmentPrescriptionsBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: MedicationRecyclerView
@@ -41,7 +39,9 @@ class PrescriptionsFragment : Fragment() {
     private lateinit var notificationHelper: NotificationHelper
     private var tag = "PrescriptionsFrag"
 
-
+    private val viewModel: HomeFragmentViewModel by activityViewModels(
+        factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
+    )
     /**
      * Inflates the fragment layout using ViewBinding.
      */
@@ -59,8 +59,8 @@ class PrescriptionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         notificationHelper = NotificationHelper(requireContext())
-        val factory = HomeFragmentViewModelFactory(notificationHelper)
-        viewModel = ViewModelProvider(this, factory)[HomeFragmentViewModel::class.java]
+     //   val factory = HomeFragmentViewModelFactory(notificationHelper)
+     //   viewModel = ViewModelProvider(this, factory)[HomeFragmentViewModel::class.java]
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()

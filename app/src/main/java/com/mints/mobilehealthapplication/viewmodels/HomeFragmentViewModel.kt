@@ -14,7 +14,6 @@ import com.mints.mobilehealthapplication.workers.MidnightWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) : ViewModel() {
 
@@ -60,33 +59,8 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
     }
 
 
-    fun testStateTracking(medication: Medication) {
-        val medicationSchedule = medication.schedule
 
-        if (medicationSchedule is MedicationSchedule.Daily) {
-            _lastOriginalDates = medicationSchedule.nextDueDates.toList()
-            _lastOriginalMedication = medication
-            Log.d("UNDO_TEST", "Stored dates: $_lastOriginalDates")
-            Log.d("UNDO_TEST", "Stored medication: ${_lastOriginalMedication?.name}")
-        } else {
-            Log.d("UNDO_TEST","Not a daily schedule, ignoring for now")
-        }
 
-    }
-
-        fun markWithUndoPrep(medication: Medication): Medication {
-        val medicationSchedule = medication.schedule
-        if (medicationSchedule is MedicationSchedule.Daily) {
-
-            _lastOriginalDates = medicationSchedule.nextDueDates.toList()
-            _lastOriginalMedication = medication
-            return debugAdvanceDates(medication)
-
-        } else {
-            return medication
-        }
-
-    }
     fun undoLastTaken(medication: Medication) {
         _lastOriginalMedication?.let { originalMed ->
             _lastOriginalDates?.let { originalDates ->
@@ -119,54 +93,45 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
 
 
-    fun updateMedicationHistory(uid: String, medicationId: String, event: MedicationEvent) {
-        viewModelScope.launch {
-            try {
-                val success = FireStoreRepository.updateMedicationHistory(
-                    userId = uid,
-                    medicationId = medicationId,
-                    event = event
-                )
-                if (success) {
-                    // Update the local medication list to reflect the new history
-                    _medications.value = _medications.value?.map { medication ->
-                        if (medication.id == medicationId) {
-                            // Create a new medication history with the added event
-                            val updatedHistory = medication.medicationHistory.apply {
-                                addEvent(event)
-                            }
-                            // Return the medication with updated history
-                            medication.copy(medicationHistory = updatedHistory)
-                        } else {
-                            medication
-                        }
-                    }
-                    Log.d("HomeViewModel", "Successfully updated medication history for $medicationId")
-                } else {
-                    Log.e("HomeViewModel", "Failed to update medication history for $medicationId")
-                }
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error updating medication history: ${e.message}")
-            }
-        }
-    }
 
     fun getMedications(uid: String, onComplete: () -> Unit = {}) {
-        Log.d("HomeFragmentViewModel", "Fetching medications for user: $uid")
-        viewModelScope.launch {
-            try {
-            val meds = FireStoreRepository.getMedications(uid)
-            Log.d("HomeFragmentViewModel", "Fetched ${meds.size} medications")
-            _medications.postValue(meds)
-            onComplete()
-        } catch(e:Exception) {
-                Log.e("HomeFragmentVM", "Failed to get medications: ${e.message}")
+        // Check if medications are already cached to avoid re-fetching
+        Log.d("HomeFragmentViewModel", "Checking cached medications: ${_medications.value}")
 
+        if (_medications.value.isNullOrEmpty()) {
+            Log.d("HomeFragmentViewModel", "Medications cache is empty, fetching medications for user: $uid")
 
+            viewModelScope.launch {
+                try {
+                    Log.d("HomeFragmentViewModel", "Fetching medications from Firestore...")
+
+                    val meds = FireStoreRepository.getMedications(uid)
+                    Log.d("HomeFragmentViewModel", "Fetched ${meds.size} medications")
+
+                    // Log the fetched medications to inspect the data
+                    meds.forEach { medication ->
+                        Log.d("HomeFragmentViewModel", "Fetched medication: ${medication.name}")
+                    }
+
+                    _medications.postValue(meds) // Cache medications
+
+                    Log.d("HomeFragmentViewModel", "Medications cached successfully.")
+                    onComplete() // Notify that the fetch is complete
+
+                } catch (e: Exception) {
+                    Log.e("HomeFragmentVM", "Failed to get medications: ${e.message}")
+                    // Optionally, update an error state or LiveData to notify UI of failure
+                    onComplete() // Notify even on failure
+                }
             }
+        } else {
+            Log.d("HomeFragmentViewModel", "Medications already cached, skipping fetch.")
+            onComplete() // Notify completion even if data is already cached
         }
-
     }
+
+
+
 
 
     fun deleteMedication(uid: String, medicationId: String, onComplete: () -> Unit) {
@@ -209,54 +174,6 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
     }
 
 
-    private fun debugAdvanceDates(medication: Medication): Medication {
-        val now = LocalDateTime.now()
-        return when (val schedule = medication.schedule) {
-            is MedicationSchedule.Daily -> {
-                // Handle "Twice Daily" separately
-                if (medication.schedule.frequencyType == "Twice Daily") {
-                    val closestDate = schedule.nextDueDates
-                        .filter { it.isAfter(now) }
-                        .minByOrNull { it }
-
-                    if (closestDate != null) {
-                        Log.d("DEBUG_DATES", "CLOSEST DATE (TWICE DAILY): $closestDate")
-
-                        // Calculate the new date (add 1 day to the closest date)
-                        val newDate = closestDate.plusDays(1)
-                        Log.d("DEBUG_DATES", "CLOSEST DATE UPDATED (TWICE DAILY): $newDate")
-
-                        // Replace the old closest date with the new one in the list
-                        val newDates = schedule.nextDueDates.toMutableList()
-                        newDates[newDates.indexOf(closestDate)] = newDate  // Update the closest date
-
-                        // Update the medication schedule with the new list of dates
-                        return medication.copy(
-                            schedule = schedule.copy(nextDueDates = newDates)
-                        )
-                    } else {
-                        Log.d("DEBUG_DATES", "No upcoming dates found for this medication.")
-                    }
-                }
-
-                // Handle the general "Daily" case (after Twice Daily if applicable)
-                val newDates = schedule.nextDueDates.map { it.plusDays(1) }
-                Log.d("DEBUG_DATES", "OLD DATES: ${schedule.nextDueDates}")
-                Log.d("DEBUG_DATES", "NEW DATES: $newDates")
-
-                // Create a new Daily schedule with updated dates
-                medication.copy(
-                    schedule = schedule.copy(nextDueDates = newDates)
-                )
-            }
-
-            // Handle other schedule types if needed
-            else -> {
-                Log.d("DEBUG_DATES", "Non-daily schedule - no change")
-                medication // Return unchanged
-            }
-        }
-    }
 
 
 
@@ -270,39 +187,8 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
     }
 
-    private fun scheduleNextNotification(medication: Medication) {
-        when (val schedule = medication.schedule) {
-            is MedicationSchedule.Daily -> {
-                val nextDueTimeMillis = schedule.nextDueDates[0]
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
-                notificationHelper.scheduleNotification(
-                    medication.name,
-                    medication.dosage,
-                    nextDueTimeMillis
-                )
-            }
-            is MedicationSchedule.WeeklySchedule -> {
-                val nextDueTimeMillis = schedule.nextDueDates[0]
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
-                notificationHelper.scheduleNotification(
-                    medication.name,
-                    medication.dosage,
-                    nextDueTimeMillis
-                )
-            }
-            else -> Log.d("HomeViewModel", "Schedule type not supported for notifications")
-        }
-    }
 
-    /*
-    User marks medication as taken should update the history saying the medication was taken
-    If the user did not take the medication and it hit midnight then that medication should be
-    set to missed
-     */
+
 
     fun markMedicationAsTaken(userId: String, medication: Medication) {
         viewModelScope.launch {
@@ -342,58 +228,6 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         }
     }
 
-
-
-    /*fun markMedicationAsTaken(userId: String, medication: Medication) {
-        viewModelScope.launch {
-            medication.id?.let { medId ->
-                if (medication.schedule is MedicationSchedule.Daily) {
-
-                    medication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
-                    val success = FireStoreRepository.updateMedicationDates(
-                        userId = userId,
-                        medicationId = medId,
-                        newDates = medication.schedule.nextDueDates
-                    )
-                    if (success) {
-                        // Update local list
-                        _medications.value = _medications.value?.map {
-                            if (it.id == medication.id) medication else it
-                        }
-
-                    } else {
-                        Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
-                    }
-                }
-
-                if (medication.schedule is MedicationSchedule.WeeklySchedule) {
-
-                    medication.markAsTaken(dateTime = medication.schedule.nextDueDates[0])
-                    val success = FireStoreRepository.updateMedicationDates(
-                        userId = userId,
-                        medicationId = medId,
-                        newDates = medication.schedule.nextDueDates
-                    )
-                    if (success) {
-                        // Update local list
-                        _medications.value = _medications.value?.map {
-                            if (it.id == medication.id) medication else it
-                        }
-
-                    } else {
-                        Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
-                    }
-
-
-                }
-            }
-        }
-    }*/
-    /*
-    we create an updated medication object
-    we mark it as taken/skipped
-    we save that up[dated value to firestore
-     */
 
     fun testReceivingMedicationHistory(medication: Medication) {
         viewModelScope.launch {
@@ -451,110 +285,6 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         }
     }
 
-
-   /* fun markMedicationAsSkipped(userId: String, medication: Medication) {
-        viewModelScope.launch {
-            medication.id?.let { medId ->
-                if (medication.schedule is MedicationSchedule.Daily) {
-
-                    medication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
-                    val success = FireStoreRepository.updateMedicationDates(
-                        userId = userId,
-                        medicationId = medId,
-                        newDates = medication.schedule.nextDueDates
-                    )
-                    if (success) {
-                        _medications.value = _medications.value?.map {
-                            if (it.id == medication.id) medication else it
-                        }
-
-                    } else {
-                        Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
-                    }
-
-
-                }
-
-                if (medication.schedule is MedicationSchedule.WeeklySchedule) {
-
-                    medication.markAsSkipped(dateTime = medication.schedule.nextDueDates[0])
-                    val success = FireStoreRepository.updateMedicationDates(
-                        userId = userId,
-                        medicationId = medId,
-                        newDates = medication.schedule.nextDueDates
-                    )
-                    if (success) {
-                        // Update local list
-                        _medications.value = _medications.value?.map {
-                            if (it.id == medication.id) medication else it
-                        }
-                    } else {
-                        Log.e("HomeViewModel", "Error marking ${medication.name} as skipped")
-                    }
-                }
-            }
-        }
-    }*/
-
-
-
-    fun testDateAdvanceMedication(userId: String, medication: Medication) {
-        val currentDate = LocalDate.now()
-
-        viewModelScope.launch {
-            when (medication.schedule) {
-                is MedicationSchedule.WeeklySchedule -> {
-                    val weeklySchedule = medication.schedule
-                    val originalDates = weeklySchedule.nextDueDates
-                    val updatedDates = originalDates.map { date ->
-                        if (date.toLocalDate() <= currentDate) {
-                            Log.d("TEST_DATE_ADVANCE", "Advancing week by 1 for $date")
-                            val newDate = date.plusWeeks(1)
-                            Log.d("TEST_DATE_ADVANCE", "New Date: $newDate")
-                            newDate
-                        } else {
-                            Log.d("TEST_DATE_ADVANCE", "Not updating date: $date")
-                            date
-                        }
-                    }.toMutableList()
-
-                    // Check if any dates were actually updated
-                    if (updatedDates != originalDates) {
-                        medication.id?.let { medId ->
-                            val success = FireStoreRepository.updateMedicationDates(userId, medId, updatedDates)
-                            if (success) {
-                                Log.d("TEST_DATE_ADVANCE", "Successfully updated dates for medication: ${medication.name}")
-                            } else {
-                                Log.e("TEST_DATE_ADVANCE", "Error updating dates for medication: ${medication.name}")
-                            }
-                        }
-                    } else {
-                        Log.d("TEST_DATE_ADVANCE", "No dates needed updating for ${medication.name}")
-                    }
-                }
-                else -> {
-                    Log.d("TEST_DATE_ADVANCE", "Medication ${medication.name} is not a weekly medication")
-                }
-            }
-        }
-    }
-
-
-
-
-    fun testFirestoreUpdate() {
-            viewModelScope.launch {
-                val testDates = listOf(LocalDateTime.now().plusDays(1))
-                val success = FireStoreRepository.updateMedicationDates(
-                    userId = "test_user_id",
-                    medicationId = "test_med_id",
-                    newDates = testDates
-                )
-                Log.d("FIREBASE_TEST", "Update success: $success")
-            }
-        }
-
-
         fun getMedicationList(): MutableLiveData<List<Medication>> = _medications
 
 
@@ -562,9 +292,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
             _navigateToDetails.value = medication // Trigger navigation
         }
 
-        fun onNavigationComplete() {
-            _navigateToDetails.value = null // Reset navigation event
-        }
+
 
 
     }
