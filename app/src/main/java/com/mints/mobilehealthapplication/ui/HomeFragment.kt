@@ -87,7 +87,33 @@ class HomeFragment : Fragment() {
         setUpRecyclerView()
         showLoadingState()
 
-        fetchUserMedication()
+        uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        Log.d(tag, "Current user UID: $uid")
+
+        if (uid.isEmpty()) {
+            Log.e(tag, "User is not authenticated")
+            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+            showContent() // Hide shimmer if there's an error
+        } else {
+            // Set up the observer once using viewLifecycleOwner
+            viewModel.medications.observe(viewLifecycleOwner) { list ->
+                if (!list.isNullOrEmpty()) {
+                    showContent()
+                    val medications = getUncompletedMedicationsForToday(list)
+                    medications.forEach { medication ->
+                        Log.d("TestFilteredMeds", "Uncompleted med: ${medication.name}")
+                    }
+                } else {
+                    Log.d(tag, "No medications found")
+                    showContent() // Hide shimmer even if no medications found
+                }
+            }
+
+            // Trigger the snapshot listener; this updates the LiveData
+            viewModel.getMedications(uid)
+        }
+
+
         viewModel.getCurrentDay()
     }
 
@@ -361,7 +387,7 @@ class HomeFragment : Fragment() {
             }
         } else {
             Log.d(tag, "No future due dates found.")
-            binding.nextMedicationName.text = "No more medication left for today. Great job!"
+            binding.nextMedicationName.text = getString(R.string.no_medications_left)
             binding.nextMedicationTime.text = ""
         }
 

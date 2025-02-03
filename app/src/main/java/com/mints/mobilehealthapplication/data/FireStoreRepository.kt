@@ -48,7 +48,6 @@ object FireStoreRepository {
             false
         }
     }
-
     suspend fun getMedications(uid: String): List<Medication> {
         return db.collection("users")
             .document(uid)
@@ -71,6 +70,44 @@ object FireStoreRepository {
                 )
             }
     }
+
+    fun getMedicationsSnapshot(uid: String, onResult: (List<Medication>, Exception?) -> Unit) {
+        val medicationsRef = db.collection("users")
+            .document(uid)
+            .collection("medications")
+
+        medicationsRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                // If there's an error, pass it along via the callback.
+                onResult(emptyList(), error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val meds = snapshot.documents.map { document ->
+                    Medication(
+                        id = document.id,
+                        name = document.getString("name") ?: "",
+                        dosage = document.getString("dosage") ?: "",
+                        schedule = parseMedicationSchedule(document.get("schedule") as? Map<String, Any>),
+                        notes = document.getString("notes") ?: "",
+                        createdAt = document.getTimestamp("createdAt") ?: Timestamp.now(),
+                        active = document.getBoolean("active") ?: true,
+                        lastModified = document.getTimestamp("lastModified") ?: Timestamp.now(),
+                        refillReminder = parseRefillInfo(document.get("refillReminder") as? Map<String, Any>),
+                        medicationHistory = parseMedicationHistory(document.get("medicationHistory") as? Map<String, Any>)
+                    )
+                }
+                onResult(meds, null)
+            } else {
+                // If snapshot is null, return an empty list.
+                onResult(emptyList(), null)
+            }
+        }
+    }
+
+
+
 
     suspend fun getMedicationDetails(uid: String, medicationId: String): Medication {
         return try {

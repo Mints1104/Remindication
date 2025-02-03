@@ -91,10 +91,29 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         }
     }
 
+    fun invalidateCache() {
+        _medications.value = emptyList()
 
-
+    }
 
     fun getMedications(uid: String, onComplete: () -> Unit = {}) {
+        Log.d("HomeFragmentViewModel", "Starting real-time medication listener for user: $uid")
+
+        FireStoreRepository.getMedicationsSnapshot(uid) { meds, error ->
+            if (error != null) {
+                Log.e("HomeFragmentVM", "Failed to get medications: ${error.message}")
+                onComplete() // Even on error, signal completion
+                return@getMedicationsSnapshot
+            }
+
+            Log.d("HomeFragmentViewModel", "Fetched ${meds.size} medications from snapshot")
+            _medications.postValue(meds) // Update LiveData with the new list
+            onComplete()
+        }
+    }
+
+
+   /* fun getMedications(uid: String, onComplete: () -> Unit = {}) {
         // Check if medications are already cached to avoid re-fetching
         Log.d("HomeFragmentViewModel", "Checking cached medications: ${_medications.value}")
 
@@ -128,7 +147,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
             Log.d("HomeFragmentViewModel", "Medications already cached, skipping fetch.")
             onComplete() // Notify completion even if data is already cached
         }
-    }
+    }*/
 
 
 

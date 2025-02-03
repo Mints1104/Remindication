@@ -19,7 +19,6 @@ class FireStoreMappers {
                 is MedicationEvent.Missed -> "missed"
             },
             "date" to Timestamp(this.date.toEpochSecond(ZoneOffset.UTC), 0),
-            "notes" to this.notes
         )
     }
 
