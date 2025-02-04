@@ -127,7 +127,6 @@ class HomeFragment : Fragment() {
      */
     private fun setUpRecyclerView() {
         Log.d(tag, "Setting up RecyclerView")
-
          adapter = MedicationRecyclerView(emptyList()) { medication ->
             viewModel.onMedicationClicked(medication)
              when (val schedule = medication.schedule) {
@@ -145,6 +144,7 @@ class HomeFragment : Fragment() {
                  }
              handleDisplayingNotes(medication)
         }
+
         binding.medicationsRecyclerView.adapter = adapter
         binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         addSwipeFunctionality()
@@ -153,6 +153,8 @@ class HomeFragment : Fragment() {
           //  adapter.updateMedicationList(medications)
             val filteredMeds = getUncompletedMedicationsForToday(medications)
             adapter.updateMedicationList(filteredMeds)
+            adapter.hideAllMedicationDays()
+
             getClosestDate(filteredMeds)
             printOutMedicationHistory(medications)
         }
@@ -236,6 +238,7 @@ class HomeFragment : Fragment() {
                         false
                     }
                 }
+                is MedicationSchedule.OnDemand -> true
 
                 else -> false
             }
