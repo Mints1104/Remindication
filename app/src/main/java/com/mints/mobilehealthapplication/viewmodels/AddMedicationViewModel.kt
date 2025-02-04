@@ -108,6 +108,9 @@ import java.time.temporal.TemporalAdjusters
             _selectedTimes.value = times
         }
 
+        fun getSelectedTimes(): List<LocalTime>? = _selectedTimes.value
+
+
         fun updateIntakeDays(days: Int) {
             _intakeDays.value = days
         }
@@ -280,19 +283,19 @@ import java.time.temporal.TemporalAdjusters
 
 
         // Save functionality
-        fun saveMedication(userId: String) {
-            viewModelScope.launch {
-                try {
-                    val medication = createMedication()
-                    val success = FireStoreRepository.saveMedication(userId, medication)
-                    saveResult.postValue(success)
-                    if (success) resetAllData()
-                } catch (e: Exception) {
-                    Log.e("AddMedicationVM", "Save failed", e)
-                    saveResult.postValue(false)
+            fun saveMedication(userId: String) {
+                viewModelScope.launch {
+                    try {
+                        val medication = createMedication()
+                        val success = FireStoreRepository.saveMedication(userId, medication)
+                        saveResult.postValue(success)
+                        if (success) resetAllData()
+                    } catch (e: Exception) {
+                        Log.e("AddMedicationVM", "Save failed", e)
+                        saveResult.postValue(false)
+                    }
                 }
             }
-        }
 
         fun updateMedication(userId: String) {
             viewModelScope.launch {

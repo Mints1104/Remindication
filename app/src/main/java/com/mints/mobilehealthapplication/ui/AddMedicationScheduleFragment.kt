@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
@@ -19,8 +20,12 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.ScheduleValidator
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationPart3ScheduleBinding
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
+import com.mints.mobilehealthapplication.viewmodels.NotificationViewModel
 import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class AddMedicationScheduleFragment : Fragment() {
@@ -31,6 +36,7 @@ class AddMedicationScheduleFragment : Fragment() {
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     private val tag = "ScheduleFragment"
     private var userId = ""
+    private lateinit var notificationViewModel: NotificationViewModel
 
 
     override fun onCreateView(
@@ -50,6 +56,8 @@ class AddMedicationScheduleFragment : Fragment() {
         Log.d(tag,"Get frequency: ${viewModel.getFrequency()}")
 
         Log.d(tag,"Get frequencyType: ${viewModel.getFrequencyType()}")
+        notificationViewModel = ViewModelProvider(this)[NotificationViewModel::class.java]
+
     }
 
     private fun setupViews() {
@@ -93,6 +101,9 @@ class AddMedicationScheduleFragment : Fragment() {
             setUpSaveButton()
         }
     }
+
+
+
 
 
     private fun setUpTimePicker() {
@@ -383,11 +394,32 @@ class AddMedicationScheduleFragment : Fragment() {
             return
         }
         Log.d(tag,"Saving medication!")
+        val currentTime = LocalTime.now()
+        val selectedLocalTime: LocalTime = viewModel.getSelectedTimes()?.get(0) ?: currentTime
+        var scheduledDateTime = LocalDateTime.of(LocalDate.now(), selectedLocalTime)
+        if (scheduledDateTime.isBefore(LocalDateTime.now())) {
+            scheduledDateTime = scheduledDateTime.plusDays(1)
+        }
+
+        val triggerTimeInMillis = scheduledDateTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        val medicationName = viewModel.getName()
+        val medicationDosage = viewModel.getDosage()
         viewModel.saveMedication(userId)
+
+
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             if (success) {
                 Log.d(tag,"Successfully saved medication")
                 displayMessage("Successfully saved medication")
+
+                notificationViewModel.scheduleMedicationNotification(
+                    medicationName = medicationName ?: "Default Medication",
+                    dosage = medicationDosage ?: "Default Dosage",
+                    triggerTimeInMillis = triggerTimeInMillis
+                    )
                 navigateToNextFragment()
             } else {
                 Log.d(tag,"Failed to save medication")

@@ -30,7 +30,6 @@ import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
  */
 class PrescriptionsFragment : Fragment() {
 
-   // private lateinit var viewModel: HomeFragmentViewModel
     private var _binding: FragmentPrescriptionsBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: MedicationRecyclerView
@@ -59,8 +58,7 @@ class PrescriptionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         notificationHelper = NotificationHelper(requireContext())
-     //   val factory = HomeFragmentViewModelFactory(notificationHelper)
-     //   viewModel = ViewModelProvider(this, factory)[HomeFragmentViewModel::class.java]
+
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()
