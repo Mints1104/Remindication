@@ -13,7 +13,6 @@ import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
@@ -26,36 +25,38 @@ class MidnightWorker(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Starting midnight schedule update")
-            val today = LocalDate.now()
+            Log.d(TAG, "LETS GOOOO ITS MIDNIIIIGHTTTTTTT")
+            val now = LocalDateTime.now()
             val userId = FireStoreRepository.getUser()?.uid ?: ""
             val medications = FireStoreRepository.getMedications(userId)
 
             medications.forEach { medication ->
                 when (val schedule = medication.schedule) {
                     is MedicationSchedule.Daily -> {
-                        Log.d(TAG,"Original date for ${medication.name}: ${schedule.nextDueDates}")
+                        Log.d(TAG, "Original date for ${medication.name}: ${schedule.nextDueDates}")
                         val missedDueDates = schedule.nextDueDates.filter {
-                            it.toLocalDate() <= today
+                            it.isBefore(now)  // Compare with current time instead of just the date
                         }
 
                         if (missedDueDates.isNotEmpty() &&
                             !medication.medicationHistory.wasTakenToday() &&
                             !medication.medicationHistory.wasSkippedToday()
                         ) {
-                            Log.d(TAG, "${medication.name} was not taken/skipped today, marking as missed")
-                            medication.markAsMissed(dateTime = LocalDateTime.now())
+                            // Use the earliest missed due date as the missed time
+                            val missedDateTime = missedDueDates.minOf { it }
+                            Log.d(TAG, "${medication.name} was not taken/skipped for time: $missedDateTime, marking as missed")
+                            medication.markAsMissed(dateTime = missedDateTime)
                             medication.id?.let {
                                 FireStoreRepository.updateMedicationHistory(
                                     userId = userId,
                                     medicationId = it,
-                                    event = MedicationEvent.Missed(date = LocalDateTime.now())
+                                    event = MedicationEvent.Missed(date = missedDateTime)
                                 )
                             }
                         }
 
                         val updatedDates = schedule.nextDueDates.map { dueDate ->
-                            if (dueDate.toLocalDate() <= today) dueDate.plusDays(1) else dueDate
+                            if (dueDate.isBefore(now)) dueDate.plusDays(1) else dueDate
                         }
 
                         medication.id?.let { medId ->
@@ -66,14 +67,12 @@ class MidnightWorker(
                             )
 
                             if (success) {
-                                // Schedule notification for the updated medication
                                 val nextDueTimeMillis = updatedDates[0]
                                     .atZone(ZoneId.systemDefault())
                                     .toInstant()
                                     .toEpochMilli()
                                 notificationHelper.scheduleNotification(
                                     medication.name,
-                                    medication.dosage,
                                     nextDueTimeMillis
                                 )
                                 Log.d(TAG, "Successfully advanced schedule for medication: ${medication.name}")
@@ -85,37 +84,35 @@ class MidnightWorker(
                     is MedicationSchedule.WeeklySchedule -> {
                         Log.d(TAG, "Original weekly dates for ${medication.name}: ${schedule.nextDueDates}")
 
-                        // Check for missed dates that are in the past
                         val missedDueDates = schedule.nextDueDates.filter {
-                            it.toLocalDate() <= today
+                            it.isBefore(now)
                         }
 
-                        // Mark medication as missed if any scheduled time was missed
                         if (missedDueDates.isNotEmpty() &&
                             !medication.medicationHistory.wasTakenToday() &&
                             !medication.medicationHistory.wasSkippedToday()
                         ) {
-                            Log.d(TAG, "${medication.name} was not taken/skipped for scheduled time, marking as missed")
-                            medication.markAsMissed(dateTime = LocalDateTime.now())
+                            // Use the earliest missed due date as the missed time
+                            val missedDateTime = missedDueDates.minOf { it }
+                            Log.d(TAG, "${medication.name} was not taken/skipped for time: $missedDateTime, marking as missed")
+                            medication.markAsMissed(dateTime = missedDateTime)
                             medication.id?.let {
                                 FireStoreRepository.updateMedicationHistory(
                                     userId = userId,
                                     medicationId = it,
-                                    event = MedicationEvent.Missed(date = LocalDateTime.now())
+                                    event = MedicationEvent.Missed(date = missedDateTime)
                                 )
                             }
                         }
 
-                        // Only update if we actually have dates that need updating
                         if (missedDueDates.isNotEmpty()) {
-                            // Update each date individually - if it's in the past, add 7 days
                             val updatedDates = schedule.nextDueDates.map { dueDate ->
-                                if (dueDate.toLocalDate() <= today) {
-                                    dueDate.plusDays(7) // Add one week for weekly schedules
+                                if (dueDate.isBefore(now)) {
+                                    dueDate.plusDays(7)
                                 } else {
-                                    dueDate // Keep future dates as is
+                                    dueDate
                                 }
-                            }.sorted() // Sort to maintain chronological order
+                            }.sorted()
 
                             medication.id?.let { medId ->
                                 val success = FireStoreRepository.updateMedicationDates(
@@ -125,14 +122,12 @@ class MidnightWorker(
                                 )
 
                                 if (success) {
-                                    // Schedule notification for the next upcoming date
                                     val nextDueTimeMillis = updatedDates[0]
                                         .atZone(ZoneId.systemDefault())
                                         .toInstant()
                                         .toEpochMilli()
                                     notificationHelper.scheduleNotification(
                                         medication.name,
-                                        medication.dosage,
                                         nextDueTimeMillis
                                     )
                                     Log.d(TAG, "Successfully advanced weekly schedule for medication: ${medication.name}")
@@ -141,14 +136,12 @@ class MidnightWorker(
                                 }
                             }
                         } else {
-                            // If no dates needed updating, just schedule the next notification
                             val nextDueTimeMillis = schedule.nextDueDates[0]
                                 .atZone(ZoneId.systemDefault())
                                 .toInstant()
                                 .toEpochMilli()
                             notificationHelper.scheduleNotification(
                                 medication.name,
-                                medication.dosage,
                                 nextDueTimeMillis
                             )
                         }
@@ -159,9 +152,7 @@ class MidnightWorker(
                 }
             }
 
-            // Schedule the next midnight update
             scheduleNextMidnightWork(applicationContext)
-
             Result.success()
         } catch (e: Exception) {
             Log.e(TAG, "Error in midnight worker: ${e.message}")

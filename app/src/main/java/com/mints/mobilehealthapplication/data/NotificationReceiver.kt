@@ -11,12 +11,11 @@ class NotificationReceiver : BroadcastReceiver() {
 
         if (intent.action == NotificationHelper.NOTIFICATION_ACTION) {
             val medicationName = intent.getStringExtra("medication_name")
-            val dosage = intent.getStringExtra("dosage")
 
-            Log.d("NotificationReceiver", "Medication: $medicationName, Dosage: $dosage")
+            Log.d("NotificationReceiver", "Medication: $medicationName")
 
             val notificationHelper = NotificationHelper(context)
-            notificationHelper.showNotification(medicationName ?: "Unknown", dosage ?: "Unknown")
+            notificationHelper.showNotification(medicationName ?: "Unknown")
         } else {
             Log.w("NotifDebug", "Received unexpected intent action: ${intent.action}")
 

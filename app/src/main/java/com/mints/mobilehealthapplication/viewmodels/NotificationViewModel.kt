@@ -8,7 +8,7 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
     // Initialize NotificationHelper using the application context.
     private val notificationHelper = NotificationHelper(application)
 
-    fun scheduleMedicationNotification(medicationName: String, dosage: String, triggerTimeInMillis: Long) {
-        notificationHelper.scheduleNotification(medicationName, dosage, triggerTimeInMillis)
+    fun scheduleMedicationNotification(medicationName: String, triggerTimeInMillis: Long) {
+        notificationHelper.scheduleNotification(medicationName, triggerTimeInMillis)
     }
 }

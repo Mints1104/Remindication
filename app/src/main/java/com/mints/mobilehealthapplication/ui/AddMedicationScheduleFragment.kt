@@ -417,7 +417,6 @@ class AddMedicationScheduleFragment : Fragment() {
 
                 notificationViewModel.scheduleMedicationNotification(
                     medicationName = medicationName ?: "Default Medication",
-                    dosage = medicationDosage ?: "Default Dosage",
                     triggerTimeInMillis = triggerTimeInMillis
                     )
                 navigateToNextFragment()

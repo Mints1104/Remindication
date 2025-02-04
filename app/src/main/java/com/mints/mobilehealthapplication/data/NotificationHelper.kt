@@ -42,7 +42,7 @@ class NotificationHelper(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun showNotification(medicationName: String, dosage: String) {
+    fun showNotification(medicationName: String) {
         Log.d("NotifDebug", "Building notification for $medicationName")
 
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -57,7 +57,7 @@ class NotificationHelper(private val context: Context) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.baseline_prescriptions_24px)
             .setContentTitle("Medication Reminder")
-            .setContentText("Time to take $medicationName - $dosage")
+            .setContentText("Time to take $medicationName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
@@ -67,13 +67,12 @@ class NotificationHelper(private val context: Context) {
     }
 
     @SuppressLint("ScheduleExactAlarm")
-    fun scheduleNotification(medicationName: String, dosage: String, timeInMillis: Long) {
+    fun scheduleNotification(medicationName: String, timeInMillis: Long) {
         Log.d("NotifDebug", "Scheduling notification for $medicationName at ${Date(timeInMillis)}")
 
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             action = NOTIFICATION_ACTION
             putExtra("medication_name", medicationName)
-            putExtra("dosage", dosage)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
