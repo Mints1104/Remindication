@@ -4,6 +4,8 @@
     package="com.mints.mobilehealthapplication">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
 
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
@@ -30,7 +32,25 @@
             tools:node="remove" />
 
 
-        <receiver android:name=".data.NotificationReceiver" android:exported="false" />
+        <receiver
+            android:name=".data.NotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="MEDICATION_NOTIFICATION_ACTION" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".workers.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.RESTART" />
+            </intent-filter>
+        </receiver>
+
+
 
         <activity android:name=".ui.MainActivity"
             android:exported="true">

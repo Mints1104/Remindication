@@ -153,7 +153,7 @@ class HomeFragment : Fragment() {
           //  adapter.updateMedicationList(medications)
             val filteredMeds = getUncompletedMedicationsForToday(medications)
             adapter.updateMedicationList(filteredMeds)
-            adapter.hideAllMedicationDays()
+     //       adapter.hideAllMedicationDays()
 
             getClosestDate(filteredMeds)
             printOutMedicationHistory(medications)

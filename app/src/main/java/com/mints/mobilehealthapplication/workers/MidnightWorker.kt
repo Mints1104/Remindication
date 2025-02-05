@@ -17,11 +17,13 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
-class MidnightWorker(
+class   MidnightWorker(
     context: Context,
     workerParams: WorkerParameters,
     private val notificationHelper: NotificationHelper
 ) : CoroutineWorker(context, workerParams) {
+
+
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -71,9 +73,11 @@ class MidnightWorker(
                                     .atZone(ZoneId.systemDefault())
                                     .toInstant()
                                     .toEpochMilli()
+                                Log.d(TAG,"Attempting to schedule noti for ${medication.name} at time: $nextDueTimeMillis")
                                 notificationHelper.scheduleNotification(
                                     medication.name,
-                                    nextDueTimeMillis
+                                    nextDueTimeMillis,
+
                                 )
                                 Log.d(TAG, "Successfully advanced schedule for medication: ${medication.name}")
                             } else {
@@ -176,6 +180,9 @@ class MidnightWorker(
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli() - System.currentTimeMillis()
+
+            // Create NotificationHelper with application context
+            NotificationHelper(context.applicationContext)
 
             val workRequest = OneTimeWorkRequestBuilder<MidnightWorker>()
                 .setInitialDelay(delayInMillis, TimeUnit.MILLISECONDS)

@@ -2,7 +2,6 @@ package com.mints.mobilehealthapplication.ui
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -31,9 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.NotificationHelper
-import com.mints.mobilehealthapplication.data.NotificationReceiver
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
-import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mToolbar: MaterialToolbar
@@ -70,13 +67,13 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
                 Log.d("AlarmDebug", "Exact alarm permission already granted")
-                scheduleExactAlarm()
+            //    scheduleExactAlarm()
             } else {
                 Log.w("AlarmDebug", "Exact alarm permission NOT granted")
                 requestPermission()
             }
         } else {
-            scheduleExactAlarm()
+          //  scheduleExactAlarm()
         }
 
     }
@@ -88,7 +85,7 @@ class MainActivity : AppCompatActivity() {
     ) { _ ->
         if (alarmManager.canScheduleExactAlarms()) {
             Log.d("AlarmDebug", "Exact alarm permission granted")
-            scheduleExactAlarm()
+            //scheduleExactAlarm()
         } else {
             Log.w("AlarmDebug", "Exact alarm permission denied")
             Toast.makeText(
@@ -110,39 +107,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun scheduleExactAlarm() {
-        val triggerTime = System.currentTimeMillis() + 5000
-        Log.d("AlarmDebug", "Scheduling exact alarm at ${Date(triggerTime)}")
-        Log.d("AlarmDebug", "Creating PendingIntent with requestCode 0")
-
-        // Step 1: Create the intent to trigger when the alarm goes off
-        val intent = Intent(this, NotificationReceiver::class.java).apply {
-            // Add any extras if needed, like medication details
-            putExtra("medication_name", "Aspirin")
-            putExtra("dosage", "500mg")
-        }
-
-        // Step 2: Create the PendingIntent to trigger the notification
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            0,  // You can use a unique request code here
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        // Step 3: Schedule the alarm with AlarmManager using setExact
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,  // Wake the device if it's asleep
-                triggerTime,  // Trigger time in milliseconds
-                pendingIntent  // PendingIntent that will be triggered
-            )
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-        }
-
-        Log.d("Alarm", "Exact alarm set for: $triggerTime")
-    }
+//    private fun scheduleExactAlarm() {
+//        val triggerTime = System.currentTimeMillis() + 5000
+//        Log.d("AlarmDebug", "Scheduling exact alarm at ${Date(triggerTime)}")
+//        Log.d("AlarmDebug", "Creating PendingIntent with requestCode 0")
+//
+//        // Step 1: Create the intent to trigger when the alarm goes off
+//        val intent = Intent(this, NotificationReceiver::class.java).apply {
+//            // Add any extras if needed, like medication details
+//            putExtra("medication_name", "Aspirin")
+//            putExtra("dosage", "500mg")
+//        }
+//
+//        // Step 2: Create the PendingIntent to trigger the notification
+//        val pendingIntent = PendingIntent.getBroadcast(
+//            this,
+//            0,  // You can use a unique request code here
+//            intent,
+//            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+//        )
+//
+//        // Step 3: Schedule the alarm with AlarmManager using setExact
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//            alarmManager.setExact(
+//                AlarmManager.RTC_WAKEUP,  // Wake the device if it's asleep
+//                triggerTime,  // Trigger time in milliseconds
+//                pendingIntent  // PendingIntent that will be triggered
+//            )
+//        } else {
+//            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+//        }
+//
+//        Log.d("Alarm", "Exact alarm set for: $triggerTime")
+//    }
 
 
     private fun requestNotificationPermission() {

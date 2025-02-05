@@ -8,11 +8,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.ui.MainActivity
-import java.util.Date
 
 class NotificationHelper(private val context: Context) {
     companion object {
@@ -25,6 +25,11 @@ class NotificationHelper(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     init {
+        Log.d("NotifDebug", "NotificationHelper Constructor Details:")
+        Log.d("NotifDebug", "Context Type: ${context.javaClass.name}")
+        Log.d("NotifDebug", "Context Hash: ${context.hashCode()}")
+        Log.d("NotifDebug", "Application Context Hash: ${context.applicationContext.hashCode()}")
+        Log.d("NotifDebug", "Is Same Context: ${context === context.applicationContext}")
         createNotificationChannel()
     }
 
@@ -68,26 +73,41 @@ class NotificationHelper(private val context: Context) {
 
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleNotification(medicationName: String, timeInMillis: Long) {
-        Log.d("NotifDebug", "Scheduling notification for $medicationName at ${Date(timeInMillis)}")
+        // Create a unique data URI so that each PendingIntent is unique.
+        // You can use the medication name, trigger time, and even the current timestamp.
+        val uniqueUri = Uri.parse("mints://notification/$medicationName/$timeInMillis/${System.currentTimeMillis()}")
 
         val intent = Intent(context, NotificationReceiver::class.java).apply {
-            action = NOTIFICATION_ACTION
+            action = NOTIFICATION_ACTION  // Ensure the action is set correctly
+            data = uniqueUri             // Set a unique data URI
             putExtra("medication_name", medicationName)
+            putExtra("schedule_time", timeInMillis)
+            putExtra("thread", Thread.currentThread().name)
+            putExtra("context_hash", context.hashCode())
         }
+
+        // Use a request code based on the unique data URI.
+        val requestCode = uniqueUri.hashCode()
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            timeInMillis.toInt(), // Use time as request code for unique PendingIntents
+            requestCode,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            timeInMillis,
-            pendingIntent
-        )
+        try {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                timeInMillis,
+                pendingIntent
+            )
+            Log.d("NotifDebug", "Alarm set successfully")
+        } catch (e: Exception) {
+            Log.e("NotifDebug", "Failed to set alarm", e)
+        }
     }
+
 
     fun getContext(): Context {
         return context
