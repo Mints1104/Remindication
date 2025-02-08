@@ -1,10 +1,8 @@
 package com.mints.mobilehealthapplication.recyclerviews
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mints.mobilehealthapplication.R
@@ -35,7 +33,6 @@ class MedicationRecyclerView(
         val context = holder.binding.root.context
 
         holder.binding.medicationName.text = medication.name
-        holder.binding.medicationId.text = context.getString(R.string.id, medication.id)
         holder.binding.medicationDosage.text = context.getString(R.string.dosage_of_medication, medication.dosage)
         holder.binding.medicationFrequency.text = context.getString(R.string.frequency_of_medication, medication.schedule.frequencyType)
 

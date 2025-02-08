@@ -197,7 +197,17 @@ class MainActivity : AppCompatActivity() {
                 updateToolbar(
                     showBackArrow = false,
                     menuResId = R.menu.top_app_bar,
-                    title = getString(R.string.app_name)
+                    title = "Prescriptions"
+                )
+                invalidateOptionsMenu()
+            }
+
+            R.id.medicationHistoryFragment -> {
+                hideFAB()
+                updateToolbar(
+                    showBackArrow = false,
+                    menuResId = R.menu.top_app_bar,
+                    title = "Medication History"
                 )
                 invalidateOptionsMenu()
             }

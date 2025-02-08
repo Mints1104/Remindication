@@ -395,18 +395,29 @@ class AddMedicationScheduleFragment : Fragment() {
         }
         Log.d(tag,"Saving medication!")
         val currentTime = LocalTime.now()
-        val selectedLocalTime: LocalTime = viewModel.getSelectedTimes()?.get(0) ?: currentTime
-        var scheduledDateTime = LocalDateTime.of(LocalDate.now(), selectedLocalTime)
-        if (scheduledDateTime.isBefore(LocalDateTime.now())) {
-            scheduledDateTime = scheduledDateTime.plusDays(1)
-        }
-
-        val triggerTimeInMillis = scheduledDateTime
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
         val medicationName = viewModel.getName()
         val medicationDosage = viewModel.getDosage()
+        if(viewModel.getFrequencyType() != "On Demand") {
+            val selectedLocalTime: LocalTime = viewModel.getSelectedTimes()?.get(0) ?: currentTime
+            var scheduledDateTime = LocalDateTime.of(LocalDate.now(), selectedLocalTime)
+            if (scheduledDateTime.isBefore(LocalDateTime.now())) {
+                scheduledDateTime = scheduledDateTime.plusDays(1)
+
+
+            }
+
+            val triggerTimeInMillis = scheduledDateTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+
+            notificationViewModel.scheduleMedicationNotification(
+                medicationName = medicationName ?: "Default Medication",
+                triggerTimeInMillis = triggerTimeInMillis
+            )
+
+        }
+
         viewModel.saveMedication(userId)
 
 
@@ -415,10 +426,7 @@ class AddMedicationScheduleFragment : Fragment() {
                 Log.d(tag,"Successfully saved medication")
                 displayMessage("Successfully saved medication")
 
-                notificationViewModel.scheduleMedicationNotification(
-                    medicationName = medicationName ?: "Default Medication",
-                    triggerTimeInMillis = triggerTimeInMillis
-                    )
+
                 navigateToNextFragment()
             } else {
                 Log.d(tag,"Failed to save medication")

@@ -85,6 +85,15 @@
             app:popExitAnim="@anim/slide_out_right" />
 
 
+        <action
+            android:id="@+id/action_homeFragment_to_medicationHistoryFragment"
+            app:destination="@+id/medicationHistoryFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+
 
 
     </fragment>
@@ -99,6 +108,15 @@
         <action
             android:id="@+id/action_prescriptionsFragment_to_homeFragment"
             app:destination="@+id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+
+        <action
+            android:id="@+id/action_prescriptionsFragment_to_medicationHistoryFragment"
+            app:destination="@+id/medicationHistoryFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -300,7 +318,30 @@
     </fragment>
 
 
+    <fragment
+        android:id="@id/medicationHistoryFragment"
+        android:name="com.mints.mobilehealthapplication.ui.MedicationHistoryFragment"
+        tools:layout="@layout/fragment_medicationhistory">
 
+        <action
+            android:id="@+id/action_medicationHistoryFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+
+        <action
+            android:id="@+id/action_medicationHistoryFragment_to_to_prescriptionsFragment"
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+
+
+
+    </fragment>
 
 
 

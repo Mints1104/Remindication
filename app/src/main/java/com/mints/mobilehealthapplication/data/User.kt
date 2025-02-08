@@ -125,6 +125,10 @@ data class MedicationHistory(
         }
     }
 
+    fun isEmpty(): Boolean {
+        return events.isEmpty()
+    }
+
     fun wasSkippedToday():Boolean {
         val today = LocalDate.now()
         return events.any {
