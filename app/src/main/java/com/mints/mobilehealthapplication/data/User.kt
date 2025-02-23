@@ -30,6 +30,8 @@ data class Medication(
     fun markAsMissed(dateTime: LocalDateTime = LocalDateTime.now()) {
         medicationHistory.addEvent(MedicationEvent.Missed(date = dateTime))
     }
+
+
 }
 
 
@@ -160,7 +162,7 @@ sealed class MedicationSchedule {
         val interval: IntervalPeriod,
         val startTime: LocalTime,
         val endDate: Timestamp? = null,
-      //  val nextDueDates: List<LocalDateTime>
+      //  val nextDueDates: ""
 
     ) : MedicationSchedule()
 

@@ -157,6 +157,7 @@ class HomeFragment : Fragment() {
 
             getClosestDate(filteredMeds)
             printOutMedicationHistory(medications)
+            viewModel.testCheckingDatesInPast(uid)
         }
 
 
