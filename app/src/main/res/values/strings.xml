@@ -172,6 +172,7 @@
     <string name="total_skipped">Skipped: 0</string>
     <string name="medication_history">Medication History</string>
     <string name="compliance_rate_value">Compliance Rate: %.2f%%</string>
+    <string name="overall_adherence">Overall Adherence</string>
 
     <!-- Array resources for Snooze Duration -->
     <string-array name="snooze_duration_entries">

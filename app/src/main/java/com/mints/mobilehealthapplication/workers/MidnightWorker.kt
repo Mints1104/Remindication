@@ -1,7 +1,9 @@
 package com.mints.mobilehealthapplication.workers
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -11,6 +13,7 @@ import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
+import com.mints.mobilehealthapplication.ui.HomeFragment.Companion.REFRESH_ACTION
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -27,7 +30,6 @@ class   MidnightWorker(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "LETS GOOOO ITS MIDNIIIIGHTTTTTTT")
             val now = LocalDateTime.now()
             val userId = FireStoreRepository.getUser()?.uid ?: ""
             val medications = FireStoreRepository.getMedications(userId)
@@ -157,6 +159,9 @@ class   MidnightWorker(
             }
 
             scheduleNextMidnightWork(applicationContext)
+            val refreshIntent = Intent(REFRESH_ACTION)
+            LocalBroadcastManager.getInstance(applicationContext)
+                .sendBroadcast(refreshIntent)
             Result.success()
         } catch (e: Exception) {
             Log.e(TAG, "Error in midnight worker: ${e.message}")

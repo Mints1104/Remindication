@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.shimmer)
     implementation(libs.play.services.auth)
     implementation (libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.localbroadcastmanager)
 
 
 

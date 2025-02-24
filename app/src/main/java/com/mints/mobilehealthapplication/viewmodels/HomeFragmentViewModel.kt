@@ -112,7 +112,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                                 }
 
                                 if (time.toLocalTime() < currentTime) {
-                                    val newTime = now.plusDays(1)
+                                    val newTime = time.plusDays(1)
                                     Log.d("Test", "New date: $newTime")
 
                                     medication.id?.let { medId ->

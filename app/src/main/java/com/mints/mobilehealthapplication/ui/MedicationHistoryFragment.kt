@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.data.Medication
+import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.databinding.FragmentMedicationhistoryBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationHistoryRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.MedicationHistoryViewModel
@@ -51,6 +52,17 @@ class MedicationHistoryFragment : Fragment() {
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
             val filteredList = medications.filter { med -> !med.medicationHistory.isEmpty() }
             adapter.updateMedicationList(filteredList)
+            val (totalTaken, totalMissed, totalSkipped) = filteredList.fold(Triple(0, 0, 0)) { acc, med ->
+                Triple(
+                    acc.first + med.medicationHistory.getEventCount(MedicationEvent.EventType.TAKEN),
+                    acc.second + med.medicationHistory.getEventCount(MedicationEvent.EventType.MISSED),
+                    acc.third + med.medicationHistory.getEventCount(MedicationEvent.EventType.SKIPPED)
+                )
+            }
+            binding.takenCountText.text = "Taken: $totalTaken"
+            binding.missedCountText.text = "Missed: $totalMissed"
+            binding.skippedCountText.text = "Skipped: $totalSkipped"
+
         }
     }
 
@@ -61,8 +73,16 @@ class MedicationHistoryFragment : Fragment() {
         } else {
             viewModel.getMedications(uid)
             medicationList = viewModel.getMedicationList()
+
+
+
+
         }
     }
+
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
