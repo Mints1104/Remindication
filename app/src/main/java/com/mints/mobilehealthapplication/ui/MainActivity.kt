@@ -240,6 +240,12 @@ class MainActivity : AppCompatActivity() {
                     title = getString(R.string.add_medication_txt)
                 )
             }
+            R.id.medicationDetailFragment -> {
+                hideFAB()
+                updateToolbar(showBackArrow = true,
+                    menuResId = R.menu.top_app_bar,
+                    title = "Medication History")
+            }
 
             // Template for new fragments
             /*

@@ -165,6 +165,13 @@
     <string name="large_touch_targets_summary">Increase touch target size for better accessibility</string>
     <string name="no_medications_left">No more medication left for today. Great job!</string>
     <string name="step_1_of_2">Step 1 of 2</string>
+    <string name="adherence_summary">Adherence Summary</string>
+    <string name="compliance_rate">Compliance Rate: 0%</string>
+    <string name="total_taken">Taken: 0</string>
+    <string name="total_missed">Missed: 0</string>
+    <string name="total_skipped">Skipped: 0</string>
+    <string name="medication_history">Medication History</string>
+    <string name="compliance_rate_value">Compliance Rate: %.2f%%</string>
 
     <!-- Array resources for Snooze Duration -->
     <string-array name="snooze_duration_entries">

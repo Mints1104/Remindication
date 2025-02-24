@@ -2,7 +2,7 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/med_detail_scroll_view"
+    android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,28 +13,27 @@
         android:padding="16dp">
 
 
-
-        <!-- Overall Adherence Statistics Card -->
+        <!-- Adherence Summary Card -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/adherence_stats_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            app:cardElevation="8dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardBackgroundColor="?attr/colorPrimaryContainer"
+            android:layout_marginBottom="16dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/overallAdherenceTitle"
+                    android:id="@+id/overallAdherenceLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Overall Adherence"
+                    android:text="@string/adherence_summary"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -43,7 +42,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Compliance Rate: 90%"
+                    android:text="@string/compliance_rate"
                     android:textSize="16sp" />
 
                 <TextView
@@ -51,7 +50,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Taken: 27"
+                    android:text="@string/total_taken"
                     android:textSize="16sp" />
 
                 <TextView
@@ -59,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Missed: 3"
+                    android:text="@string/total_missed"
                     android:textSize="16sp" />
 
                 <TextView
@@ -67,30 +66,27 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Skipped: 2"
+                    android:text="@string/total_skipped"
                     android:textSize="16sp" />
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Medication Basic Information Card -->
-
-
-        <!-- Daily Adherence Section Header -->
+        <!-- History Events Header -->
         <TextView
-            android:id="@+id/dailyAdherenceLabel"
+            android:id="@+id/historyHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Daily Adherence"
+            android:text="@string/medication_history"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp" />
 
-        <!-- RecyclerView for Daily Adherence Details -->
+        <!-- RecyclerView for Medication History Events -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/dailyAdherenceRecyclerView"
+            android:id="@+id/eventsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
+
     </LinearLayout>
 </ScrollView>
