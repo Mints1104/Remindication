@@ -72,6 +72,10 @@ data class MedicationHistory(
         events.sortByDescending { it.date }
     }
 
+    fun getAllEvents(): MutableList<MedicationEvent> {
+        return events
+    }
+
     // Get all events for a specific status using the new EventType
     fun getEventsByType(type: MedicationEvent.EventType): List<MedicationEvent> {
         return events.filter { it.type == type }
@@ -138,6 +142,7 @@ data class MedicationHistory(
                     it.date.toLocalDate() == today
         }
     }
+
 }
 
 data class MedicationDose(

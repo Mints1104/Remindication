@@ -1,3 +1,4 @@
+// MedicationHistoryViewModel.kt
 package com.mints.mobilehealthapplication.viewmodels
 
 import android.util.Log
@@ -10,31 +11,29 @@ import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import kotlinx.coroutines.launch
 
-class MedicationHistoryViewModel: ViewModel() {
+class MedicationHistoryViewModel : ViewModel() {
 
     private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
+
     private val _navigateToDetails = MutableLiveData<Medication?>()
     val navigateToDetails: LiveData<Medication?> get() = _navigateToDetails
-    private val tag = "MHistoryViewModel"
 
+    private val tag = "MHistoryViewModel"
 
     fun getMedications(uid: String, onComplete: () -> Unit = {}) {
         Log.d(tag, "Starting real-time medication listener for user: $uid")
-
         FireStoreRepository.getMedicationsSnapshot(uid) { meds, error ->
             if (error != null) {
                 Log.e(tag, "Failed to get medications: ${error.message}")
-                onComplete() // Even on error, signal completion
+                onComplete()
                 return@getMedicationsSnapshot
             }
-
             Log.d(tag, "Fetched ${meds.size} medications from snapshot")
-            _medications.postValue(meds) // Update LiveData with the new list
+            _medications.postValue(meds)
             onComplete()
         }
     }
-
 
     fun testReceivingMedicationHistory(medication: Medication) {
         viewModelScope.launch {
@@ -43,24 +42,24 @@ class MedicationHistoryViewModel: ViewModel() {
             history.getLastEventOfType(MedicationEvent.EventType.TAKEN)?.let { lastTaken ->
                 Log.d(tag, "Last taken: ${lastTaken.date}")
             }
-
             val compliance = history.getComplianceRate()
             Log.d(tag, "Compliance rate: $compliance%")
-
             if (history.wasTakenToday()) {
                 Log.d(tag, "Medication already taken today")
             }
-
             val recentEvents = history.getEventsFromLastDays(7)
             Log.d(tag, "Events in last 7 days: ${recentEvents.size}")
         }
     }
 
-    fun getMedicationList(): MutableLiveData<List<Medication>> = _medications
-
-
     fun onMedicationClicked(medication: Medication) {
-        _navigateToDetails.value = medication // Trigger navigation
+        _navigateToDetails.value = medication
     }
 
+    // Clear navigation event once handled
+    fun onMedicationNavigated() {
+        _navigateToDetails.value = null
+    }
+
+    fun getMedicationList(): MutableLiveData<List<Medication>> = _medications
 }

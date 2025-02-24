@@ -339,10 +339,26 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
 
+        <action
+            android:id="@+id/action_medicationHistoryFragment_to_medicationDetailFragment"
+            app:destination="@id/medicationDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+
 
 
     </fragment>
 
+    <fragment
+        android:id="@+id/medicationDetailFragment"
+        android:name="com.mints.mobilehealthapplication.ui.MedicationDetailFragment"
+        tools:layout="@layout/fragment_medication_detail">
+        <argument
+            android:name="medicationId"
+            app:argType="string" />
+    </fragment>
 
 
 
