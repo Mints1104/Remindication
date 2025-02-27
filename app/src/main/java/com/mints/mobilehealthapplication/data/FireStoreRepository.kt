@@ -168,6 +168,38 @@ object FireStoreRepository {
         }
     }
 
+    suspend fun updateMultipleMedicationHistories(
+        userId: String,
+        medicationId: String,
+        events: List<MedicationEvent>
+    ): Boolean {
+        return try {
+            val documentPath = "users/$userId/medications/$medicationId"
+            Log.d("FireStoreRepo", "Updating medication history at path: [$documentPath] with multiple events.")
+
+            // Map each event to its corresponding Map representation using your mappers
+            val eventMaps = events.map { with(mappers) { it.toMap() } }
+
+            // Use the spread operator to pass all event maps to arrayUnion
+            db.collection("users")
+                .document(userId)
+                .collection("medications")
+                .document(medicationId)
+                .update("medicationHistory.events", FieldValue.arrayUnion(*eventMaps.toTypedArray()))
+                .await()
+
+            Log.d("FireStoreRepo", "Successfully updated medication history with multiple events at path: [$documentPath]")
+            true
+        } catch (e: FirebaseFirestoreException) {
+            Log.e("FireStoreRepo", "Firestore update failed at path [$userId/$medicationId]: ${e.code} - ${e.message}", e)
+            false
+        } catch (e: Exception) {
+            Log.e("FireStoreRepo", "Unexpected error updating medication history at path [$userId/$medicationId]: ${e.message}", e)
+            false
+        }
+    }
+
+
 
 
 

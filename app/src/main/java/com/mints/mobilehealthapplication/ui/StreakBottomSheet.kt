@@ -84,18 +84,20 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate()
 
-                    when {
+                    newStreak = when {
                         lastLoginDate.isEqual(currentDate) -> {
                             // Already logged in today; no change needed.
-                            newStreak = loginStreak
+                            loginStreak
                         }
+
                         lastLoginDate.plusDays(1).isEqual(currentDate) -> {
                             // Last login was yesterday; increment streak.
-                            newStreak = loginStreak + 1
+                            loginStreak + 1
                         }
+
                         else -> {
                             // Gap in days; reset streak.
-                            newStreak = 1
+                            1
                         }
                     }
                 }
