@@ -60,6 +60,88 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         return dates
     }
 
+    fun testCheckingDatesInPast(userId: String) {
+        viewModelScope.launch {
+            val now = LocalDateTime.now()
+            val currentDate = LocalDate.now()
+            val currentTime = LocalTime.now()
+
+            Log.d("Test", "Current day: ${now.dayOfWeek}")
+            Log.d("Test", "Current time: $currentTime")
+
+            val pastDate = LocalDate.of(2024, 12, 1)
+            val dateList = getDatesBetween(pastDate, currentDate)
+            Log.d("Test", "Dates between past date and present: $dateList")
+
+            _medications.value?.forEach { medication ->
+                when (val schedule = medication.schedule) {
+                    is MedicationSchedule.Daily -> {
+                        val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
+                        if (missedDueDates.isNotEmpty()) {
+                            Log.d("Test", "Next date for ${medication.name} is behind current date.")
+                            val missedEvents = mutableListOf<MedicationEvent>()
+
+                            schedule.nextDueDates.forEach { time ->
+                                Log.d("Test", "Scheduled medication date: ${time.toLocalDate()}")
+
+                                val medDatesList = getDatesBetween(time.toLocalDate(), currentDate.minusDays(1))
+                                Log.d("Test", "Dates between scheduled date and yesterday: ${medDatesList.size}")
+
+                                medDatesList.forEach { date ->
+                                    val dateTime = date.atTime(time.toLocalTime())
+                                    Log.d("Test", "Marking as missed: $dateTime")
+                                    medication.markAsMissed(dateTime)
+                                    missedEvents.add(MedicationEvent.Missed(date = dateTime))
+                                }
+
+                                // Update the next due date: loop until newTime is in the future
+                                var newTime = time
+                                while (newTime.isBefore(now)) {
+                                    newTime = newTime.plusDays(1)
+                                }
+                                Log.d("Test", "New due date for ${medication.name}: $newTime")
+
+                                medication.id?.let { medId ->
+                                    val success = FireStoreRepository.updateMedicationDates(
+                                        userId = userId,
+                                        medicationId = medId,
+                                        newDates = listOf(newTime)
+                                    )
+                                    if (success) {
+                                        Log.d("Test", "Date successfully updated!")
+                                    } else {
+                                        Log.e("Test", "Date failed to update :(")
+                                    }
+                                }
+                            }
+
+                            // Batch update the missed events in Firestore
+                            if (missedEvents.isNotEmpty() && medication.id != null) {
+                                val updateSuccess = FireStoreRepository.updateMultipleMedicationHistories(
+                                    userId = userId,
+                                    medicationId = medication.id!!,
+                                    events = missedEvents
+                                )
+                                if (updateSuccess) {
+                                    Log.d("Test", "Medication history updated with missed events!")
+                                } else {
+                                    Log.e("Test", "Failed to update medication history with missed events.")
+                                }
+                            }
+                        } else {
+                            Log.d("Test", "Next date for ${medication.name} is AFTER current date.")
+                        }
+                    }
+                    // You can add similar logic for other schedule types later
+                    else -> {}
+                }
+            }
+        }
+    }
+
+
+    /*
+
      fun testCheckingDatesInPast(userId: String) {
         viewModelScope.launch {
             val now = LocalDateTime.now()
@@ -166,6 +248,8 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
             }
         }
     }
+
+     */
 
 
     private fun checkAnyDatesInPast(userId: String) {
