@@ -112,6 +112,7 @@ data class MedicationHistory(
         return (takenCount.toDouble() / events.size) * 100
     }
 
+
     // Get count of events by type
     fun getEventCount(type: MedicationEvent.EventType): Int {
         return events.count { it.type == type }

@@ -35,6 +35,15 @@ class MedicationHistoryViewModel : ViewModel() {
         }
     }
 
+
+
+    fun getComplianceRate():Double {
+        val meds = medications.value.orEmpty()
+        if(meds.isEmpty()) return 0.0
+        val totalComplianceRate = meds.sumOf { it.medicationHistory.getComplianceRate() }
+        return totalComplianceRate / meds.size
+    }
+
     fun testReceivingMedicationHistory(medication: Medication) {
         viewModelScope.launch {
             val history = medication.medicationHistory

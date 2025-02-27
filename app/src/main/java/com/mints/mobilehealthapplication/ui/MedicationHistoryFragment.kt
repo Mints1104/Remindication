@@ -12,11 +12,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.databinding.FragmentMedicationhistoryBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationHistoryRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.MedicationHistoryViewModel
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class MedicationHistoryFragment : Fragment() {
 
@@ -62,7 +65,9 @@ class MedicationHistoryFragment : Fragment() {
             binding.takenCountText.text = "Taken: $totalTaken"
             binding.missedCountText.text = "Missed: $totalMissed"
             binding.skippedCountText.text = "Skipped: $totalSkipped"
-
+            val complianceRate = viewModel.getComplianceRate()
+            val rounded = BigDecimal(complianceRate).setScale(2, RoundingMode.HALF_UP).toDouble()
+            binding.complianceRateText.text = getString(R.string.compliance_rate_value, rounded)
         }
     }
 
