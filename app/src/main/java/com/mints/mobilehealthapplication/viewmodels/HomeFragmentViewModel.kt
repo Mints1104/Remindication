@@ -76,7 +76,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
             _medications.value?.forEach { medication ->
                 when (val schedule = medication.schedule) {
                     is MedicationSchedule.Daily -> {
-                        val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
+                        val missedDueDates = schedule.nextDueDates.filter { it.toLocalDate().isBefore(currentDate) }
                         if (missedDueDates.isNotEmpty()) {
                             Log.d("Test", "Next date for ${medication.name} is behind current date.")
                             val missedEvents = mutableListOf<MedicationEvent>()
@@ -539,6 +539,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
 
     fun markMedicationAsTaken(userId: String, medication: Medication) {
+        val currentDateTime = LocalDateTime.now()
         viewModelScope.launch {
             medication.id?.let { medId ->
                try {
@@ -549,14 +550,14 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                        else -> LocalDateTime.now()
                    } ?: LocalDateTime.now()
                    //Update the local medication object
-                   medication.markAsTaken(dateTime = eventDateTime)
+                   medication.markAsTaken(dateTime = currentDateTime)
 
                    //Update the medication history in FireStore
 
                    val success = FireStoreRepository.updateMedicationHistory(
                        userId = userId,
                        medicationId = medId,
-                       event = MedicationEvent.Taken(date = eventDateTime)
+                       event = MedicationEvent.Taken(date = currentDateTime)
                    )
 
                  if(success) {
