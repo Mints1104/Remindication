@@ -23,12 +23,14 @@ import androidx.navigation.navOptions
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.data.NHSMedication
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
 
@@ -58,10 +60,17 @@ class MainActivity : AppCompatActivity() {
         checkAuthenticationState()
         requestNotificationPermission()
         setUpAlarmManager()
+        val nhsMedication = NHSMedication()
+        val callApiButton = findViewById<MaterialButton>(R.id.call_Api)
+        callApiButton.setOnClickListener {
+            nhsMedication.testGetMedicineDetails("Adalimumab")
+            nhsMedication.testGetMedicineDetails("Alendronic acid")
+            nhsMedication.testGetMedicineDetails("Allopurinol")
+        }
     }
 
 
-    private fun setUpAlarmManager() {
+        private fun setUpAlarmManager() {
         Log.d("AlarmDebug", "Setting up alarm manager")
         alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

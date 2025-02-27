@@ -173,6 +173,7 @@
     <string name="medication_history">Medication History</string>
     <string name="compliance_rate_value">Compliance Rate: %.2f%%</string>
     <string name="overall_adherence">Overall Adherence</string>
+    <string name="step_2_of_2">Step 2 of 2</string>
 
     <!-- Array resources for Snooze Duration -->
     <string-array name="snooze_duration_entries">
