@@ -73,22 +73,31 @@ class NotificationHelper(private val context: Context) {
 
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleNotification(medicationName: String, timeInMillis: Long) {
-        // Create a unique data URI so that each PendingIntent is unique.
-        // You can use the medication name, trigger time, and even the current timestamp.
-        val uniqueUri = Uri.parse("mints://notification/$medicationName/$timeInMillis/${System.currentTimeMillis()}")
-
+        val uniqueUri = Uri.parse("mints://notification/$medicationName/$timeInMillis")
         val intent = Intent(context, NotificationReceiver::class.java).apply {
-            action = NOTIFICATION_ACTION  // Ensure the action is set correctly
-            data = uniqueUri             // Set a unique data URI
+            action = NOTIFICATION_ACTION
+            data = uniqueUri
             putExtra("medication_name", medicationName)
             putExtra("schedule_time", timeInMillis)
             putExtra("thread", Thread.currentThread().name)
             putExtra("context_hash", context.hashCode())
         }
 
-        // Use a request code based on the unique data URI.
         val requestCode = uniqueUri.hashCode()
 
+        //Check if there is already an existing PendingIntent
+
+        val existingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+        )
+
+        if(existingIntent !=null) {
+            alarmManager.cancel(existingIntent)
+        }
+        //Create a new PendingIntent
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
