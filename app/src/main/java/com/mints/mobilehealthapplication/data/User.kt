@@ -113,6 +113,15 @@ data class MedicationHistory(
     }
 
 
+    fun hasEventToday(): Boolean {
+        val today = LocalDate.now()
+        return events.any {
+            it.date.toLocalDate() == today
+        }
+
+
+    }
+
     // Get count of events by type
     fun getEventCount(type: MedicationEvent.EventType): Int {
         return events.count { it.type == type }

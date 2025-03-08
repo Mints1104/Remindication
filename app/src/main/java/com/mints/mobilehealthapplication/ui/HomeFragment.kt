@@ -346,6 +346,15 @@
                 .show()
         }
 
+        private fun getClosestMedication(currentList: List<Medication>) {
+            val regularSchedList = currentList.filter {
+                it.schedule is MedicationSchedule.Daily || it.schedule is MedicationSchedule.WeeklySchedule
+            }
+            val now = LocalDateTime.now()
+
+
+        }
+
         private fun getClosestDate(currentList: List<Medication>) {
             Log.d(tag, "Starting getClosestDate function")
             Log.d(tag, "Current medication list size: ${currentList.size}")
@@ -359,14 +368,17 @@
             val now = LocalDateTime.now()
             Log.d(tag, "Current time: $now")
 
-            // Find the medication with the earliest upcoming date
+            // Find the medication with the earliest upcoming or passed but not taken date
             val closestMedication = regularSchedList.minByOrNull { medication ->
                 val nextDueDates = when (val sched = medication.schedule) {
                     is MedicationSchedule.Daily -> sched.nextDueDates
                     is MedicationSchedule.WeeklySchedule -> sched.nextDueDates
                     else -> emptyList()
                 }
-                val closestDate = nextDueDates.filter { it.isAfter(now) }.minOrNull()
+
+                val closestDate = nextDueDates.filter { it.isAfter(now) || (it.isBefore(now) && !medication.medicationHistory.hasEventToday()) }
+                    .minOrNull()
+
                 Log.d(tag, "Evaluating medication: ${medication.name}, closest due date: $closestDate")
                 closestDate ?: LocalDateTime.MAX
             }
@@ -377,7 +389,9 @@
                     is MedicationSchedule.WeeklySchedule -> sched.nextDueDates
                     else -> emptyList()
                 }
-                val closestDueDate = nextDueDates.filter { it.isAfter(now) }.minOrNull()
+                val closestDueDate = nextDueDates.filter { it.isAfter(now) || (it.isBefore(now) && !closestMedication.medicationHistory.hasEventToday()) }
+                    .minOrNull()
+
                 Log.d(tag, "Closest medication: ${closestMedication.name}, closest due date: $closestDueDate")
 
                 binding.nextMedicationName.text = getString(R.string.name_of_next_med, closestMedication.name)
