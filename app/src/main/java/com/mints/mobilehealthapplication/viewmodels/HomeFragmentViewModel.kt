@@ -76,12 +76,14 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
             _medications.value?.forEach { medication ->
                 when (val schedule = medication.schedule) {
                     is MedicationSchedule.Daily -> {
+                        // Filter out only the missed dates
                         val missedDueDates = schedule.nextDueDates.filter { it.toLocalDate().isBefore(currentDate) }
                         if (missedDueDates.isNotEmpty()) {
                             Log.d("Test", "Next date for ${medication.name} is behind current date.")
                             val missedEvents = mutableListOf<MedicationEvent>()
 
-                            schedule.nextDueDates.forEach { time ->
+                            // Loop only through the missed due dates
+                            missedDueDates.forEach { time ->
                                 Log.d("Test", "Scheduled medication date: ${time.toLocalDate()}")
 
                                 val medDatesList = getDatesBetween(time.toLocalDate(), currentDate.minusDays(1))
@@ -94,7 +96,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                                     missedEvents.add(MedicationEvent.Missed(date = dateTime))
                                 }
 
-                                // Update the next due date: loop until newTime is in the future
+                                // Update the next due date until it's in the future
                                 var newTime = time
                                 while (newTime.isBefore(now)) {
                                     newTime = newTime.plusDays(1)
@@ -132,7 +134,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                             Log.d("Test", "Next date for ${medication.name} is AFTER current date.")
                         }
                     }
-                    // You can add similar logic for other schedule types later
+                    // Additional schedule types can be added here later
                     else -> {}
                 }
             }

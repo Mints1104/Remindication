@@ -175,8 +175,8 @@
                 adapter.hideAllMedicationDays()
 
                 getClosestDate(filteredMeds)
-                printOutMedicationHistory(medications)
-                viewModel.testCheckingDatesInPast(uid)
+              //  printOutMedicationHistory(medications)
+              //  viewModel.testCheckingDatesInPast(uid)
             }
 
 
