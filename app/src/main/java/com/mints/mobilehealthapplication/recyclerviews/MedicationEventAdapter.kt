@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.databinding.MedicationEventItemBinding
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class MedicationEventAdapter(private var events: List<MedicationEvent>) :
@@ -25,8 +26,20 @@ class MedicationEventAdapter(private var events: List<MedicationEvent>) :
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val event = events[position]
         holder.binding.eventTypeText.text = event.type.name
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        holder.binding.eventDateText.text = event.date.format(formatter)
+     //   val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        holder.binding.eventDateText.text = event.getFormattedDate()
+    }
+
+    // Define this extension function somewhere accessible
+    fun MedicationEvent.getFormattedDate(): String {
+        val today = LocalDate.now()
+        val yesterday = today.minusDays(1)
+
+        return when (this.date.toLocalDate()) {
+            today -> "Today at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
+            yesterday -> "Yesterday at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
+            else -> this.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a"))
+        }
     }
 
     override fun getItemCount(): Int = events.size

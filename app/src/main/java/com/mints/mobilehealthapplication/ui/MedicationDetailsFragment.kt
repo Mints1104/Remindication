@@ -15,6 +15,9 @@ import com.mints.mobilehealthapplication.recyclerviews.MedicationEventAdapter
 import com.mints.mobilehealthapplication.viewmodels.MedicationHistoryViewModel
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class MedicationDetailFragment : Fragment() {
 
@@ -61,6 +64,17 @@ class MedicationDetailFragment : Fragment() {
                 // Update the events adapter with all history events
                 eventAdapter.updateData(it.medicationHistory.events.reversed())
             }
+        }
+    }
+
+    fun formatMedicationEventDate(dateTime: LocalDateTime): String {
+        val today = LocalDate.now()
+        val yesterday = today.minusDays(1)
+
+        return when (dateTime.toLocalDate()) {
+            today -> "Today at ${dateTime.format(DateTimeFormatter.ofPattern("h:mm a"))}"
+            yesterday -> "Yesterday at ${dateTime.format(DateTimeFormatter.ofPattern("h:mm a"))}"
+            else -> dateTime.format(DateTimeFormatter.ofPattern("MMM d at h:mm a"))
         }
     }
 
