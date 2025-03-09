@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
@@ -69,7 +70,9 @@ class PrescriptionsFragment : Fragment() {
 
 
 
+
     }
+
 
 
     private fun fetchUserMedication() {
@@ -81,6 +84,11 @@ class PrescriptionsFragment : Fragment() {
         } else {
             viewModel.getMedications(uid)
             medicationList = viewModel.getMedicationList()
+
+           if(medicationList.value?.isEmpty() == true) {
+               Log.d("Test","User has no medications added.")
+               binding.noMedicationsAdded.isVisible = true
+           }
 
         }
     }

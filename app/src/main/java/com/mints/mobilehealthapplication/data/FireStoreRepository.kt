@@ -8,9 +8,11 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.SetOptions
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -137,6 +139,58 @@ object FireStoreRepository {
             throw Exception("Error fetching medication details: ${e.message}")
         }
     }
+
+    suspend fun updateAdherenceStreak(userId: String): Boolean {
+        return try {
+            // Retrieve medications list.
+            val medications = getMedications(userId)
+            val currentDate = LocalDate.now()
+            val adherentToday = medications.any { it.medicationHistory.wasTakenToday() }
+            Log.d("Adherence", "User adherent today: $adherentToday")
+
+            // Fetch the user's current adherence data.
+            val userDocRef = db.collection("users").document(userId)
+            val document = userDocRef.get().await()
+
+            val newStreak: Int = if (document.exists()) {
+                val currentStreak = document.getLong("adherenceStreak")?.toInt() ?: 0
+                val lastAdherenceTimestamp = document.getTimestamp("lastAdherenceDate")
+                if (lastAdherenceTimestamp != null) {
+                    val lastAdherenceDate = lastAdherenceTimestamp.toDate().toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    when {
+                        lastAdherenceDate.isEqual(currentDate) -> currentStreak
+                        lastAdherenceDate.plusDays(1).isEqual(currentDate) -> if (adherentToday) currentStreak + 1 else 0
+                        else -> if (adherentToday) 1 else 0
+                    }
+                } else {
+                    if (adherentToday) 1 else 0
+                }
+            } else {
+                if (adherentToday) 1 else 0
+            }
+
+            val data: MutableMap<String, Any?> = mutableMapOf(
+                "adherenceStreak" to newStreak,
+                "lastAdherenceDate" to if (adherentToday) Timestamp.now() else null
+            )
+
+            // Use set() instead of update() to avoid errors if the document doesn't exist.
+            // Use set() with merge option to update fields in the user document
+            db.collection("users")
+                .document(userId)
+                .set(data, SetOptions.merge())
+                .await()
+
+            true
+        } catch (e: Exception) {
+            Log.e("FireStoreRepo", "Error updating adherence streak: ${e.message}", e)
+            false
+        }
+    }
+
+
 
     suspend fun updateMedicationHistory(
         userId: String,

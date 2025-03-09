@@ -73,7 +73,7 @@
     <string name="home_page_txt">Home</string>
     <string name="streaks_xml">streaks</string>
     <string name="current_streak_loading">Loading…</string>
-    <string name="current_streak_d">Current streak: %d</string>
+    <string name="current_streak_d">Current Adherence streak: %d</string>
     <string name="your_daily_streak">Your Streak</string>
     <string name="add_medication_txt">Add Medication</string>
     <string name="home_tab">Home</string>

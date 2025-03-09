@@ -5,21 +5,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.BottomsheetStreaksBinding
-import java.time.LocalDate
-import java.time.ZoneId
 
 /**
- * A BottomSheetFragment that displays a user's streak data.
- * This fragment connects to Firebase Firestore to fetch and update the user's login streak.
+ * A BottomSheetFragment that displays a user's daily adherence streak.
+ * Instead of tracking logins, it checks if the user has taken any medication today.
  */
 class StreakBottomSheetFragment : BottomSheetDialogFragment() {
 
@@ -33,12 +29,12 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = BottomsheetStreaksBinding.inflate(inflater, container, false)
-        Log.d("StreakView", "We are in streak view.")
+        Log.d("StreakView", "We are in adherence streak view.")
 
         db = Firebase.firestore
         auth = Firebase.auth
 
-        // Show loading text while we fetch/update streak data
+        // Show loading text while we fetch/update adherence streak data
         binding.currentStreakText.text = getString(R.string.current_streak_loading)
 
         // Set up close button for the bottom sheet
@@ -46,10 +42,12 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
             dismiss()
         }
 
-        // If the user is logged in, update the login streak
+        // If the user is logged in, update the adherence streak
         val userId = FirebaseAuth.getInstance().uid
         if (userId != null) {
-            updateLoginStreak(userId)
+        //    updateAdherenceStreak(userId)
+            listenToAdherenceChanges(userId)
+
         } else {
             Log.e("Streak", "User is not logged in")
         }
@@ -57,70 +55,24 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
         return binding.root
     }
 
-    /**
-     * Retrieves the current streak data from Firestore, calculates the new streak,
-     * and then saves the updated data back to Firestore.
-     *
-     * The logic:
-     * 1. If there's no document or no lastLogin date, start with streak = 1.
-     * 2. If lastLogin is today, do nothing.
-     * 3. If lastLogin was yesterday, increment the streak.
-     * 4. Otherwise, reset the streak to 1.
-     */
-    private fun updateLoginStreak(userId: String) {
+
+
+    private fun listenToAdherenceChanges(userId: String) {
         val userDocRef = db.collection("users").document(userId)
-
-        userDocRef.get().addOnSuccessListener { document ->
-            val currentDate = LocalDate.now()
-            var newStreak = 1 // default if no document or not consecutive
-
-            if (document.exists()) {
-                // Get current streak and last login date from Firestore
-                val loginStreak = document.getLong("loginStreak")?.toInt() ?: 0
-                val lastLoginTimestamp = document.getTimestamp("lastLogin")
-                if (lastLoginTimestamp != null) {
-                    // Convert Firestore Timestamp to LocalDate
-                    val lastLoginDate = lastLoginTimestamp.toDate().toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
-
-                    newStreak = when {
-                        lastLoginDate.isEqual(currentDate) -> {
-                            // Already logged in today; no change needed.
-                            loginStreak
-                        }
-
-                        lastLoginDate.plusDays(1).isEqual(currentDate) -> {
-                            // Last login was yesterday; increment streak.
-                            loginStreak + 1
-                        }
-
-                        else -> {
-                            // Gap in days; reset streak.
-                            1
-                        }
-                    }
-                }
+        userDocRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e("AdherenceListener", "Listen failed", error)
+                return@addSnapshotListener
             }
-
-            // Prepare data to update Firestore with the new streak and current login date
-            val data = hashMapOf(
-                "loginStreak" to newStreak,
-                "lastLogin" to Timestamp.now()
-            )
-
-            userDocRef.set(data, SetOptions.merge())
-                .addOnSuccessListener {
-                    // Update the UI text with the new streak value
-                    binding.currentStreakText.text = "Current Streak: $newStreak"
-                }
-                .addOnFailureListener { e ->
-                    Log.e("Streak", "Error updating login streak", e)
-                }
-        }.addOnFailureListener { exception ->
-            Log.e("Streak", "Error retrieving user document", exception)
+            if (snapshot != null && snapshot.exists()) {
+                val streak = snapshot.getLong("adherenceStreak")?.toInt() ?: 0
+                binding.currentStreakText.text = "Current Adherence Streak: $streak"
+                Log.d("AdherenceListener", "Current adherence streak: $streak")
+            }
         }
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
