@@ -10,6 +10,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/how_often_do_you_take_this_medication"
+            android:contentDescription="@string/how_often_do_you_take_this_medication"
             android:textColor="?attr/colorOnSurface"
             android:textSize="25sp"
             android:textStyle="bold"
@@ -24,6 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/pageTitle"
+        android:contentDescription="@string/select_frequency_of_medication"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -32,6 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:enabled="true"
+            android:contentDescription="@string/once_daily_option"
             android:text="@string/once_daily"/>
         <RadioButton
             android:id="@+id/twiceDailyButton"
@@ -39,6 +42,7 @@
             android:layout_height="match_parent"
             android:checked="false"
             android:enabled="true"
+            android:contentDescription="@string/twice_daily_option"
             android:text="@string/twice_daily"/>
 
         <RadioButton
@@ -47,6 +51,7 @@
             android:layout_height="match_parent"
             android:checked="false"
             android:enabled="true"
+            android:contentDescription="@string/weekly_option"
             android:text="Weekly"/>
 
         <RadioButton
@@ -55,12 +60,14 @@
             android:layout_height="match_parent"
             android:checked="false"
             android:enabled="true"
+            android:contentDescription="@string/cyclic_option"
             android:text="Cyclic"/>
 
         <RadioButton
             android:id="@+id/onDemandButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/on_demand_option"
             android:checked="false"
             android:enabled="true"
             android:text="@string/on_demand"/>
@@ -74,6 +81,7 @@
         android:progress="66"
         android:max="100"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:contentDescription="@string/_66_of_the_way_through_adding_medication"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -94,6 +102,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/continueSignUp"
+        android:contentDescription="@string/continueSignUp"
         app:layout_constraintBottom_toTopOf="@+id/stepText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

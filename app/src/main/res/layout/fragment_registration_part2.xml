@@ -29,6 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/first_name_hint"
+            app:startIconContentDescription="@string/person_icon"
             app:startIconDrawable="@drawable/baseline_person_24">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -48,6 +49,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/last_name_hint"
             android:layout_marginTop="16dp"
+            app:startIconContentDescription="@string/person_icon"
             app:startIconDrawable="@drawable/baseline_person_24">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -67,6 +69,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/dob_hint"
             android:layout_marginTop="16dp"
+            app:startIconContentDescription="@string/calendar_icon"
             app:startIconDrawable="@drawable/baseline_calendar_today_24">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -75,6 +78,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="none"
                 android:focusable="true"
+                android:contentDescription="@string/enter_date_of_birth"
                 android:clickable="true"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp" />
@@ -85,6 +89,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/complete_registration"
+            android:contentDescription="@string/complete_registration"
             android:textColor="@android:color/white"
             android:layout_marginTop="32dp"/>
 

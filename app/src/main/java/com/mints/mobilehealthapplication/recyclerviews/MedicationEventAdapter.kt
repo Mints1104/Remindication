@@ -30,8 +30,7 @@ class MedicationEventAdapter(private var events: List<MedicationEvent>) :
         holder.binding.eventDateText.text = event.getFormattedDate()
     }
 
-    // Define this extension function somewhere accessible
-    fun MedicationEvent.getFormattedDate(): String {
+    private fun MedicationEvent.getFormattedDate(): String {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
 

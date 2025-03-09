@@ -35,6 +35,7 @@
             android:id="@+id/email_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:startIconContentDescription="Email icon"
             android:hint="@string/email_hint2"
             app:startIconDrawable="@drawable/baseline_email_24">
             <com.google.android.material.textfield.TextInputEditText
@@ -53,8 +54,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password"
+            app:startIconContentDescription="Password icon"
             app:startIconDrawable="@drawable/baseline_lock_24"
             app:endIconMode="password_toggle"
+            app:endIconContentDescription="Toggle password visibility"
             android:layout_marginTop="16dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/password_edit_text"

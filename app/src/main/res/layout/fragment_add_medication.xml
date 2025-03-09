@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/medication_name_hint"
+        app:startIconContentDescription="@string/medication_icon"
         app:startIconDrawable="@drawable/baseline_medication_24">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/medication_name_edit_text"
@@ -30,6 +31,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/select_dosage"
         android:layout_marginTop="16dp"
+        app:startIconContentDescription="@string/dosage_icon"
         app:startIconDrawable="@drawable/baseline_medication_24">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/dosage_edit_text"
@@ -50,6 +52,7 @@
             android:layout_height="wrap_content"
             android:text="@string/select_frequency"
             android:textStyle="bold"
+            android:contentDescription="@string/select_frequency_of_medication"
             app:drawableStartCompat="@drawable/baseline_schedule_24"
             android:gravity="center_vertical"
             android:padding="8dp" />
@@ -76,6 +79,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/reminder_time_hint"
         android:layout_marginTop="16dp"
+        app:startIconContentDescription="@string/reminder_time_icon"
         app:startIconDrawable="@drawable/baseline_event_upcoming_24px">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -110,6 +114,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/save_medication"
+        android:contentDescription="@string/save"
         android:layout_gravity="center"
         android:layout_marginTop="24dp" />
 </LinearLayout>

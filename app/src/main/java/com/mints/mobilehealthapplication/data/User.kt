@@ -152,16 +152,7 @@ data class MedicationHistory(
         return events.isEmpty()
     }
 
-    fun MedicationEvent.getFormattedDate(): String {
-        val today = LocalDate.now()
-        val yesterday = today.minusDays(1)
 
-        return when (this.date.toLocalDate()) {
-            today -> "Today at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
-            yesterday -> "Yesterday at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
-            else -> this.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a"))
-        }
-    }
 
     fun wasSkippedToday():Boolean {
         val today = LocalDate.now()
