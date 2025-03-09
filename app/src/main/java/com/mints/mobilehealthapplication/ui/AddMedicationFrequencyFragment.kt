@@ -88,7 +88,7 @@ class AddMedicationFrequencyFragment : Fragment() {
         Log.d(tag,"Test before restoring prev selection: ${viewModel.frequency.value}")
         Log.d(tag,"Test before restoring prev selection: ${viewModel.getFrequencyType()}")
         if(viewModel.getIsEditing() == true) {
-            Log.d(tag,"We are editing so use saved frequencytype: ${viewModel.getFrequencyType()}")
+            Log.d(tag,"We are editing so use saved frequency type: ${viewModel.getFrequencyType()}")
             viewModel.frequencyType.value?.let { freq ->
                val radioId = when(freq) {
                    "Once Daily" -> R.id.onceDailyButton

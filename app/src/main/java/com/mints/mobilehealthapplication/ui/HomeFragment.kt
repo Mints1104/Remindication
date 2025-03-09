@@ -1,37 +1,35 @@
     package com.mints.mobilehealthapplication.ui
 
     import android.content.BroadcastReceiver
-    import android.content.Context
-    import android.content.Intent
-    import android.content.IntentFilter
-    import android.os.Bundle
-    import android.util.Log
-    import android.view.LayoutInflater
-    import android.view.View
-    import android.view.ViewGroup
-    import android.widget.Toast
-    import androidx.fragment.app.Fragment
-    import androidx.fragment.app.activityViewModels
-    import androidx.lifecycle.MutableLiveData
-    import androidx.localbroadcastmanager.content.LocalBroadcastManager
-    import androidx.navigation.fragment.findNavController
-    import androidx.recyclerview.widget.ItemTouchHelper
-    import androidx.recyclerview.widget.LinearLayoutManager
-    import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-    import com.google.android.material.snackbar.Snackbar
-    import com.google.firebase.auth.FirebaseAuth
-    import com.mints.mobilehealthapplication.R
-    import com.mints.mobilehealthapplication.data.Medication
-    import com.mints.mobilehealthapplication.data.MedicationEvent
-    import com.mints.mobilehealthapplication.data.MedicationInfo
-    import com.mints.mobilehealthapplication.data.MedicationSchedule
-    import com.mints.mobilehealthapplication.data.NotificationHelper
-    import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
-    import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
-    import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
-    import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
-    import java.time.LocalDate
-    import java.time.LocalDateTime
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.data.Medication
+import com.mints.mobilehealthapplication.data.MedicationEvent
+import com.mints.mobilehealthapplication.data.MedicationSchedule
+import com.mints.mobilehealthapplication.data.NotificationHelper
+import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
+import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
+import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
+import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 
     /**
@@ -44,9 +42,6 @@
         private val binding get() = _binding!!
         private lateinit var adapter: MedicationRecyclerView
         private var uid = ""
-        private var medicationList = MutableLiveData<List<Medication>>()
-        private val addMedicationViewModel: AddMedicationViewModel by activityViewModels()
-        private lateinit var medToClear: Medication
         private lateinit var notificationHelper: NotificationHelper
         private var tag = "HomeFragment"
         private var deviceConnected = false
@@ -182,14 +177,11 @@
             addSwipeFunctionality()
             viewModel.medications.observe(viewLifecycleOwner) { medications ->
                 Log.d(tag, "Observed ${medications.size} medications in LiveData")
-              //  adapter.updateMedicationList(medications)
                 val filteredMeds = getUncompletedMedicationsForToday(medications)
                 adapter.updateMedicationList(filteredMeds)
                 adapter.hideAllMedicationDays()
-
                 getClosestDate(filteredMeds)
-              //  printOutMedicationHistory(medications)
-              //  viewModel.testCheckingDatesInPast(uid)
+
             }
 
 
@@ -198,25 +190,6 @@
             Log.d(tag, "RecyclerView setup complete")
         }
 
-        private fun printOutMedicationHistory(currentList: List<Medication>) {
-
-            currentList.forEach { medication ->
-
-
-                val history = medication.medicationHistory.events
-
-                if (history.isNotEmpty()) {
-
-                    history.forEach { event ->
-                        Log.d(tag, "${medication.name}: Event: $event")
-                    }
-                } else {
-                    Log.e(tag, "${medication.name}: History is empty!")
-
-                }
-
-            }
-        }
 
 
 
@@ -372,14 +345,7 @@
                 .show()
         }
 
-        private fun getClosestMedication(currentList: List<Medication>) {
-            val regularSchedList = currentList.filter {
-                it.schedule is MedicationSchedule.Daily || it.schedule is MedicationSchedule.WeeklySchedule
-            }
-            val now = LocalDateTime.now()
 
-
-        }
 
         private fun getClosestDate(currentList: List<Medication>) {
             Log.d(tag, "Starting getClosestDate function")
@@ -450,13 +416,6 @@
                 }
         }
 
-        /**
-         * Updates the card displaying the next medication to be taken.
-         * @param medication The medication to display in the next card.
-         */
-        private fun updateNextMedicationCard(medication: MedicationInfo?) {
-            // Logic for updating the next medication card goes here
-        }
 
 
 

@@ -75,7 +75,7 @@ class   MidnightWorker(
 
         // Find all dates that are “missed” (i.e. scheduled in the past)
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
-        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hasEventToday()
+        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()
         ) {
             val missedEvents = mutableListOf<MedicationEvent>()
 
@@ -147,7 +147,7 @@ class   MidnightWorker(
         // Find missed dates and mark the earliest one as missed.
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() &&
-            !medication.medicationHistory.hasEventToday()
+            !medication.medicationHistory.hadEventYesterday()
         ) {
             val missedDateTime = missedDueDates.minByOrNull { it }!!
             Log.d(TAG, "${medication.name} missed at $missedDateTime, marking as missed")
