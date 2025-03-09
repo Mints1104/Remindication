@@ -30,6 +30,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.data.InternetConnectionChecker
 import com.mints.mobilehealthapplication.data.NHSMedication
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         checkAuthenticationState()
         requestNotificationPermission()
         setUpAlarmManager()
+        checkNetworkState()
         val nhsMedication = NHSMedication()
         val callApiButton = findViewById<MaterialButton>(R.id.call_Api)
         callApiButton.setOnClickListener {
@@ -68,6 +70,31 @@ class MainActivity : AppCompatActivity() {
             nhsMedication.testGetMedicineDetails("Allopurinol")
         }
     }
+
+    private fun checkNetworkState() {
+        val internetChecker = InternetConnectionChecker(this)
+        val initialConnectionStatus = internetChecker.checkInternetConnection()
+
+
+
+        if(initialConnectionStatus) {
+            Log.d("MainActivity","Initial internet check is true")
+        } else {
+            Log.d("MainActivity","Initial internet check is false")
+
+        }
+
+        internetChecker.registerNetworkCallback()
+        if(internetChecker.isConnected) {
+            Log.d("MainActivity","User is connected to internet")
+        } else {
+            Log.d("MainActivity","User is NOT connected to internet")
+
+        }
+
+    }
+
+
 
 
         private fun setUpAlarmManager() {
