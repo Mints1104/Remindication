@@ -49,6 +49,7 @@
         private lateinit var medToClear: Medication
         private lateinit var notificationHelper: NotificationHelper
         private var tag = "HomeFragment"
+        private var deviceConnected = false
 
         private val viewModel: HomeFragmentViewModel by activityViewModels(
             factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
@@ -91,10 +92,11 @@
             setupFAB()
             setUpRecyclerView()
             showLoadingState()
-
+            deviceConnected = isDeviceConnected()
+            Log.d(tag,"Is device connected: $deviceConnected ")
             uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             Log.d(tag, "Current user UID: $uid")
-
+            observeNetworkState()
             if (uid.isEmpty()) {
                 Log.e(tag, "User is not authenticated")
                 Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
@@ -139,6 +141,17 @@
             const val REFRESH_ACTION = "com.mints.mobilehealthapplication.REFRESH_MEDICATIONS"
         }
 
+        private fun observeNetworkState() {
+            val mainActivity = requireActivity() as MainActivity
+            mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
+                deviceConnected = isConnected
+            }
+        }
+
+        private fun isDeviceConnected(): Boolean {
+            val mainActivity = requireActivity() as MainActivity
+            return mainActivity.checkNetworkState()
+        }
 
         /**
          * Sets up the RecyclerView to display a list of medications.
@@ -281,15 +294,28 @@
                 ),
                 onSwipeLeft = { position ->
                     val medication = adapter.getMedicationAt(position)
-                    displayMessage("Mark ${medication.name} as skipped")
-                    showUndoSkipMedicationSnackbar(medication,position)
+                    if(deviceConnected) {
+                        displayMessage("Mark ${medication.name} as skipped")
+                        showUndoSkipMedicationSnackbar(medication, position)
+                    } else {
+                        displayMessage("Device not connected to internet")
+                        Log.d(tag,"Cannot mark as skipped as device not connected to internet")
+
+                    }
                     adapter.notifyItemChanged(position)
+
 
                 },
                 onSwipeRight = { position ->
                     val medication = adapter.getMedicationAt(position)
-                    displayMessage("Mark ${medication.name} as taken")
-                    showUndoMedicationSnackbar(medication,position)
+                    if(deviceConnected) {
+                        displayMessage("Mark ${medication.name} as taken")
+                        showUndoMedicationSnackbar(medication, position)
+
+                    } else {
+                        displayMessage("Device not connected to internet")
+                        Log.d(tag,"Cannot mark as taken as device not connected to internet")
+                    }
                     adapter.notifyItemChanged(position)
 
 
@@ -416,8 +442,12 @@
         private fun setupFAB() {
             val fab = requireActivity().findViewById<ExtendedFloatingActionButton>(R.id.add_medication_fab)
             fab.setOnClickListener {
+                if(deviceConnected) {
                 findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
-            }
+            } else {
+                displayMessage("Device not connected to internet")
+                }
+                }
         }
 
         /**

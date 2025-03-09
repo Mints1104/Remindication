@@ -45,11 +45,11 @@ class MainActivity : AppCompatActivity() {
     private var shouldShowMenu = false
     private lateinit var alarmManager: AlarmManager
     private val REQUEST_PERMISSION_CODE = 1001
-
-    private var currentMenu: Int? = null
+    lateinit var internetChecker: InternetConnectionChecker
+        private var currentMenu: Int? = null
 
     val homeFragmentViewModelFactory: HomeFragmentViewModelFactory by lazy {
-        HomeFragmentViewModelFactory(NotificationHelper(this))
+        HomeFragmentViewModelFactory(NotificationHelper(applicationContext))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +61,18 @@ class MainActivity : AppCompatActivity() {
         checkAuthenticationState()
         requestNotificationPermission()
         setUpAlarmManager()
+        internetChecker = InternetConnectionChecker(applicationContext)
+        internetChecker.registerNetworkCallback()
+
+        val initialConnectionStatus = internetChecker.checkInternetConnection()
+        if(initialConnectionStatus) {
+            Log.d("MainActivity","Initial internet check is true")
+        } else {
+            Log.d("MainActivity","Initial internet check is false")
+
+        }
         checkNetworkState()
+
         val nhsMedication = NHSMedication()
         val callApiButton = findViewById<MaterialButton>(R.id.call_Api)
         callApiButton.setOnClickListener {
@@ -71,27 +82,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkNetworkState() {
-        val internetChecker = InternetConnectionChecker(this)
-        val initialConnectionStatus = internetChecker.checkInternetConnection()
-
-
-
-        if(initialConnectionStatus) {
-            Log.d("MainActivity","Initial internet check is true")
-        } else {
-            Log.d("MainActivity","Initial internet check is false")
-
-        }
-
-        internetChecker.registerNetworkCallback()
-        if(internetChecker.isConnected) {
-            Log.d("MainActivity","User is connected to internet")
-        } else {
-            Log.d("MainActivity","User is NOT connected to internet")
-
-        }
-
+    fun checkNetworkState(): Boolean {
+        return internetChecker.isConnected
     }
 
 
@@ -391,5 +383,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    override fun onDestroy() {
+        internetChecker.unregisterNetworkCallback()
+        super.onDestroy()
     }
 }

@@ -4,35 +4,49 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 class InternetConnectionChecker(private val context: Context) {
 
     private val TAG = "InternetConnectionChecker"
+    private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
-    // Variable to store the connection status
+    // LiveData for observing connection state changes
+    private val _connectionState = MutableLiveData<Boolean>()
+    val connectionState: LiveData<Boolean> = _connectionState
+
+    // Variable to store the connection status (still useful for immediate checks)
     var isConnected: Boolean = false
         private set
+
+    init {
+        // Initialize connection state
+        checkInternetConnection()
+        // Register network callback in initialization
+        registerNetworkCallback()
+    }
 
     /**
      * Checks if the device has an active internet connection
      * @return Boolean indicating if internet is available
      */
     fun checkInternetConnection(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
         // For Android 6.0+ (API 23+)
         val network: Network? = connectivityManager.activeNetwork
         if (network == null) {
             Log.d(TAG, "No active network detected")
-            isConnected = false
+            updateConnectionState(false)
             return false
         }
 
         val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
         if (networkCapabilities == null) {
             Log.d(TAG, "No network capabilities detected")
-            isConnected = false
+            updateConnectionState(false)
             return false
         }
 
@@ -40,7 +54,7 @@ class InternetConnectionChecker(private val context: Context) {
         val hasInternet = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 
-        isConnected = hasInternet
+        updateConnectionState(hasInternet)
 
         if (hasInternet) {
             Log.d(TAG, "Internet connection available")
@@ -64,21 +78,31 @@ class InternetConnectionChecker(private val context: Context) {
     }
 
     /**
+     * Updates the connection state and LiveData
+     */
+    private fun updateConnectionState(connected: Boolean) {
+        isConnected = connected
+        _connectionState.postValue(connected)
+    }
+
+    /**
      * Sets up a network callback to monitor network changes
+     * This should be called only once, preferably when the app starts
      */
     fun registerNetworkCallback() {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        // Avoid registering multiple callbacks
+        if (networkCallback != null) return
 
-        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
-                isConnected = true
                 Log.d(TAG, "Network available")
+                // Don't immediately update state here - wait for capabilities check
             }
 
             override fun onLost(network: Network) {
                 super.onLost(network)
-                isConnected = false
+                updateConnectionState(false)
                 Log.d(TAG, "Network lost")
             }
 
@@ -87,11 +111,23 @@ class InternetConnectionChecker(private val context: Context) {
                 val hasInternet = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
                         networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 
-                isConnected = hasInternet
+                updateConnectionState(hasInternet)
                 Log.d(TAG, "Network capabilities changed, internet available: $hasInternet")
             }
         }
 
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        val request = NetworkRequest.Builder().build()
+        connectivityManager.registerNetworkCallback(request, networkCallback!!)
+    }
+
+    /**
+     * Unregisters the network callback to prevent memory leaks
+     * This should be called when the app is being destroyed
+     */
+    fun unregisterNetworkCallback() {
+        networkCallback?.let {
+            connectivityManager.unregisterNetworkCallback(it)
+            networkCallback = null
+        }
     }
 }

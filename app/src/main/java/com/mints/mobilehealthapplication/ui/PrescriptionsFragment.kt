@@ -38,6 +38,7 @@ class PrescriptionsFragment : Fragment() {
     private var medicationList = MutableLiveData<List<Medication>>()
     private lateinit var notificationHelper: NotificationHelper
     private var tag = "PrescriptionsFrag"
+    private var deviceConnected = false
 
     private val viewModel: HomeFragmentViewModel by activityViewModels(
         factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
@@ -63,6 +64,8 @@ class PrescriptionsFragment : Fragment() {
         setUpRecyclerView()
         fetchUserMedication()
         viewModel.getCurrentDay()
+        deviceConnected = isDeviceConnected()
+        observeNetworkState()
 
         val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
@@ -73,6 +76,17 @@ class PrescriptionsFragment : Fragment() {
 
     }
 
+    private fun observeNetworkState() {
+        val mainActivity = requireActivity() as MainActivity
+        mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
+            deviceConnected = isConnected
+        }
+    }
+
+    private fun isDeviceConnected(): Boolean {
+        val mainActivity = requireActivity() as MainActivity
+        return mainActivity.checkNetworkState()
+    }
 
 
     private fun fetchUserMedication() {
@@ -163,19 +177,31 @@ class PrescriptionsFragment : Fragment() {
             ),
             onSwipeLeft = { position ->
                 val medicationName = adapter.getMedicationNameAt(position)
-                val medication= adapter.getMedicationAt(position)
-                displayMessage("Delete medication: $medicationName")
-                showUndoSnackbar(medication, position)
+                if(deviceConnected) {
+                    val medication = adapter.getMedicationAt(position)
+                    displayMessage("Delete medication: $medicationName")
+                    showUndoSnackbar(medication, position)
+                } else {
+                    displayMessage("Device not connected to internet")
+
+                }
+                adapter.notifyItemChanged(position)
+
             },
             onSwipeRight = { position ->
-                adapter.notifyItemChanged(position)
                 val medication = adapter.getMedicationAt(position)
-                val medicationId = medication.id
-                val action = PrescriptionsFragmentDirections
-                    .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
-                findNavController().navigate(action)
+                if(deviceConnected) {
+                    val medicationId = medication.id
+                    val action = PrescriptionsFragmentDirections
+                        .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
+                    findNavController().navigate(action)
 
+                } else {
+                    displayMessage("Device not connected to internet")
+                }
+                adapter.notifyItemChanged(position)
             }
+
         )
 
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
