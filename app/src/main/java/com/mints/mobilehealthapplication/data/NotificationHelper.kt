@@ -19,6 +19,7 @@ class NotificationHelper(private val context: Context) {
         private const val CHANNEL_ID = "medication_reminder_channel"
         private const val CHANNEL_NAME = "Medication Reminders"
         const val NOTIFICATION_ACTION = "MEDICATION_NOTIFICATION_ACTION"
+        const val SNOOZE_ACTION = "MEDICATION_SNOOZE_ACTION"
     }
 
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -47,17 +48,35 @@ class NotificationHelper(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun showNotification(medicationName: String) {
+
+
+    fun showNotification(medicationName: String,scheduleTime:Long) {
         Log.d("NotifDebug", "Building notification for $medicationName")
 
-        val intent = Intent(context, MainActivity::class.java).apply {
+        //Intent to open the app when the notification is tapped
+
+        val mainIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+        val mainPendingIntent = PendingIntent.getActivity(
+            context, 0, mainIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+
+        //Create snooze intent
+        val snoozeIntent = Intent(context,NotificationReceiver::class.java).apply {
+            action = SNOOZE_ACTION
+            putExtra("medication_name",medicationName)
+            putExtra("schedule_time",scheduleTime)
+        }
+        val snoozePendingIntent = PendingIntent.getBroadcast(
+            context,
+            snoozeIntent.hashCode(),
+            snoozeIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.baseline_prescriptions_24px)
@@ -65,7 +84,8 @@ class NotificationHelper(private val context: Context) {
             .setContentText("Time to take $medicationName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
+            .setContentIntent(mainPendingIntent)
+            .addAction(R.drawable.baseline_ic_snooze,"Snooze",snoozePendingIntent)
         Log.i("NotifDebug", "Notification displayed for $medicationName")
 
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
@@ -86,7 +106,6 @@ class NotificationHelper(private val context: Context) {
         val requestCode = uniqueUri.hashCode()
 
         //Check if there is already an existing PendingIntent
-
         val existingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
@@ -118,8 +137,7 @@ class NotificationHelper(private val context: Context) {
     }
 
 
-    fun getContext(): Context {
-        return context
-    }
+    fun getContext(): Context = context
+
 }
 
