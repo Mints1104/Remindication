@@ -42,7 +42,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 val snoozeDelayMillis = snoozeDuration * 60 * 1000L
                 val newTime = System.currentTimeMillis() + snoozeDelayMillis
                 val notificationHelper = NotificationHelper(context)
-                notificationHelper.scheduleNotification(medicationName,newTime)
+                notificationHelper.scheduleNotification(medicationName,newTime,true)
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 val notificationId = medicationName.hashCode()
                 notificationManager.cancel(notificationId)
@@ -73,7 +73,7 @@ class NotificationReceiver : BroadcastReceiver() {
                         val backupTime = System.currentTimeMillis() + backupDelayMillis
 
                         //Schedule a backup notification for this medication
-                        notificationHelper.scheduleNotification(medicationName,backupTime)
+                        notificationHelper.scheduleNotification(medicationName,backupTime,true)
                         Log.d("NotifDebug", "Backup notification scheduled for $medicationName for ${Instant.ofEpochMilli(backupTime)}")
 
 

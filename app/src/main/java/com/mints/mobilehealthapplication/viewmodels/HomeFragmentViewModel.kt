@@ -567,6 +567,8 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                      _medications.value = _medications.value?.map {
                          if(it.id == medication.id) medication else it
                      }
+                     NotificationHelper(notificationHelper.getContext()).cancelBackupNotification(medication.name)
+
                      val streakUpdated = FireStoreRepository.updateAdherenceStreak(userId)
                      if (!streakUpdated) {
                          Log.e("HomeViewModel", "Failed to update adherence streak.")
@@ -629,6 +631,8 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
+                        NotificationHelper(notificationHelper.getContext()).cancelBackupNotification(medication.name)
+
                     } else {
                         Log.e("HomeViewModel","Error marking ${medication.name} as skipped")
                     }
