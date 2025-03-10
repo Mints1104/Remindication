@@ -5,8 +5,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.preference.PreferenceManager
 import com.mints.mobilehealthapplication.data.NotificationHelper.Companion.NOTIFICATION_ACTION
 import com.mints.mobilehealthapplication.data.NotificationHelper.Companion.SNOOZE_ACTION
+import java.time.Instant
 import java.util.Date
 
 class NotificationReceiver : BroadcastReceiver() {
@@ -34,21 +36,24 @@ class NotificationReceiver : BroadcastReceiver() {
                     Log.e("NotifDebug","Medication name is null or empty for the snooze action.")
                     return
                 }
-                val snoozeDelayMillis = 10 * 60 * 1000L //10 mins in ms
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                val snoozeDuration = prefs.getString("snooze_duration", "5")?.toLong() ?: 5L
+                Log.d("NotifDebug","Snoozing alarm by: $snoozeDuration.")
+                val snoozeDelayMillis = snoozeDuration * 60 * 1000L
                 val newTime = System.currentTimeMillis() + snoozeDelayMillis
                 val notificationHelper = NotificationHelper(context)
                 notificationHelper.scheduleNotification(medicationName,newTime)
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 val notificationId = medicationName.hashCode()
                 notificationManager.cancel(notificationId)
-                Log.d("NotifDebug","Snoozed $medicationName to $newTime")
+                Log.d("NotifDebug","Snoozed $medicationName to ${Date(newTime)}")
             }
             NOTIFICATION_ACTION -> {
                 //Handle a regular notification
                 val medicationName = intent.getStringExtra("medication_name")
                 val scheduleTime = intent.getLongExtra("schedule_time",0)
                 Log.d("NotifDebug","Extracted medName: $medicationName")
-                Log.d("NotifDebug","Extracted schedule time: ${Date(scheduleTime)}")
+                Log.d("NotifDebug","Extracted schedule time: ${Instant.ofEpochMilli(scheduleTime)}")
                 if (medicationName.isNullOrEmpty()) {
                     Log.e("NotifDebug","Medication name is null or empty")
                     return
@@ -57,6 +62,22 @@ class NotificationReceiver : BroadcastReceiver() {
                     val notificationHelper = NotificationHelper(context)
                     notificationHelper.showNotification(medicationName,scheduleTime)
                     Log.d("NotifDebug","Successfully showed notification for $medicationName")
+                    //Check backup reminder settings and schedule backup if enabled
+                    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                    val backupEnabled = prefs.getBoolean("enabled_backup_reminder",true)
+                    Log.d("NotifDebug","Is backups enabled: $backupEnabled")
+                    if(backupEnabled) {
+                        //Get backup delay in minutes, defaulting to 30 mins
+                        val backupDelayMinutes = prefs.getString("backup_reminder_delay","30")?.toLong()?:30L
+                        val backupDelayMillis = backupDelayMinutes * 60 * 1000L
+                        val backupTime = System.currentTimeMillis() + backupDelayMillis
+
+                        //Schedule a backup notification for this medication
+                        notificationHelper.scheduleNotification(medicationName,backupTime)
+                        Log.d("NotifDebug", "Backup notification scheduled for $medicationName for ${Instant.ofEpochMilli(backupTime)}")
+
+
+                    }
 
                 }catch(e:Exception) {
                     Log.e("NotifDebug","Failed to show notification",e)
