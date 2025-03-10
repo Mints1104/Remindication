@@ -1,5 +1,6 @@
 package com.mints.mobilehealthapplication.data
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -37,6 +38,9 @@ class NotificationReceiver : BroadcastReceiver() {
                 val newTime = System.currentTimeMillis() + snoozeDelayMillis
                 val notificationHelper = NotificationHelper(context)
                 notificationHelper.scheduleNotification(medicationName,newTime)
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notificationId = medicationName.hashCode()
+                notificationManager.cancel(notificationId)
                 Log.d("NotifDebug","Snoozed $medicationName to $newTime")
             }
             NOTIFICATION_ACTION -> {

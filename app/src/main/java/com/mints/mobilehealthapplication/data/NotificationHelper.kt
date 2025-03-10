@@ -87,8 +87,9 @@ class NotificationHelper(private val context: Context) {
             .setContentIntent(mainPendingIntent)
             .addAction(R.drawable.baseline_ic_snooze,"Snooze",snoozePendingIntent)
         Log.i("NotifDebug", "Notification displayed for $medicationName")
+        val notificationId = medicationName.hashCode()
+        notificationManager.notify(notificationId, builder.build())
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 
     @SuppressLint("ScheduleExactAlarm")
