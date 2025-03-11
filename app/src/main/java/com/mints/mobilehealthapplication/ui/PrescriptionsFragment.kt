@@ -216,15 +216,16 @@ class PrescriptionsFragment : Fragment() {
         val currentList = adapter.getMedicationList().toMutableList()
         val removedItem = currentList.removeAt(position)
 
-        // Update adapter with new list using DiffUtil
+        // Update adapter with new list and notify only about the removed item
         adapter.updateMedicationList(currentList)
+        adapter.notifyItemRemoved(position)
 
         Snackbar.make(binding.root, "${medication.name} deleted", Snackbar.LENGTH_LONG)
             .setAction("UNDO") {
                 // Re-insert at original position
                 currentList.add(position, removedItem)
                 adapter.updateMedicationList(currentList)
-                adapter.notifyItemChanged(position)
+                adapter.notifyItemInserted(position)
 
             }
             .addCallback(object : Snackbar.Callback() {
@@ -233,7 +234,6 @@ class PrescriptionsFragment : Fragment() {
                         // Delete from ViewModel after confirmation
                         medication.id?.let {
                             viewModel.deleteMedication(uid, it) {
-                                viewModel.getMedications(uid)
                             }
                         }
                     }

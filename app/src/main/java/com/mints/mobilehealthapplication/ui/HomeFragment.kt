@@ -4,13 +4,15 @@
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Bundle
+    import android.content.SharedPreferences
+    import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
+    import androidx.core.view.isVisible
+    import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
@@ -23,7 +25,8 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
-import com.mints.mobilehealthapplication.data.NotificationHelper
+    import com.mints.mobilehealthapplication.data.MotivationManager
+    import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
@@ -84,12 +87,23 @@ import java.time.LocalDateTime
             notificationHelper = NotificationHelper(requireContext())
 
 
+            binding.motivationCover.setOnClickListener {
+                revealMotivationContent()
+                it.visibility = View.GONE
+            }
+
+
             val mainActivity = requireActivity() as MainActivity
             mainActivity.showAllUI()
             setupFAB()
             setUpRecyclerView()
             showLoadingState()
+            resetIfNewDay()
+
             deviceConnected = isDeviceConnected()
+
+
+
             Log.d(tag,"Is device connected: $deviceConnected ")
             uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             Log.d(tag, "Current user UID: $uid")
@@ -189,9 +203,9 @@ import java.time.LocalDateTime
 
                 scheduledMeds.forEach { Log.d("ScheduledMeds","Test: ${it.name}") }
                 onDemandMeds.forEach { Log.d("OnDemandMeds","TestOD: ${it.name}") }
-                adapter.updateMedicationList(filteredMeds)
+                adapter.updateMedicationList(scheduledMeds)
                 adapter.hideAllMedicationDays()
-                getClosestDate(filteredMeds)
+                getClosestDate(scheduledMeds)
 
             }
 
@@ -280,7 +294,7 @@ import java.time.LocalDateTime
                     val medication = adapter.getMedicationAt(position)
                     if(deviceConnected) {
                         displayMessage("Mark ${medication.name} as skipped")
-                        showUndoSkipMedicationSnackbar(medication, position)
+                        showUndoSnackbar(medication, position, true)
                     } else {
                         displayMessage("Device not connected to internet")
                         Log.d(tag,"Cannot mark as skipped as device not connected to internet")
@@ -294,7 +308,7 @@ import java.time.LocalDateTime
                     val medication = adapter.getMedicationAt(position)
                     if(deviceConnected) {
                         displayMessage("Mark ${medication.name} as taken")
-                        showUndoMedicationSnackbar(medication, position)
+                        showUndoSnackbar(medication, position, false)
 
                     } else {
                         displayMessage("Device not connected to internet")
@@ -310,20 +324,23 @@ import java.time.LocalDateTime
         }
 
 
-        private fun showUndoMedicationSnackbar(medication: Medication,position: Int) {
+        private fun showUndoSnackbar(medication: Medication, position: Int, isSkipped: Boolean) {
             val currentList = adapter.getMedicationList().toMutableList()
-
-            Snackbar.make(binding.root,"${medication.name} taken", Snackbar.LENGTH_LONG)
+            val message = if (isSkipped) "${medication.name} skipped" else "${medication.name} taken"
+            Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
                 .setAction("UNDO") {
                     viewModel.undoLastTaken(medication)
                     adapter.updateMedicationList(currentList)
                     adapter.notifyItemChanged(position)
-
                 }
                 .addCallback(object : Snackbar.Callback() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         if (event != DISMISS_EVENT_ACTION) {
-                            viewModel.markMedicationAsTaken(uid,medication)
+                            if (isSkipped) {
+                                viewModel.markMedicationAsSkipped(uid, medication)
+                            } else {
+                                viewModel.markMedicationAsTaken(uid, medication)
+                            }
                             adapter.updateMedicationList(currentList)
                             adapter.notifyItemChanged(position)
                         }
@@ -333,28 +350,51 @@ import java.time.LocalDateTime
         }
 
 
-        private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {
-            val currentList = adapter.getMedicationList().toMutableList()
-
-            Snackbar.make(binding.root,"${medication.name} skipped", Snackbar.LENGTH_LONG)
-                .setAction("UNDO") {
-                    viewModel.undoLastTaken(medication)
-                    adapter.updateMedicationList(currentList)
-                    adapter.notifyItemChanged(position)
-
-                }
-                .addCallback(object : Snackbar.Callback() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        if (event != DISMISS_EVENT_ACTION) {
-                            viewModel.markMedicationAsSkipped(uid,medication)
-
-                            adapter.updateMedicationList(currentList)
-                            adapter.notifyItemChanged(position)
-                        }
-                    }
-                })
-                .show()
-        }
+//        private fun showUndoMedicationSnackbar(medication: Medication,position: Int) {
+//            val currentList = adapter.getMedicationList().toMutableList()
+//
+//            Snackbar.make(binding.root,"${medication.name} taken", Snackbar.LENGTH_LONG)
+//                .setAction("UNDO") {
+//                    viewModel.undoLastTaken(medication)
+//                    adapter.updateMedicationList(currentList)
+//                    adapter.notifyItemChanged(position)
+//
+//                }
+//                .addCallback(object : Snackbar.Callback() {
+//                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+//                        if (event != DISMISS_EVENT_ACTION) {
+//                            viewModel.markMedicationAsTaken(uid,medication)
+//                            adapter.updateMedicationList(currentList)
+//                            adapter.notifyItemChanged(position)
+//                        }
+//                    }
+//                })
+//                .show()
+//        }
+//
+//
+//        private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {
+//            val currentList = adapter.getMedicationList().toMutableList()
+//
+//            Snackbar.make(binding.root,"${medication.name} skipped", Snackbar.LENGTH_LONG)
+//                .setAction("UNDO") {
+//                    viewModel.undoLastTaken(medication)
+//                    adapter.updateMedicationList(currentList)
+//                    adapter.notifyItemChanged(position)
+//
+//                }
+//                .addCallback(object : Snackbar.Callback() {
+//                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+//                        if (event != DISMISS_EVENT_ACTION) {
+//                            viewModel.markMedicationAsSkipped(uid,medication)
+//
+//                            adapter.updateMedicationList(currentList)
+//                            adapter.notifyItemChanged(position)
+//                        }
+//                    }
+//                })
+//                .show()
+//        }
 
 
 
@@ -413,8 +453,55 @@ import java.time.LocalDateTime
             Log.d(tag, "No more scheduled medications to complete!")
             binding.nextMedicationName.text = getString(R.string.no_medications_left)
             binding.nextMedicationTime.text = ""
+            binding.motivationCover.visibility = View.VISIBLE
 
 
+        }
+
+        // Kotlin
+        private fun revealMotivationContent() {
+            val sharedPref = requireContext().getSharedPreferences("motivation_prefs", Context.MODE_PRIVATE)
+            val alreadyUncovered = sharedPref.getBoolean("already_uncovered", false)
+
+            if (!alreadyUncovered) {
+                when (val content = MotivationManager.pickOrRetrieveContentForToday(requireContext())) {
+                    is MotivationManager.ContentOption.Image -> {
+                        binding.specialImageView.setImageResource(content.drawableId)
+                        binding.specialImageView.isVisible = true
+                        binding.specialQuoteTextView.isVisible = false
+                        binding.specialImageView.setOnClickListener {
+                            binding.specialImageView.isVisible = false
+                            sharedPref.edit().putBoolean("already_uncovered", true).apply()
+                        }
+                    }
+                    is MotivationManager.ContentOption.Quote -> {
+                        binding.specialQuoteTextView.text = content.text
+                        binding.specialQuoteTextView.isVisible = true
+                        binding.specialImageView.isVisible = false
+                        binding.specialQuoteTextView.setOnClickListener {
+                            binding.specialQuoteTextView.isVisible = false
+                            sharedPref.edit().putBoolean("already_uncovered", true).apply()
+                        }
+                    }
+                }
+            }
+        }
+
+        private fun isNewDay(sharedPref: SharedPreferences): Boolean {
+            val lastDate = sharedPref.getString("last_uncovered_date", null)
+            val todayDate = LocalDate.now().toString()
+            return lastDate == null || lastDate != todayDate
+        }
+
+        // Resets the uncover flag if it's a new day.
+        private fun resetIfNewDay() {
+            val sharedPref = requireContext().getSharedPreferences("motivation_prefs", Context.MODE_PRIVATE)
+            if (isNewDay(sharedPref)) {
+                sharedPref.edit()
+                    .putBoolean("already_uncovered", false)
+                    .putString("last_uncovered_date", LocalDate.now().toString())
+                    .apply()
+            }
         }
 
 
