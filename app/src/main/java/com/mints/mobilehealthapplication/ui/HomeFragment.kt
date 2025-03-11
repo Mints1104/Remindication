@@ -45,6 +45,8 @@ import java.time.LocalDateTime
         private lateinit var notificationHelper: NotificationHelper
         private var tag = "HomeFragment"
         private var deviceConnected = false
+        private var scheduledMeds = mutableListOf<Medication>()
+        private var onDemandMeds = mutableListOf<Medication>()
 
         private val viewModel: HomeFragmentViewModel by activityViewModels(
             factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
@@ -179,6 +181,14 @@ import java.time.LocalDateTime
             viewModel.medications.observe(viewLifecycleOwner) { medications ->
                 Log.d(tag, "Observed ${medications.size} medications in LiveData")
                 val filteredMeds = getUncompletedMedicationsForToday(medications)
+                 scheduledMeds = filteredMeds.filter {
+                     it.schedule !is MedicationSchedule.OnDemand
+                 }.toMutableList()
+                onDemandMeds = filteredMeds.filter { it.schedule is MedicationSchedule.OnDemand }
+                    .toMutableList()
+
+                scheduledMeds.forEach { Log.d("ScheduledMeds","Test: ${it.name}") }
+                onDemandMeds.forEach { Log.d("OnDemandMeds","TestOD: ${it.name}") }
                 adapter.updateMedicationList(filteredMeds)
                 adapter.hideAllMedicationDays()
                 getClosestDate(filteredMeds)
@@ -392,15 +402,20 @@ import java.time.LocalDateTime
                     binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toLocalTime().toString())
                 }
             } else {
-                Log.d(tag, "No future due dates found.")
-                binding.nextMedicationName.text = getString(R.string.no_medications_left)
-                binding.nextMedicationTime.text = ""
+                handleAllMedicationsCompleted()
+
             }
 
             Log.d(tag, "Completed getClosestDate function")
         }
 
+        private fun handleAllMedicationsCompleted() {
+            Log.d(tag, "No more scheduled medications to complete!")
+            binding.nextMedicationName.text = getString(R.string.no_medications_left)
+            binding.nextMedicationTime.text = ""
 
+
+        }
 
 
         /**

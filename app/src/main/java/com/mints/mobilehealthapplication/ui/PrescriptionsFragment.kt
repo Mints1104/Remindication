@@ -20,7 +20,7 @@ import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.databinding.FragmentPrescriptionsBinding
-import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
+import com.mints.mobilehealthapplication.recyclerviews.PrescriptionsRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
 
@@ -33,7 +33,7 @@ class PrescriptionsFragment : Fragment() {
 
     private var _binding: FragmentPrescriptionsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var adapter: MedicationRecyclerView
+    private lateinit var adapter: PrescriptionsRecyclerView
     private var uid = ""
     private var medicationList = MutableLiveData<List<Medication>>()
     private lateinit var notificationHelper: NotificationHelper
@@ -114,7 +114,7 @@ class PrescriptionsFragment : Fragment() {
     private fun setUpRecyclerView() {
         Log.d("HomeFragment", "Setting up RecyclerView")
 
-        adapter = MedicationRecyclerView(emptyList()) { medication ->
+        adapter = PrescriptionsRecyclerView(emptyList()) { medication ->
             viewModel.onMedicationClicked(medication)
             when (val schedule = medication.schedule) {
                 is MedicationSchedule.Daily -> {

@@ -35,6 +35,9 @@ class MedicationHistoryFragment : Fragment() {
         _binding = FragmentMedicationhistoryBinding.inflate(inflater, container, false)
         setUpRecyclerView()
         fetchUserMedication()
+
+        val mainActivity = activity as MainActivity
+        mainActivity.showBottomNav()
         return binding.root
     }
 

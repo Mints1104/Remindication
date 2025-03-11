@@ -346,12 +346,12 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.settings_tab -> {
-                navController.navigate(R.id.action_homeFragment_to_settingsFragment)
+                navController.navigate(R.id.global_action_to_settingsFragment)
                 true
             }
             R.id.action_logout -> {
                 auth.signOut()
-                navController.navigate(R.id.action_homeFragment_to_loginFragment)
+                navController.navigate(R.id.global_action_to_loginFragment)
                 true
             }
             R.id.streaks -> {
