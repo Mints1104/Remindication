@@ -160,13 +160,11 @@
 
 
 
-    <!-- Fragment 1: UserInfoFragment (Registration) -->
     <fragment
         android:id="@+id/userInfoFragment"
         android:name="com.mints.mobilehealthapplication.ui.UserInfoFragment"
         tools:layout="@layout/fragment_registration">
 
-        <!-- Define the action to navigate to Fragment 2 -->
         <action
             android:id="@+id/action_userInfoFragment_to_healthInfoFragment"
             app:destination="@id/healthInfoFragment"
@@ -184,7 +182,6 @@
             app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
-    <!-- Fragment 2: HealthInfoFragment -->
     <fragment
         android:id="@+id/healthInfoFragment"
         android:name="com.mints.mobilehealthapplication.ui.HealthInfoFragment"
@@ -352,6 +349,13 @@
 
 
         />
+
+        <argument
+            android:name="medicationId"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true"
+            />
     </fragment>
 
 
@@ -404,6 +408,15 @@
         <argument
             android:name="medicationId"
             app:argType="string" />
+
+        <action
+            android:id="@+id/action_medicationDetailFragment_to_medicationTrendsFragment"
+            app:destination="@id/medicationTrendsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+
     </fragment>
 
 

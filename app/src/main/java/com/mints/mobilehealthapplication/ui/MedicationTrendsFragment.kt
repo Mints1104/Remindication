@@ -3,11 +3,13 @@ package com.mints.mobilehealthapplication.ui
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.navArgs
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
@@ -26,6 +28,8 @@ class MedicationTrendsFragment : Fragment() {
     private var _binding: FragmentMedicationTrendsBinding? = null
     private val binding get() = _binding!!
     private var uid = ""
+    private val args: MedicationTrendsFragmentArgs by navArgs()
+    private var tag = "MedicationTrendsFragment"
 
     private val viewModel: MedicationAnalyticsViewModel by activityViewModels()
 
@@ -38,20 +42,34 @@ class MedicationTrendsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val medicationId = args.medicationId
+        Log.d(tag, "Passed in medicationID: $medicationId")
+
         uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        if (uid.isNotEmpty()) {
-            viewModel.getMedications(uid)
-            viewModel.medications.observe(viewLifecycleOwner) { medications ->
-                if (medications.isNotEmpty()) {
-                    val events: List<MedicationEvent> =
-                        medications.flatMap { it.medicationHistory.getAllEvents() }
-                    setupAdherenceChart(events)
-                    setupWeeklyChart(events)
-                    setupDailyTimingChart(events)
-                }
+        if (uid.isEmpty()) return
+
+        viewModel.getMedications(uid)
+        viewModel.medications.observe(viewLifecycleOwner) { medications ->
+            if (medications.isEmpty()) return@observe
+
+            val events: List<MedicationEvent> = if (medicationId.isNullOrEmpty()) {
+                Log.d(tag, "Medication ID is null or empty")
+                medications.flatMap { it.medicationHistory.getAllEvents() }
+            } else {
+                val medication = medications.find { it.id == medicationId }
+                Log.d(tag, "Medication Name: ${medication?.name}")
+                // Update the toolbar title using the medication name
+                (requireActivity() as MainActivity).updateToolBarTitle("${medication!!.name} Trends")
+                medication.medicationHistory.getAllEvents()
             }
+
+            setupAdherenceChart(events)
+            setupWeeklyChart(events)
+            setupDailyTimingChart(events)
         }
     }
+
 
     private fun setupAdherenceChart(events: List<MedicationEvent>) {
         val chart = binding.adherenceChart

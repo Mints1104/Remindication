@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mints.mobilehealthapplication.R
@@ -44,6 +45,12 @@ class MedicationDetailFragment : Fragment() {
             adapter = eventAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
+        binding.visualiseAdherenceButton.setOnClickListener {
+            val action = MedicationDetailFragmentDirections
+                .actionMedicationDetailFragmentToMedicationTrendsFragment(medicationId)
+            findNavController().navigate(action)
+        }
+
 
         // Observe medications from the shared ViewModel
         viewModel.medications.observe(viewLifecycleOwner) { medicationList ->
