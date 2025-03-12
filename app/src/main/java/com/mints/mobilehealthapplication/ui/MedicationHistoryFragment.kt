@@ -35,6 +35,10 @@ class MedicationHistoryFragment : Fragment() {
         _binding = FragmentMedicationhistoryBinding.inflate(inflater, container, false)
         setUpRecyclerView()
         fetchUserMedication()
+        binding.visualiseAdherenceButton.setOnClickListener {
+            findNavController().navigate(R.id.action_medicationHistoryFragment_to_medicationTrendsFragment)
+
+        }
 
         val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
@@ -43,7 +47,6 @@ class MedicationHistoryFragment : Fragment() {
 
     private fun setUpRecyclerView() {
         adapter = MedicationHistoryRecyclerView(emptyList()) { medication ->
-            // Instead of passing the whole medication, pass its id.
             val medId = medication.id
             if (medId != null) {
                 val action = MedicationHistoryFragmentDirections

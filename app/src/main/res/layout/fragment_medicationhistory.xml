@@ -69,6 +69,16 @@
                 android:text="@string/total_skipped"
                 android:textColor="?attr/colorOnPrimaryContainer"
                 android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/visualise_adherence_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Visualise Adherence"
+                android:textAllCaps="false"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

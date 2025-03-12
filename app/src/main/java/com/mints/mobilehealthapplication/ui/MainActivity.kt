@@ -274,6 +274,14 @@ class MainActivity : AppCompatActivity() {
                     menuResId = R.menu.top_app_bar,
                     title = "Medication History")
             }
+            R.id.medicationTrendsFragment -> {
+                hideFAB()
+                updateToolbar(
+                    showBackArrow = true,
+                    menuResId = R.menu.top_app_bar,
+                    title = "Medication Trends"
+                )
+            }
 
             // Template for new fragments
             /*

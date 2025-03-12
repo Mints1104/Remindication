@@ -77,6 +77,8 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation (libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.localbroadcastmanager)
+    implementation(libs.mpandroidchart)
+
 
 
 

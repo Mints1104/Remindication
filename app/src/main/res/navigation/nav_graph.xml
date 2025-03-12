@@ -335,6 +335,26 @@
 
     </fragment>
 
+    <fragment
+        android:id="@+id/medicationTrendsFragment"
+        android:name="com.mints.mobilehealthapplication.ui.MedicationTrendsFragment"
+        android:label="Medication Trends"
+        tools:layout="@layout/fragment_medication_trends">
+
+        <action
+            android:id="@+id/action_medicationTrendsFragment_to_medicationHistoryFragment"
+            app:destination="@id/medicationHistoryFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+
+
+
+        />
+    </fragment>
+
+
 
     <fragment
         android:id="@id/medicationHistoryFragment"
@@ -348,6 +368,14 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
+
+        <action
+            android:id="@+id/action_medicationHistoryFragment_to_medicationTrendsFragment"
+            app:destination="@id/medicationTrendsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_medicationHistoryFragment_to_to_prescriptionsFragment"
