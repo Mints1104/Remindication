@@ -117,25 +117,48 @@ class MedicationTrendsFragment : Fragment() {
         chart.setDrawGridBackground(false)
         chart.legend.isEnabled = true
 
-        val dayNames: List<String> = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-        val eventsByDay: Map<Int, List<MedicationEvent>> = events.groupBy { event ->
-            val date = event.date.toLocalDate()
-            date.dayOfWeek.value // 1 (Monday) to 7 (Sunday)
+        // Get the current date and calculate the start of the current week (Monday)
+        val today = LocalDate.now()
+        val currentDayOfWeek = today.dayOfWeek.value // 1 (Monday) to 7 (Sunday)
+        val startOfWeek = today.minusDays((currentDayOfWeek - 1).toLong())
+
+        // Create a list of the 7 days in the current week
+        val daysInWeek = (0..6).map { startOfWeek.plusDays(it.toLong()) }
+
+        // Create labels for the x-axis
+        val dayLabels = daysInWeek.map { date -> "${date.monthValue}/${date.dayOfMonth} ${date.dayOfWeek.toString().take(3)}" }
+
+        // Group events by their actual date
+        val eventsByDate = events.groupBy { event ->
+            event.date.toLocalDate()
         }
 
-        val entries: List<BarEntry> = (1..7).map { dayOfWeek ->
-            val dayEvents: List<MedicationEvent> = eventsByDay[dayOfWeek] ?: emptyList()
-            BarEntry((dayOfWeek - 1).toFloat(), dayEvents.size.toFloat())
+        // Create entries for each day of the current week
+        val entries = daysInWeek.mapIndexed { index, date ->
+            val dayEvents = eventsByDate[date] ?: emptyList()
+            BarEntry(index.toFloat(), dayEvents.size.toFloat())
         }
 
         val dataSet = BarDataSet(entries, "Events by Day")
         dataSet.color = Color.GREEN
 
+        // Highlight today's bar with a different color
+        val todayIndex = currentDayOfWeek - 1
+        if (todayIndex >= 0 && todayIndex < entries.size) {
+            val colors = entries.mapIndexed { index, _ ->
+                if (index == todayIndex) Color.BLUE else Color.GREEN
+            }
+            dataSet.colors = colors
+        }
+
         val xAxis = chart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
-        xAxis.valueFormatter = IndexAxisValueFormatter(dayNames)
+        xAxis.valueFormatter = IndexAxisValueFormatter(dayLabels)
+
+        // Adjust label rotation if needed for better readability
+        xAxis.labelRotationAngle = 45f
 
         chart.data = BarData(dataSet).apply { barWidth = 0.6f }
         chart.invalidate()
