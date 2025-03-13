@@ -73,6 +73,14 @@ class PrescriptionsRecyclerView(
                         }
                     )
                 }
+                if(medicationSchedule is MedicationSchedule.Cyclic) {
+                    holder.binding.medicationDay.text = context.getString(
+                        R.string.medication_date,
+                        medicationSchedule.nextDueDates.joinToString(", ") { date ->
+                            date.dayOfWeek.toString().lowercase().replaceFirstChar { it.uppercase() }
+                        }
+                    )
+                }
             }
         }
 

@@ -254,7 +254,26 @@ object FireStoreRepository {
     }
 
 
+    fun calculateCyclicDueDates(
+        intakeDays: Int,
+        times: List<LocalTime>,
+        currentCycleStartDate: Timestamp?
+    ): List<LocalDateTime> {
+        // If currentCycleStartDate is null, use today.
+        val startDate: LocalDate = currentCycleStartDate?.toDate()?.toInstant()
+            ?.atZone(ZoneId.systemDefault())
+            ?.toLocalDate() ?: LocalDate.now()
 
+        val dueDates = mutableListOf<LocalDateTime>()
+        // For each day in the intake period, add each time as a due date.
+        for (day in 0 until intakeDays) {
+            val date = startDate.plusDays(day.toLong())
+            times.forEach { time ->
+                dueDates.add(LocalDateTime.of(date, time))
+            }
+        }
+        return dueDates.sorted()
+    }
 
 
 
@@ -495,23 +514,33 @@ object FireStoreRepository {
             }
 
             "cyclic" -> {
+                // Parse times
                 val times = (scheduleMap["times"] as? List<*>)?.mapNotNull {
                     (it as? String)?.let { timeStr -> LocalTime.parse(timeStr) }
                 } ?: emptyList()
 
-                MedicationSchedule.Cyclic(
-                    intakeDays = (scheduleMap["intakeDays"] as? Long)?.toInt() ?: 1,
-                    pauseDays   = (scheduleMap["pauseDays"] as? Long)?.toInt() ?: 0,
-                    times = times,
-                    currentCycleStartDate = scheduleMap["currentCycleStartDate"] as? Timestamp
-                )
-            }
+                // Parse intakeDays and pauseDays
+                val intakeDays = (scheduleMap["intakeDays"] as? Long)?.toInt() ?: 1
+                val pauseDays = (scheduleMap["pauseDays"] as? Long)?.toInt() ?: 0
 
-            "onDemand" -> {
-                MedicationSchedule.OnDemand(
-                    maxDailyDoses = (scheduleMap["maxDailyDoses"] as? Long)?.toInt(),
-                    minTimeBetweenDoses = (scheduleMap["minTimeBetweenDoses"] as? Long)?.toInt(),
-                    instructions = scheduleMap["instructions"] as? String ?: ""
+                // Parse currentCycleStartDate (optional)
+                val currentCycleStartDate = scheduleMap["currentCycleStartDate"] as? Timestamp
+
+                // If nextDueDates are provided, parse them; otherwise, calculate them.
+                val nextDueDates: List<LocalDateTime> = if (scheduleMap.containsKey("nextDueDates")) {
+                    (scheduleMap["nextDueDates"] as? List<Timestamp>)?.map { timestamp ->
+                        LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+                    } ?: emptyList()
+                } else {
+                    calculateCyclicDueDates(intakeDays, times, currentCycleStartDate)
+                }
+
+                MedicationSchedule.Cyclic(
+                    intakeDays = intakeDays,
+                    pauseDays = pauseDays,
+                    times = times,
+                    nextDueDates = nextDueDates,
+                    currentCycleStartDate = currentCycleStartDate
                 )
             }
 

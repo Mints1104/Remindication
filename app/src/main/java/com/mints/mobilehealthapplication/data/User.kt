@@ -202,7 +202,7 @@ sealed class MedicationSchedule {
         val intakeDays: Int,
         val pauseDays: Int,
         val times: List<LocalTime>,
-   //     val nextDueDates: List<LocalDateTime>,
+        val nextDueDates: List<LocalDateTime>,
         val currentCycleStartDate: Timestamp? = null,
 
     ) : MedicationSchedule()

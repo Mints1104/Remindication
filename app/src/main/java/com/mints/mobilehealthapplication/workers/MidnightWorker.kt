@@ -45,6 +45,10 @@ class MidnightWorker(
                     is MedicationSchedule.WeeklySchedule -> {
                         processWeeklySchedule(medication, schedule, now, userId)
                     }
+                    is MedicationSchedule.Cyclic -> {
+                        processCyclicSchedule(medication, schedule, now, userId)
+                    }
+
                     else -> {
                         Log.d(TAG, "Schedule type not handled for medication: ${medication.name}")
                     }
@@ -64,6 +68,75 @@ class MidnightWorker(
             Result.retry()
         }
     }
+
+    private suspend fun processCyclicSchedule(
+        medication: Medication,
+        schedule: MedicationSchedule.Cyclic,
+        now: LocalDateTime,
+        userId: String
+    ) {
+        Log.d(TAG, "Processing cyclic schedule for ${medication.name}")
+
+        // Check if the medication has past due dates (missed doses)
+        val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
+        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
+            val missedEvents = mutableListOf<MedicationEvent>()
+            missedDueDates.forEach { missedDateTime ->
+                val missedDates = ScheduleHelper.getDatesBetween(
+                    start = missedDateTime.toLocalDate(),
+                    end = now.toLocalDate().minusDays(1)
+                )
+                missedDates.forEach { date ->
+                    val eventDateTime = date.atTime(missedDateTime.toLocalTime())
+                    Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
+                    medication.markAsMissed(eventDateTime)
+                    missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
+                }
+            }
+
+            if (missedEvents.isNotEmpty() && medication.id != null) {
+                val updateSuccess = FireStoreRepository.updateMultipleMedicationHistories(
+                    userId = userId,
+                    medicationId = medication.id!!,
+                    events = missedEvents
+                )
+                if (updateSuccess) {
+                    Log.d(TAG, "Medication history updated with missed events for ${medication.name}")
+                } else {
+                    Log.e(TAG, "Failed to update medication history for ${medication.name}")
+                }
+            }
+        }
+
+        // Determine new due dates for the cycle
+        val newDueDates = ScheduleHelper.calculateCyclicDueDates(
+            intakeDays = schedule.intakeDays,
+            pauseDays = schedule.pauseDays,
+            times = schedule.times,
+            currentCycleStartDate = schedule.currentCycleStartDate
+        )
+
+        // Update Firestore with new due dates
+        medication.id?.let { medId ->
+            val success = FireStoreRepository.updateMedicationDates(
+                userId = userId,
+                medicationId = medId,
+                newDates = newDueDates
+            )
+            if (success) {
+                val nextDueTimeMillis = newDueDates.minByOrNull { it }
+                    ?.atZone(ZoneId.systemDefault())
+                    ?.toInstant()
+                    ?.toEpochMilli() ?: 0L
+                Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
+                notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
+                Log.d(TAG, "Successfully advanced cyclic schedule for ${medication.name}")
+            } else {
+                Log.e(TAG, "Failed to update cyclic schedule for ${medication.name}")
+            }
+        }
+    }
+
 
     private suspend fun processDailySchedule(
         medication: Medication,

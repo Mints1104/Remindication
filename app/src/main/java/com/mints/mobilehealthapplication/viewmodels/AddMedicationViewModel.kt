@@ -16,7 +16,9 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.temporal.TemporalAdjusters
+    import java.time.ZoneId
+    import java.time.temporal.TemporalAdjusters
+    import java.util.Date
 
     class AddMedicationViewModel : ViewModel() {
 
@@ -246,44 +248,16 @@ import java.time.temporal.TemporalAdjusters
             _validationState.value = ValidationState.Initial
         }
 
-
-
         suspend fun getMedicationDetails(uid: String, medicationId: String) {
-            Log.d("HomeFragmentViewModel", "Fetching medication: $medicationId")
-            Log.d("HomeFragmentViewModel", "Fetching userId: $uid")
-
             val med = FireStoreRepository.getMedicationDetails(uid, medicationId)
-
-            Log.d("HomeFragmentViewModel", "Fetched ${med.name}")
-            Log.d("HomeFragmentViewModel", "Fetched ${med.id}")
-            Log.d("HomeFragmentViewModel", "Fetched ${med.dosage}")
-            Log.d("HomeFragmentViewModel", "Fetched ${med.createdAt}")
-            Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.formattedFrequency}")
-            Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.frequencyType}")
-            Log.d("HomeFragmentViewModel", "Fetched ${med.schedule.formattedTimes}")
-
-
-            // Update mutable states
-
-
-
                 updateMedicationName(med.name)
                 updateDosage(med.dosage)
                 updateNotes(med.notes)
                 updateFrequency(med.schedule.formattedFrequency)
                 updateFrequencyType(med.schedule.frequencyType)
                 updateMedicationId(med.id!!)
-
-
-
-
         }
-
-
-
-
-        // Save functionality
-            fun saveMedication(userId: String) {
+        fun saveMedication(userId: String) {
                 viewModelScope.launch {
                     try {
                         val medication = createMedication()
@@ -330,13 +304,7 @@ import java.time.temporal.TemporalAdjusters
         }
 
 
-        private fun calculateDailyDueDates(times: List<LocalTime>): List<LocalDateTime> {
-            return times.map { time ->
-                val now = LocalDateTime.now()
-                val todayAtTime = time.atDate(now.toLocalDate())
-                if (todayAtTime.isBefore(now)) todayAtTime.plusDays(1) else todayAtTime
-            }
-        }
+
 
         fun testDateLogic() {
             val testTime = LocalTime.of(20, 0) // 8:00 PM
@@ -348,12 +316,7 @@ import java.time.temporal.TemporalAdjusters
             Log.d("TEST", "8:00 PM should be $resultDate")
         }
 
-
-
-
-
-
-            private fun calculateWeeklyDueDates(days: List<DayOfWeek>, times: List<LocalTime>): List<LocalDateTime> {
+        private fun calculateWeeklyDueDates(days: List<DayOfWeek>, times: List<LocalTime>): List<LocalDateTime> {
                 return days.flatMap { day ->
                     times.map { time ->
                         LocalDate.now()
@@ -363,98 +326,9 @@ import java.time.temporal.TemporalAdjusters
                     }
                 }
             }
-        fun testWeeklyDateCalculation() {
-            val testDays = listOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY)
-            val testTimes = listOf(LocalTime.of(8, 0), LocalTime.of(20, 0))
-
-            val calculated = calculateWeeklyDueDates(testDays, testTimes)
-            Log.d("WEEKLY_TEST", "Calculated dates: $calculated")
-        }
-
-        fun testWeeklyDateCalculationEdgeCase() {
-            val fixedNow = LocalDateTime.of(2025, 1, 29, 9, 0) // Wednesday 9 AM
-            val testDays = listOf(DayOfWeek.WEDNESDAY)
-            val testTimes = listOf(LocalTime.of(8, 0), LocalTime.of(20, 0))
-
-            val calculated = testDays.flatMap { day ->
-                testTimes.map { time ->
-                    fixedNow.toLocalDate()
-                        .with(TemporalAdjusters.nextOrSame(day))
-                        .atTime(time)
-                        .let { if (it.isBefore(fixedNow)) it.plusWeeks(1) else it }
-                }
-            }
-
-            Log.d("WEEKLY_TEST", "Edge Case Result: $calculated")
-        }
-
-        fun advanceWeeklyDate(medication: Medication, takenDate: LocalDateTime): Medication {
-            return if (medication.schedule is MedicationSchedule.WeeklySchedule) {
-                val newDates = medication.schedule.nextDueDates.map { date ->
-                    if (date == takenDate) date.plusWeeks(1) else date
-                }
-                medication.copy(
-                    schedule = medication.schedule.copy(nextDueDates = newDates)
-                )
-            } else {
-                medication
-            }
-        }
 
 
 
-        fun testSingleDateAdvance() {
-            val originalDates = listOf(
-                LocalDateTime.of(2025, 1, 27, 8, 0),  // To be advanced
-                LocalDateTime.of(2025, 1, 26, 20, 0) // Unchanged
-            )
-
-            val testMed = Medication(
-                schedule = MedicationSchedule.WeeklySchedule(
-                    days = listOf(DayOfWeek.WEDNESDAY),
-                    times = listOf(LocalTime.of(8, 0), LocalTime.of(20, 0)),
-                    nextDueDates = originalDates
-                )
-            )
-
-            val currentDate = LocalDate.now()
-            val isDatePresent = originalDates.any { it.toLocalDate() == currentDate }
-            val anyDatesInPast = originalDates.any{it.toLocalDate() < currentDate}
-
-            originalDates.forEach { date ->
-                if(date.toLocalDate() < currentDate || date.toLocalDate() == currentDate) {
-                    Log.d("WEEKLY_ADVANCE","Advancing week by 1 for $date")
-                    val newDate = date.plusWeeks(1)
-                    Log.d("WEEKLY_ADVANCE","New Date: $newDate")
-               } else {
-                    Log.d("WEEKLY_ADVANCE","Not updating date: $date")
-
-                }
-
-            }
-
-            Log.d("WEEKLY_ADVANCE", when {
-                anyDatesInPast && isDatePresent -> "Date in list is in the past AND today's date is in list."
-                anyDatesInPast -> "Date in list is in the past."
-                isDatePresent -> "Today's date is in the list."
-                else -> "No past dates, today's date not found."
-            })
-
-            val updatedMed = advanceWeeklyDate(testMed, originalDates[0])
-
-            val testMedSchedule = testMed.schedule
-
-            if(testMedSchedule is MedicationSchedule.WeeklySchedule) {
-                val updatedMedSchedule = updatedMed.schedule
-                if(updatedMedSchedule is MedicationSchedule.WeeklySchedule) {
-                    Log.d("WEEKLY_ADVANCE", "Original: ${testMedSchedule.nextDueDates}")
-                    Log.d("WEEKLY_ADVANCE", "Updated: ${updatedMedSchedule.nextDueDates}")
-                }
-                }
-
-
-
-        }
 
 
             private fun calculateDueDates(times: List<LocalTime>): List<LocalDateTime> {
@@ -468,33 +342,44 @@ import java.time.temporal.TemporalAdjusters
 
 
         private fun createSchedule(): MedicationSchedule {
-            Log.d("DEBUG", "Selected Times: ${_selectedTimes.value}") // Add this line
+            Log.d("DEBUG", "Selected Times: ${_selectedTimes.value}") // Debug output
             return when (_frequency.value) {
                 "Once Daily", "Twice Daily" ->
-                MedicationSchedule.Daily(
-                    frequency = DailyFrequency.fromInt(_selectedTimes.value?.size ?: 1),
-                    times = _selectedTimes.value ?: emptyList(),
-                    nextDueDates = calculateDueDates(_selectedTimes.value ?: emptyList()), // ADD THIS
-                    withFood = _withFood.value ?: false
-
-                )
+                    MedicationSchedule.Daily(
+                        frequency = DailyFrequency.fromInt(_selectedTimes.value?.size ?: 1),
+                        times = _selectedTimes.value ?: emptyList(),
+                        nextDueDates = calculateDueDates(_selectedTimes.value ?: emptyList()), // Already defined for daily
+                        withFood = _withFood.value ?: false
+                    )
                 "Weekly" -> MedicationSchedule.WeeklySchedule(
                     days = _selectedDays.value?.toList() ?: emptyList(),
                     times = _selectedTimes.value ?: emptyList(),
-                   nextDueDates = calculateWeeklyDueDates(
+                    nextDueDates = calculateWeeklyDueDates(
                         _selectedDays.value?.toList() ?: emptyList(),
                         _selectedTimes.value ?: emptyList()
                     ),
                     withFood = _withFood.value ?: false
                 )
-                "Cyclic" -> MedicationSchedule.Cyclic(
-                    intakeDays = _intakeDays.value
-                        ?: throw IllegalStateException("Missing intake days"),
-                    pauseDays = _pauseDays.value
-                        ?: throw IllegalStateException("Missing pause days"),
-                    times = _selectedTimes.value ?: emptyList(),
-                //    nextDueDates = emptyList()
-                )
+                "Cyclic" -> {
+                    // For cyclic schedules, get the intake and pause days.
+                    val intakeDays = _intakeDays.value
+                        ?: throw IllegalStateException("Missing intake days")
+                    val pauseDays = _pauseDays.value
+                        ?: throw IllegalStateException("Missing pause days")
+                    // Use the selected times.
+                    val cyclicTimes = _selectedTimes.value ?: emptyList()
+                    // For currentCycleStartDate, we can default to now.
+                    val currentCycleStart = Timestamp(Date())
+                    // Calculate next due dates for the cyclic schedule.
+                    val nextDueDates = calculateCyclicDueDates(intakeDays, cyclicTimes, currentCycleStart)
+                    MedicationSchedule.Cyclic(
+                        intakeDays = intakeDays,
+                        pauseDays = pauseDays,
+                        times = cyclicTimes,
+                        nextDueDates = nextDueDates,
+                        currentCycleStartDate = currentCycleStart
+                    )
+                }
                 "On Demand" -> MedicationSchedule.OnDemand(
                     maxDailyDoses = _maxDoses.value,
                     minTimeBetweenDoses = _minHoursBetween.value,
@@ -502,6 +387,28 @@ import java.time.temporal.TemporalAdjusters
                 )
                 else -> throw IllegalArgumentException("Invalid schedule type")
             }
+        }
+
+
+        private fun calculateCyclicDueDates(
+            intakeDays: Int,
+            times: List<LocalTime>,
+            currentCycleStartDate: Timestamp?
+        ): List<LocalDateTime> {
+            // If currentCycleStartDate is null, use today.
+            val startDate: LocalDate = currentCycleStartDate?.toDate()?.toInstant()
+                ?.atZone(ZoneId.systemDefault())
+                ?.toLocalDate() ?: LocalDate.now()
+
+            val dueDates = mutableListOf<LocalDateTime>()
+            // For each day in the intake period, add each time as a due date.
+            for (day in 0 until intakeDays) {
+                val date = startDate.plusDays(day.toLong())
+                times.forEach { time ->
+                    dueDates.add(LocalDateTime.of(date, time))
+                }
+            }
+            return dueDates.sorted()
         }
 
         private fun setValidationError(message: String) {

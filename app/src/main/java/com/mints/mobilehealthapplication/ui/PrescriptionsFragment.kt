@@ -132,6 +132,11 @@ class PrescriptionsFragment : Fragment() {
                     viewModel.testReceivingMedicationHistory(medication)
 
                 }
+                is MedicationSchedule.Cyclic -> {
+                    Log.d("CyclicTest","Cyclic: Times: ${schedule.times}")
+                    Log.d("CyclicTest","Cyclic: next due dates: ${schedule.nextDueDates}")
+
+                }
                 else -> Log.d(tag,"N/A")
             }
 

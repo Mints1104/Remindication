@@ -269,6 +269,18 @@ import java.time.LocalDateTime
                             false
                         }
                     }
+                    is MedicationSchedule.Cyclic -> {
+                        val hasDueDatesToday = schedule.nextDueDates.any{it.toLocalDate() == today}
+                        if(hasDueDatesToday) {
+                            val takenToday = medication.medicationHistory.events.count{ event ->
+                                event.type == MedicationEvent.EventType.TAKEN &&
+                                        event.date.toLocalDate() == today
+                            }
+                            takenToday < schedule.times.size
+                        } else {
+                            false
+                        }
+                    }
                     is MedicationSchedule.OnDemand -> true
 
                     else -> false
@@ -404,9 +416,9 @@ import java.time.LocalDateTime
 
             // Filter daily and weekly schedules
             val regularSchedList = currentList.filter {
-                it.schedule is MedicationSchedule.Daily || it.schedule is MedicationSchedule.WeeklySchedule
+                it.schedule is MedicationSchedule.Daily || it.schedule is MedicationSchedule.WeeklySchedule || it.schedule is MedicationSchedule.Cyclic
             }
-            Log.d(tag, "Filtered daily/weekly schedules: ${regularSchedList.size} medications")
+            Log.d(tag, "Filtered daily/weekly/interval schedules: ${regularSchedList.size} medications")
 
             val now = LocalDateTime.now()
             Log.d(tag, "Current time: $now")
@@ -416,6 +428,7 @@ import java.time.LocalDateTime
                 val nextDueDates = when (val sched = medication.schedule) {
                     is MedicationSchedule.Daily -> sched.nextDueDates
                     is MedicationSchedule.WeeklySchedule -> sched.nextDueDates
+                    is MedicationSchedule.Cyclic -> sched.nextDueDates
                     else -> emptyList()
                 }
 
@@ -430,6 +443,8 @@ import java.time.LocalDateTime
                 val nextDueDates = when (val sched = closestMedication.schedule) {
                     is MedicationSchedule.Daily -> sched.nextDueDates
                     is MedicationSchedule.WeeklySchedule -> sched.nextDueDates
+                    is MedicationSchedule.Cyclic -> sched.nextDueDates
+
                     else -> emptyList()
                 }
                 val closestDueDate = nextDueDates.filter { it.isAfter(now) || (it.isBefore(now) && !closestMedication.medicationHistory.hasEventToday()) }
