@@ -15,20 +15,20 @@ import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.ui.HomeFragment.Companion.REFRESH_ACTION
+import com.mints.mobilehealthapplication.utils.ScheduleHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
-class   MidnightWorker(
+class MidnightWorker(
     context: Context,
-    workerParams: WorkerParameters,
-    private val notificationHelper: NotificationHelper
+    workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
-
+    // Instantiate NotificationHelper using the application context.
+    private val notificationHelper = NotificationHelper(applicationContext)
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -51,10 +51,10 @@ class   MidnightWorker(
                 }
             }
 
-            // Re-schedule the MidnightWorker to run at the next midnight.
+            // Re-schedule MidnightWorker for the next midnight.
             scheduleNextMidnightWork(applicationContext)
 
-            // Broadcast an intent so the UI can refresh if needed.
+            // Broadcast refresh intent for UI updates.
             val refreshIntent = Intent(REFRESH_ACTION)
             LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(refreshIntent)
 
@@ -73,15 +73,14 @@ class   MidnightWorker(
     ) {
         Log.d(TAG, "Original daily due dates for ${medication.name}: ${schedule.nextDueDates}")
 
-        // Find all dates that are “missed” (i.e. scheduled in the past)
+        // Identify missed due dates.
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
-        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()
-        ) {
+        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()
 
-            // For each missed due date, mark every intervening day as missed.
             missedDueDates.forEach { missedDateTime ->
-                val missedDates = getDatesBetween(
+                // Use the shared ScheduleHelper function.
+                val missedDates = ScheduleHelper.getDatesBetween(
                     start = missedDateTime.toLocalDate(),
                     end = now.toLocalDate().minusDays(1)
                 )
@@ -93,7 +92,6 @@ class   MidnightWorker(
                 }
             }
 
-            // Batch update missed events in Firestore.
             if (missedEvents.isNotEmpty() && medication.id != null) {
                 val updateSuccess = FireStoreRepository.updateMultipleMedicationHistories(
                     userId = userId,
@@ -108,21 +106,18 @@ class   MidnightWorker(
             }
         }
 
-        // Adjust each due date that is in the past.
+        // Adjust due dates using ScheduleHelper.
         val updatedDates = schedule.nextDueDates.map { dueDate ->
-            if (dueDate.isBefore(now)) adjustDailyDueDate(dueDate, now) else dueDate
+            if (dueDate.isBefore(now)) ScheduleHelper.adjustDailyDueDate(dueDate, now) else dueDate
         }.distinct()
 
-        // Update the medication dates and schedule notification.
         medication.id?.let { medId ->
             val success = FireStoreRepository.updateMedicationDates(
                 userId = userId,
                 medicationId = medId,
                 newDates = updatedDates
             )
-
             if (success) {
-                // Choose the earliest upcoming due date.
                 val nextDueTimeMillis = updatedDates.minByOrNull { it }
                     ?.atZone(ZoneId.systemDefault())
                     ?.toInstant()
@@ -144,11 +139,9 @@ class   MidnightWorker(
     ) {
         Log.d(TAG, "Original weekly due dates for ${medication.name}: ${schedule.nextDueDates}")
 
-        // Find missed dates and mark the earliest one as missed.
+        // Handle missed weekly due dates.
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
-        if (missedDueDates.isNotEmpty() &&
-            !medication.medicationHistory.hadEventYesterday()
-        ) {
+        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedDateTime = missedDueDates.minByOrNull { it }!!
             Log.d(TAG, "${medication.name} missed at $missedDateTime, marking as missed")
             medication.markAsMissed(missedDateTime)
@@ -161,19 +154,17 @@ class   MidnightWorker(
             }
         }
 
-        // Adjust each weekly due date that is in the past.
+        // Adjust weekly due dates using ScheduleHelper.
         val updatedDates = schedule.nextDueDates.map { dueDate ->
-            if (dueDate.isBefore(now)) adjustWeeklyDueDate(dueDate, now) else dueDate
+            if (dueDate.isBefore(now)) ScheduleHelper.adjustWeeklyDueDate(dueDate, now) else dueDate
         }.sorted()
 
-        // Update the medication dates and schedule notification.
         medication.id?.let { medId ->
             val success = FireStoreRepository.updateMedicationDates(
                 userId = userId,
                 medicationId = medId,
                 newDates = updatedDates
             )
-
             if (success) {
                 val nextDueTimeMillis = updatedDates.first()
                     .atZone(ZoneId.systemDefault())
@@ -187,11 +178,6 @@ class   MidnightWorker(
         }
     }
 
-
-
-
-
-
     companion object {
         private const val MIDNIGHT_WORK_NAME = "midnight_work"
         private const val TAG = "MidnightWorker"
@@ -201,43 +187,6 @@ class   MidnightWorker(
             scheduleNextMidnightWork(context)
         }
 
-        /**
-         * Adjust a daily due date by repeatedly adding one day until it is no longer in the past.
-         */
-        private fun adjustDailyDueDate(dueDate: LocalDateTime, now: LocalDateTime): LocalDateTime {
-            var newDueDate = dueDate
-            while (newDueDate.isBefore(now)) {
-                newDueDate = newDueDate.plusDays(1)
-            }
-            return newDueDate
-        }
-
-        /**
-         * Adjust a weekly due date by repeatedly adding seven days until it is no longer in the past.
-         */
-        private fun adjustWeeklyDueDate(dueDate: LocalDateTime, now: LocalDateTime): LocalDateTime {
-            var newDueDate = dueDate
-            while (newDueDate.isBefore(now)) {
-                newDueDate = newDueDate.plusDays(7)
-            }
-            return newDueDate
-        }
-
-        /**
-         * Return a list of dates between two dates (inclusive of start, inclusive/exclusive at end as desired).
-         */
-        private fun getDatesBetween(start: LocalDate, end: LocalDate): List<LocalDate> {
-            val dates = mutableListOf<LocalDate>()
-            var current = start
-            // Here we include the end date; adjust condition if you prefer exclusive.
-            while (!current.isAfter(end)) {
-                dates.add(current)
-                current = current.plusDays(1)
-            }
-            return dates
-        }
-
-
         private fun scheduleNextMidnightWork(context: Context) {
             val now = LocalDateTime.now()
             val nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay()
@@ -245,9 +194,6 @@ class   MidnightWorker(
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli() - System.currentTimeMillis()
-
-            // Create NotificationHelper with application context
-            NotificationHelper(context.applicationContext)
 
             val workRequest = OneTimeWorkRequestBuilder<MidnightWorker>()
                 .setInitialDelay(delayInMillis, TimeUnit.MILLISECONDS)
