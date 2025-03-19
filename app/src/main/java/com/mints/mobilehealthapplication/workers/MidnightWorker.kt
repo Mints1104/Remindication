@@ -24,11 +24,11 @@ import java.util.concurrent.TimeUnit
 
 class MidnightWorker(
     context: Context,
-    workerParams: WorkerParameters
+    workerParams: WorkerParameters,
+    private val notificationHelper: NotificationHelper
 ) : CoroutineWorker(context, workerParams) {
 
     // Instantiate NotificationHelper using the application context.
-    private val notificationHelper = NotificationHelper(applicationContext)
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -77,7 +77,6 @@ class MidnightWorker(
     ) {
         Log.d(TAG, "Processing cyclic schedule for ${medication.name}")
 
-        // Identify missed due dates and mark missed events (same as before)
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()

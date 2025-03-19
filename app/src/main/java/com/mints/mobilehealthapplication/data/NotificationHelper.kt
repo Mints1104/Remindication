@@ -13,6 +13,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.ui.MainActivity
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class NotificationHelper(private val context: Context) {
     companion object {
@@ -220,7 +223,11 @@ class NotificationHelper(private val context: Context) {
                 timeInMillis,
                 pendingIntent
             )
-            Log.d("NotifDebug", "Alarm set successfully")
+            val instant = Instant.ofEpochMilli(timeInMillis)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+            val formattedDate = formatter.format(instant)
+
+            Log.d("NotifDebug", "Alarm set successfully at: $formattedDate for $medicationName")
         } catch (e: Exception) {
             Log.e("NotifDebug", "Failed to set alarm", e)
         }

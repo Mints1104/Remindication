@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
@@ -17,11 +16,12 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.application.MedicationApp
 import com.mints.mobilehealthapplication.data.ScheduleValidator
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationPart3ScheduleBinding
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
-import com.mints.mobilehealthapplication.viewmodels.NotificationViewModel
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -36,7 +36,6 @@ class AddMedicationScheduleFragment : Fragment() {
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     private val tag = "ScheduleFragment"
     private var userId = ""
-    private lateinit var notificationViewModel: NotificationViewModel
 
 
     override fun onCreateView(
@@ -56,7 +55,6 @@ class AddMedicationScheduleFragment : Fragment() {
         Log.d(tag,"Get frequency: ${viewModel.getFrequency()}")
 
         Log.d(tag,"Get frequencyType: ${viewModel.getFrequencyType()}")
-        notificationViewModel = ViewModelProvider(this)[NotificationViewModel::class.java]
 
     }
 
@@ -412,10 +410,16 @@ class AddMedicationScheduleFragment : Fragment() {
                 .toInstant()
                 .toEpochMilli()
 
-            notificationViewModel.scheduleMedicationNotification(
-                medicationName = medicationName ?: "Default Medication",
-                triggerTimeInMillis = triggerTimeInMillis
-            )
+            val instant = Instant.ofEpochMilli(triggerTimeInMillis)
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+            val formattedDate = formatter.format(instant)
+
+            Log.d(tag,"Initial notification should be  at: $formattedDate for $medicationName")
+            val notificationHelper = (requireActivity().application as MedicationApp).notificationHelper
+            notificationHelper.scheduleNotification(medicationName = medicationName!!,
+                timeInMillis = triggerTimeInMillis)
+
+
 
         }
 

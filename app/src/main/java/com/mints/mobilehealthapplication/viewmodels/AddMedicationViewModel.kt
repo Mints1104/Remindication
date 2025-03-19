@@ -249,7 +249,7 @@ import java.time.LocalTime
         }
 
         suspend fun getMedicationDetails(uid: String, medicationId: String) {
-            val med = FireStoreRepository.getMedicationDetails(uid, medicationId)
+                val med = FireStoreRepository.getMedicationDetails(uid, medicationId)
                 updateMedicationName(med.name)
                 updateDosage(med.dosage)
                 updateNotes(med.notes)

@@ -163,7 +163,8 @@
     <string name="text_size_title">Text Size</string>
     <string name="large_touch_targets_title">Large Touch Targets</string>
     <string name="large_touch_targets_summary">Increase touch target size for better accessibility</string>
-    <string name="no_medications_left">No more medication left for today. Great job!\nTap below to reveal your daily image or quote</string>    <string name="step_1_of_2">Step 1 of 2</string>
+    <string name="no_medications_left">No more medication left for today. Great job!\nTap below to reveal your daily image or quote.</string>
+    <string name="step_1_of_2">Step 1 of 2</string>
     <string name="adherence_summary">Adherence Summary</string>
     <string name="compliance_rate">Compliance Rate: 0%</string>
     <string name="total_taken">Taken: 0</string>

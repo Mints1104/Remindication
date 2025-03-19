@@ -7,10 +7,11 @@ import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.workers.MidnightWorkerFactory
 
 class MedicationApp : Application() {
+    val notificationHelper by lazy { NotificationHelper(applicationContext) }
+
     override fun onCreate() {
         super.onCreate()
 
-        val notificationHelper = NotificationHelper(this)
         val factory = MidnightWorkerFactory(notificationHelper)
 
         WorkManager.initialize(
@@ -20,9 +21,6 @@ class MedicationApp : Application() {
                 .build()
         )
 
-        // Enqueue RescheduleWorker when the app is started (not the device)
-      //  Log.d("AppDebug", "App started. Enqueueing RescheduleWorker.")
-      //  val workRequest = OneTimeWorkRequestBuilder<RescheduleWorker>().build()
-      //  WorkManager.getInstance(this).enqueue(workRequest)
+
     }
 }

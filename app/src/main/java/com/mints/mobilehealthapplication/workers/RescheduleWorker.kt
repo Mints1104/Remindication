@@ -15,10 +15,11 @@ import java.time.ZoneId
 
 class RescheduleWorker(
     context: Context,
-    workerParams: WorkerParameters
+    workerParams: WorkerParameters,
+    private val notificationHelper: NotificationHelper
+
 ) : CoroutineWorker(context, workerParams) {
 
-    private val notificationHelper = NotificationHelper(applicationContext)
     private val tag = "RescheduleWorker"
 
     override suspend fun doWork(): Result {
