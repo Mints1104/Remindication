@@ -76,9 +76,7 @@ class MainActivity : AppCompatActivity() {
         val nhsMedication = NHSMedication()
         val callApiButton = findViewById<MaterialButton>(R.id.call_Api)
         callApiButton.setOnClickListener {
-            nhsMedication.testGetMedicineDetails("Adalimumab")
-            nhsMedication.testGetMedicineDetails("Alendronic acid")
-            nhsMedication.testGetMedicineDetails("Allopurinol")
+            navController.navigate(R.id.global_action_to_testFragment)
         }
     }
 
@@ -288,6 +286,15 @@ class MainActivity : AppCompatActivity() {
                     showBackArrow = true,
                     menuResId = null,
                     title = "Profile"
+                )
+            }
+
+            R.id.testFragment -> {
+                hideFAB()
+                updateToolbar(
+                    showBackArrow = true,
+                    menuResId = null,
+                    title = "Test"
                 )
             }
 

@@ -1,6 +1,5 @@
 package com.mints.mobilehealthapplication.utils
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -65,7 +64,6 @@ object ScheduleHelper {
                 newDueDates.add(LocalDateTime.of(date, time))
             }
         }
-        Log.d("ScheduleHelper", "New due dates: $newDueDates")
         return newDueDates.sorted()
     }
 

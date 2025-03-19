@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.preference)
+    implementation(libs.junit.junit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -78,6 +79,11 @@ dependencies {
     implementation (libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.localbroadcastmanager)
     implementation(libs.mpandroidchart)
+    testImplementation (libs.mockito.mockito.core)
+    testImplementation (libs.kotlin.mockito.kotlin)
+    testImplementation (libs.jetbrains.kotlinx.coroutines.test)
+    testImplementation (libs.androidx.core.testing)
+    testImplementation (libs.robolectric)
 
 
 
