@@ -53,7 +53,7 @@
         <item name="colorOutlineVariant">@color/md_theme_outlineVariant_mediumContrast</item>
         <item name="colorSurfaceBright">@color/md_theme_surfaceBright_mediumContrast</item>
         <item name="colorSurfaceDim">@color/md_theme_surfaceDim_mediumContrast</item>
-        <item name="cardBackgroundColor">@color/card_view_background_dark</item>
+        <item name="cardBackgroundColor">@color/primary_color_dark</item>
         <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
         <item name="snackbarTextViewStyle">@style/Widget.App.Snackbar.TextView</item>
 
@@ -78,6 +78,7 @@
         <item name="cardElevation">6dp</item>
         <item name="cardCornerRadius">12dp</item>
         <item name="cardBackgroundColor">@color/card_view_background_dark</item>
+
 
     </style>
 

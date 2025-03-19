@@ -193,11 +193,18 @@ import java.time.LocalDateTime
             binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
             addSwipeFunctionality()
             viewModel.medications.observe(viewLifecycleOwner) { medications ->
+                // In here if the scheduled meds isn't empty then we'll hide the motivational message
+
                 Log.d(tag, "Observed ${medications.size} medications in LiveData")
+
                 val filteredMeds = getUncompletedMedicationsForToday(medications)
                  scheduledMeds = filteredMeds.filter {
                      it.schedule !is MedicationSchedule.OnDemand
                  }.toMutableList()
+                if(scheduledMeds.isNotEmpty()) {
+                    binding.motivationCover.visibility = View.GONE
+                }
+
                 onDemandMeds = filteredMeds.filter { it.schedule is MedicationSchedule.OnDemand }
                     .toMutableList()
 
