@@ -286,7 +286,7 @@ class MainActivity : AppCompatActivity() {
                 hideFAB()
                 updateToolbar(
                     showBackArrow = true,
-                    menuResId = R.menu.top_app_bar,
+                    menuResId = null,
                     title = "Profile"
                 )
             }

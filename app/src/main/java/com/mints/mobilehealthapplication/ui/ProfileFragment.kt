@@ -34,6 +34,7 @@ class ProfileFragment : Fragment() {
 
         // Load user details
         viewModel.loadUserProfile()
+        (requireActivity() as MainActivity).hideBottomNav()
 
         // Observe profile data and update UI
         viewModel.userProfile.observe(viewLifecycleOwner) { user ->

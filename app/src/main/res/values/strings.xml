@@ -218,6 +218,7 @@
     <string name="user_email">User Email:</string>
     <string name="user_full_name">Name:</string>
     <string name="profile">Profile</string>
+    <string name="user">User</string>
 
 
 </resources>
