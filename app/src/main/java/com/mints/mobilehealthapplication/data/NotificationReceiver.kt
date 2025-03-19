@@ -15,7 +15,6 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("NotifDebug", "FULL INTENT DUMP START ==================")
 
-        // Log all extras for debugging
         intent.extras?.keySet()?.forEach { key ->
             Log.d("NotifDebug", "Extra Key: $key, Value: ${intent.extras?.get(key)}")
         }
@@ -62,12 +61,10 @@ class NotificationReceiver : BroadcastReceiver() {
                     val notificationHelper = NotificationHelper(context)
                     notificationHelper.showNotification(medicationName,scheduleTime)
                     Log.d("NotifDebug","Successfully showed notification for $medicationName")
-                    //Check backup reminder settings and schedule backup if enabled
                     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                     val backupEnabled = prefs.getBoolean("enabled_backup_reminder",true)
                     Log.d("NotifDebug","Is backups enabled: $backupEnabled")
                     if(backupEnabled) {
-                        //Get backup delay in minutes, defaulting to 30 mins
                         val backupDelayMinutes = prefs.getString("backup_reminder_delay","30")?.toLong()?:30L
                         val backupDelayMillis = backupDelayMinutes * 60 * 1000L
                         val backupTime = System.currentTimeMillis() + backupDelayMillis
@@ -89,37 +86,5 @@ class NotificationReceiver : BroadcastReceiver() {
         }
         Log.d("NotifDebug", "FULL INTENT DUMP END ==================")
 
-
-
-//        var action = ""
-//        if(intent.action.isNullOrEmpty()) {
-//            action = NOTIFICATION_ACTION
-//        }
-//
-//        // Explicitly check for the NOTIFICATION_ACTION
-//        if (intent.action == NOTIFICATION_ACTION || action == NOTIFICATION_ACTION) {
-//            val medicationName = intent.getStringExtra("medication_name")
-//            val scheduleTime = intent.getLongExtra("schedule_time", 0)
-//
-//            Log.d("NotifDebug", "Extracted medication name: $medicationName")
-//            Log.d("NotifDebug", "Extracted schedule time: ${Date(scheduleTime)}")
-//
-//            if (medicationName == null) {
-//                Log.e("NotifDebug", "Received null medication name!")
-//                return
-//            }
-//
-//            try {
-//                val notificationHelper = NotificationHelper(context)
-//                notificationHelper.showNotification(medicationName)
-//                Log.d("NotifDebug", "Successfully showed notification for $medicationName")
-//            } catch (e: Exception) {
-//                Log.e("NotifDebug", "Failed to show notification", e)
-//            }
-//        } else {
-//            Log.w("NotifDebug", "Unexpected intent action: ${intent.action}")
-//        }
-//
-//        Log.d("NotifDebug", "FULL INTENT DUMP END ==================")
     }
 }

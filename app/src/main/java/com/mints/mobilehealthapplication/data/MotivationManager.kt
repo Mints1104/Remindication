@@ -15,7 +15,6 @@ object MotivationManager {
         "Stay positive!",
     )
 
-    // Replace these with valid drawable references
     private val images = listOf(R.drawable.mountain1,
         R.drawable.mountain2,
         R.drawable.mountain3,
@@ -33,7 +32,6 @@ object MotivationManager {
         val todayDate = LocalDate.now().toString()
         val storedDate = sharedPref.getString("content_date", null)
 
-        // If we already picked content today, return the stored content
         if (todayDate == storedDate) {
             val contentType = sharedPref.getString("content_type", null)
             return when (contentType) {
@@ -72,7 +70,7 @@ object MotivationManager {
         return content
     }
 
-    fun pickContentForToday(): ContentOption {
+    private fun pickContentForToday(): ContentOption {
         val isImageDay = (0..1).random() == 0
         return if (isImageDay) {
             ContentOption.Image(images.random())

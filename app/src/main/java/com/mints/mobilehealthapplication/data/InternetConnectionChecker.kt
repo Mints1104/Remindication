@@ -15,18 +15,14 @@ class InternetConnectionChecker(private val context: Context) {
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
-    // LiveData for observing connection state changes
     private val _connectionState = MutableLiveData<Boolean>()
     val connectionState: LiveData<Boolean> = _connectionState
 
-    // Variable to store the connection status (still useful for immediate checks)
     var isConnected: Boolean = false
         private set
 
     init {
-        // Initialize connection state
         checkInternetConnection()
-        // Register network callback in initialization
         registerNetworkCallback()
     }
 
@@ -35,7 +31,6 @@ class InternetConnectionChecker(private val context: Context) {
      * @return Boolean indicating if internet is available
      */
     fun checkInternetConnection(): Boolean {
-        // For Android 6.0+ (API 23+)
         val network: Network? = connectivityManager.activeNetwork
         if (network == null) {
             Log.d(TAG, "No active network detected")

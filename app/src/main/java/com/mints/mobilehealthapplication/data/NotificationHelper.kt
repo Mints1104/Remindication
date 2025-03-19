@@ -93,7 +93,6 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun cancelBackupNotification(medicationName: String) {
-        //Build the same URI used for backup notifications
         val backupUri = Uri.parse("mints://notification/backup/$medicationName")
         val requestCode = backupUri.hashCode()
 
@@ -116,14 +115,47 @@ class NotificationHelper(private val context: Context) {
         } else {
             Log.d("NotifDebug","Failed to cancel backup notification")
         }
-        // Also, cancel the notification from the drawer if present.
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(medicationName.hashCode())
     }
 
+    fun cancelRegularNotification(medicationName: String, timeInMillis: Long) {
+        // Construct the same unique URI used for regular notifications.
+        val uniqueUri = Uri.parse("mints://notification/$medicationName/$timeInMillis")
+        val requestCode = uniqueUri.hashCode()
+
+        // Create an intent with the same action and data.
+        val intent = Intent(context, NotificationReceiver::class.java).apply {
+            action = NOTIFICATION_ACTION
+            data = uniqueUri
+        }
+
+        // Get the existing PendingIntent, if any.
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+        )
+
+        // If there's an existing intent, cancel it using the AlarmManager.
+        if (pendingIntent != null) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.cancel(pendingIntent)
+            Log.d("NotifDebug", "Cancelled regular notification for $medicationName")
+        } else {
+            Log.d("NotifDebug", "No regular notification found to cancel for $medicationName")
+        }
+
+        // Also cancel the notification from the NotificationManager.
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(requestCode)
+    }
+
+
+
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleNotification(medicationName: String, timeInMillis:Long, isBackup:Boolean = false) {
-        //For backup notifications, use a different URI to have a consistent request code.
         val uriPath = if(isBackup) "backup" else medicationName
         val uniqueUri = if(isBackup) {
             Uri.parse("mints://notification/$uriPath/$medicationName")
@@ -141,7 +173,6 @@ class NotificationHelper(private val context: Context) {
 
         val requestCode = uniqueUri.hashCode()
 
-        //Check if there is already an existing PendingIntent
         val existingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
@@ -152,7 +183,6 @@ class NotificationHelper(private val context: Context) {
         if(existingIntent !=null) {
             alarmManager.cancel(existingIntent)
         }
-        //Create a new PendingIntent
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,

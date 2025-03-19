@@ -169,7 +169,7 @@ class MedicationTrendsFragment : Fragment() {
         // Highlight today's bar with a different color
         val todayIndex = currentDayOfWeek - 1
         if (todayIndex in entries.indices) {
-            val colors = entries.mapIndexed { index, _ ->
+            val colors = List(entries.size) { index ->
                 if (index == todayIndex) Color.BLUE else Color.GREEN
             }
             dataSet.colors = colors
@@ -224,14 +224,12 @@ class MedicationTrendsFragment : Fragment() {
         val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
         val labelColor = if (isDarkMode) Color.WHITE else Color.BLACK
 
-        // Set up the data set for the chart.
         val dataSet = BarDataSet(entries, "Events by Time").apply {
             color = Color.CYAN
             valueTextSize = 12f
-            valueTextColor = labelColor  // set value text color
+            valueTextColor = labelColor
         }
 
-        // Configure x-axis
         val xAxis = chart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(false)
@@ -240,11 +238,9 @@ class MedicationTrendsFragment : Fragment() {
         xAxis.textColor = labelColor
         xAxis.labelRotationAngle = 45f
 
-        // Set y-axis colors
         chart.axisLeft.textColor = labelColor
         chart.axisRight.textColor = labelColor
 
-        // Set legend and description text color
         chart.legend.textColor = labelColor
         chart.description.textColor = labelColor
 
