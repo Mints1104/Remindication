@@ -31,16 +31,6 @@ object FireStoreRepository {
                 "lastName" to data.lastName,
                 "dateOfBirth" to data.dateOfBirth,
                 "phoneNumber" to data.phoneNumber,
-                "medication" to hashMapOf(
-                    "name" to data.medicationName,
-                    "dosage" to data.dosage,
-                    "frequency" to data.frequency,
-                    "reminderTime" to data.reminderTime
-                ),
-                "preferences" to hashMapOf(
-                    "theme" to data.theme,
-                    "enableNotifications" to data.enableNotifications
-                ),
                 "createdAt" to FieldValue.serverTimestamp()
             )
 

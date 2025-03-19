@@ -16,13 +16,15 @@
         app:showAsAction="ifRoom" />
 
 
-
-
-
-
-
     <item
-        android:id="@+id/action_logout"
-        android:title="@string/log_xml" />
+        android:id="@+id/profile_tab"
+        android:icon="@drawable/baseline_profile_24"
+        android:title="@string/profile_tab"
+        app:showAsAction="ifRoom" />
+
+
+
+
+
 
 </menu>

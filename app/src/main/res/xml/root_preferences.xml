@@ -33,4 +33,22 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        app:title="Streak Reminders">
+
+        <SwitchPreferenceCompat
+            app:key="enable_streak_notifications"
+            app:title="Enable Streak Notifications"
+            app:summary="Get reminders to maintain your adherence streak"
+            app:defaultValue="true" />
+
+
+
+
+    </PreferenceCategory>
+
+
+
+
+
 </PreferenceScreen>

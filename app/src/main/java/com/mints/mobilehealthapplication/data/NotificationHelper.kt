@@ -119,6 +119,30 @@ class NotificationHelper(private val context: Context) {
         notificationManager.cancel(medicationName.hashCode())
     }
 
+    fun showCustomNotification(title:String,message:String) {
+
+        val mainIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val mainPendingIntent = PendingIntent.getActivity(
+            context, 0, mainIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.baseline_prescriptions_24px)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setAutoCancel(true)
+            .setContentIntent(mainPendingIntent)
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(title.hashCode(), builder.build())
+        notificationManager.notify(message.hashCode(), builder.build())
+
+
+    }
+
     fun cancelRegularNotification(medicationName: String, timeInMillis: Long) {
         // Construct the same unique URI used for regular notifications.
         val uniqueUri = Uri.parse("mints://notification/$medicationName/$timeInMillis")

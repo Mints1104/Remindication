@@ -282,6 +282,15 @@ class MainActivity : AppCompatActivity() {
                     title = "Medication Trends"
                 )
             }
+            R.id.userProfileFragment -> {
+                hideFAB()
+                updateToolbar(
+                    showBackArrow = true,
+                    menuResId = R.menu.top_app_bar,
+                    title = "Profile"
+                )
+            }
+
 
             // Template for new fragments
             /*
@@ -357,9 +366,13 @@ class MainActivity : AppCompatActivity() {
                 navController.navigate(R.id.global_action_to_settingsFragment)
                 true
             }
-            R.id.action_logout -> {
-                auth.signOut()
-                navController.navigate(R.id.global_action_to_loginFragment)
+//            R.id.action_logout -> {
+//                auth.signOut()
+//                navController.navigate(R.id.global_action_to_loginFragment)
+//                true
+//            }
+            R.id.profile_tab -> {
+                navController.navigate(R.id.global_action_to_userProfileFragment)
                 true
             }
             R.id.streaks -> {

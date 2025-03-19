@@ -42,13 +42,6 @@ class RegistrationViewModel : ViewModel() {
         var lastName: String = "",
         var dateOfBirth: String = "",
         var phoneNumber: String = "",
-        // Medication fields are optional during registration
-        var medicationName: String = "",
-        var dosage: String = "",
-        var frequency: String = "",
-        var reminderTime: String = "",
-        var theme: String = "Light",
-        var enableNotifications: Boolean = true
     )
 
     /**
