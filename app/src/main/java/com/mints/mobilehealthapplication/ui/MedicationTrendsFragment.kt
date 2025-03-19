@@ -79,6 +79,31 @@ class MedicationTrendsFragment : Fragment() {
         chart.setScaleEnabled(true)
         chart.legend.isEnabled = true
 
+        val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val labelColor = if (isDarkMode) Color.WHITE else Color.BLACK
+
+        // Set X-Axis text color
+        val xAxis = chart.xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.granularity = 1f
+        xAxis.textColor = labelColor
+        xAxis.valueFormatter = IndexAxisValueFormatter(
+            events.groupBy { it.date.toLocalDate().toString() }
+                .toSortedMap()
+                .keys.map { key ->
+                    val date = LocalDate.parse(key)
+                    "${date.monthValue}/${date.dayOfMonth}"
+                }
+        )
+
+        // Set left Y-Axis and right Y-Axis text colors
+        chart.axisLeft.textColor = labelColor
+        chart.axisRight.textColor = labelColor
+
+        // Set legend text color
+        chart.legend.textColor = labelColor
+
+        // Prepare your data set
         val eventsByDate: Map<String, List<MedicationEvent>> = events.groupBy { event ->
             event.date.toLocalDate().toString()
         }.toSortedMap()
@@ -91,25 +116,18 @@ class MedicationTrendsFragment : Fragment() {
             Entry(index.toFloat(), value)
         }
 
-        val dataSet = LineDataSet(entries, "Daily Adherence")
-        dataSet.color = Color.BLUE
-        dataSet.lineWidth = 2f
-        dataSet.setCircleColor(Color.BLUE)
-        dataSet.setDrawCircleHole(false)
-        dataSet.setDrawValues(false)
+        val dataSet = LineDataSet(entries, "Daily Adherence").apply {
+            color = Color.BLUE
+            lineWidth = 2f
+            setCircleColor(Color.BLUE)
+            setDrawCircleHole(false)
+            setDrawValues(false)
+        }
 
-        val xAxis = chart.xAxis
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.granularity = 1f
-        xAxis.valueFormatter = IndexAxisValueFormatter(
-            eventsByDate.keys.map { key ->
-                val date = LocalDate.parse(key)
-                "${date.monthValue}/${date.dayOfMonth}"
-            }
-        )
         chart.data = LineData(dataSet)
-        chart.invalidate()
+        chart.invalidate()  // Refresh chart
     }
+
 
     private fun setupWeeklyChart(events: List<MedicationEvent>) {
         val chart = binding.weeklyChart
@@ -126,7 +144,9 @@ class MedicationTrendsFragment : Fragment() {
         val daysInWeek = (0..6).map { startOfWeek.plusDays(it.toLong()) }
 
         // Create labels for the x-axis
-        val dayLabels = daysInWeek.map { date -> "${date.monthValue}/${date.dayOfMonth} ${date.dayOfWeek.toString().take(3)}" }
+        val dayLabels = daysInWeek.map { date ->
+            "${date.monthValue}/${date.dayOfMonth} ${date.dayOfWeek.toString().take(3)}"
+        }
 
         // Group events by their actual date
         val eventsByDate = events.groupBy { event ->
@@ -139,30 +159,43 @@ class MedicationTrendsFragment : Fragment() {
             BarEntry(index.toFloat(), dayEvents.size.toFloat())
         }
 
-        val dataSet = BarDataSet(entries, "Events by Day")
-        dataSet.color = Color.GREEN
+        val dataSet = BarDataSet(entries, "Events by Day").apply {
+            color = Color.GREEN
+            valueTextSize = 12f
+            // Set the values' text color for the bars
+            valueTextColor = if ((resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) Color.WHITE else Color.BLACK
+        }
 
         // Highlight today's bar with a different color
         val todayIndex = currentDayOfWeek - 1
-        if (todayIndex >= 0 && todayIndex < entries.size) {
+        if (todayIndex in entries.indices) {
             val colors = entries.mapIndexed { index, _ ->
                 if (index == todayIndex) Color.BLUE else Color.GREEN
             }
             dataSet.colors = colors
         }
 
+        // Detect dark mode and set label color accordingly.
+        val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val labelColor = if (isDarkMode) Color.WHITE else Color.BLACK
+
+        // Set colors for x-axis, y-axes, legend, and description
         val xAxis = chart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
         xAxis.valueFormatter = IndexAxisValueFormatter(dayLabels)
+        xAxis.textColor = labelColor
 
-        // Adjust label rotation if needed for better readability
-        xAxis.labelRotationAngle = 45f
+        chart.axisLeft.textColor = labelColor
+        chart.axisRight.textColor = labelColor
+        chart.legend.textColor = labelColor
+        chart.description.textColor = labelColor
 
         chart.data = BarData(dataSet).apply { barWidth = 0.6f }
         chart.invalidate()
     }
+
 
     private fun setupDailyTimingChart(events: List<MedicationEvent>) {
         val chart = binding.dailyTimingChart
@@ -170,6 +203,7 @@ class MedicationTrendsFragment : Fragment() {
         chart.setDrawGridBackground(false)
         chart.legend.isEnabled = true
 
+        // Group events by hour
         val eventsByHour: Map<Int, List<MedicationEvent>> = events.groupBy { event ->
             event.date.hour
         }
@@ -186,18 +220,38 @@ class MedicationTrendsFragment : Fragment() {
             BarEntry(index.toFloat(), count.toFloat())
         }
 
-        val dataSet = BarDataSet(entries, "Events by Time")
-        dataSet.color = Color.CYAN
+        // Detect dark mode and set label color accordingly.
+        val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val labelColor = if (isDarkMode) Color.WHITE else Color.BLACK
 
+        // Set up the data set for the chart.
+        val dataSet = BarDataSet(entries, "Events by Time").apply {
+            color = Color.CYAN
+            valueTextSize = 12f
+            valueTextColor = labelColor  // set value text color
+        }
+
+        // Configure x-axis
         val xAxis = chart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
         xAxis.valueFormatter = IndexAxisValueFormatter(timeBlocks.keys.toList())
+        xAxis.textColor = labelColor
+        xAxis.labelRotationAngle = 45f
+
+        // Set y-axis colors
+        chart.axisLeft.textColor = labelColor
+        chart.axisRight.textColor = labelColor
+
+        // Set legend and description text color
+        chart.legend.textColor = labelColor
+        chart.description.textColor = labelColor
 
         chart.data = BarData(dataSet).apply { barWidth = 0.6f }
         chart.invalidate()
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

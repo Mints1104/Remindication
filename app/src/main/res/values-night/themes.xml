@@ -10,7 +10,7 @@
         <item name="colorPrimaryFixedDim">@color/md_theme_primaryFixedDim</item>
         <item name="colorOnPrimaryFixedVariant">@color/md_theme_onPrimaryFixedVariant</item>
         <item name="chipStyle">@style/Widget.App.Chip</item>
-
+        <item name="graphAxisColor">@color/white</item>
 
         <item name="colorSecondary">@color/md_theme_secondaryFixed</item>
         <item name="colorOnSecondary">@color/md_theme_onSecondaryFixed</item>
