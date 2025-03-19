@@ -566,9 +566,10 @@ object FireStoreRepository {
                 .update("schedule.nextDueDates", firestoreDates)
                 .await()
 
-            newDates.forEach { date ->
+            newDates.lastOrNull()?.let { date ->
                 Log.d("FIRESTORE_UPDATE", "Success, new date: $date")
             }
+
 
             true
         } catch (e: Exception) {

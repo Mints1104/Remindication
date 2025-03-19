@@ -1,5 +1,6 @@
 package com.mints.mobilehealthapplication.utils
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -47,18 +48,16 @@ object ScheduleHelper {
             ?.toLocalDate() ?: LocalDate.now()
 
         val today = LocalDate.now()
-
-        // Check if the cycle has ended
         val cycleLength = intakeDays + pauseDays
         val cycleEndDate = cycleStartDate.plusDays(intakeDays.toLong())
 
-        val newCycleStartDate = if (today.isAfter(cycleEndDate)) {
-            cycleStartDate.plusDays(cycleLength.toLong()) // Move to next cycle
+        // Advance cycle if today is on or after the cycle end date
+        val newCycleStartDate = if (today.isAfter(cycleEndDate) || today.isEqual(cycleEndDate)) {
+            cycleStartDate.plusDays(cycleLength.toLong())
         } else {
-            cycleStartDate // Stay in current cycle
+            cycleStartDate
         }
 
-        // Generate new due dates for the intake period
         val newDueDates = mutableListOf<LocalDateTime>()
         for (day in 0 until intakeDays) {
             val date = newCycleStartDate.plusDays(day.toLong())
@@ -66,9 +65,11 @@ object ScheduleHelper {
                 newDueDates.add(LocalDateTime.of(date, time))
             }
         }
-
+        Log.d("ScheduleHelper", "New due dates: $newDueDates")
         return newDueDates.sorted()
     }
+
+
 
     fun getDatesBetween(start: LocalDate, end: LocalDate): List<LocalDate> {
         val dates = mutableListOf<LocalDate>()

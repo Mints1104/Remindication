@@ -405,6 +405,7 @@ class AddMedicationScheduleFragment : Fragment() {
 
 
             }
+            Log.d(tag,"Scheduled date time: $scheduledDateTime")
 
             val triggerTimeInMillis = scheduledDateTime
                 .atZone(ZoneId.systemDefault())

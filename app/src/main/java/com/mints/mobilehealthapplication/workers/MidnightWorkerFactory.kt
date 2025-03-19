@@ -16,7 +16,7 @@ class MidnightWorkerFactory(
     ): ListenableWorker? {
         return when (workerClassName) {
             MidnightWorker::class.java.name ->
-                MidnightWorker(appContext, workerParameters, notificationHelper)
+                MidnightWorker(appContext, workerParameters)
             else -> null
         }
     }

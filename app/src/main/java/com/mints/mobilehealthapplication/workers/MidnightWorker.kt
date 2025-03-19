@@ -73,11 +73,11 @@ class MidnightWorker(
         medication: Medication,
         schedule: MedicationSchedule.Cyclic,
         now: LocalDateTime,
-        userId: String
+        userId: String,
     ) {
         Log.d(TAG, "Processing cyclic schedule for ${medication.name}")
 
-        // Check if the medication has past due dates (missed doses)
+        // Identify missed due dates and mark missed events (same as before)
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()
@@ -108,7 +108,7 @@ class MidnightWorker(
             }
         }
 
-        // Determine new due dates for the cycle
+        // Calculate new due dates for the cycle using our updated helper
         val newDueDates = ScheduleHelper.calculateCyclicDueDates(
             intakeDays = schedule.intakeDays,
             pauseDays = schedule.pauseDays,
@@ -116,7 +116,7 @@ class MidnightWorker(
             currentCycleStartDate = schedule.currentCycleStartDate
         )
 
-        // Update Firestore with new due dates
+        // Update Firestore with the new due dates
         medication.id?.let { medId ->
             val success = FireStoreRepository.updateMedicationDates(
                 userId = userId,
@@ -124,10 +124,14 @@ class MidnightWorker(
                 newDates = newDueDates
             )
             if (success) {
-                val nextDueTimeMillis = newDueDates.minByOrNull { it }
-                    ?.atZone(ZoneId.systemDefault())
-                    ?.toInstant()
-                    ?.toEpochMilli() ?: 0L
+                // Filter out due dates that are not after the current time
+                val upcomingDueDates = newDueDates.filter { it.isAfter(now) }
+                val nextDueTimeMillis = if (upcomingDueDates.isNotEmpty()) {
+                    upcomingDueDates.minByOrNull { it }?.atZone(ZoneId.systemDefault())
+                        ?.toInstant()?.toEpochMilli() ?: 0L
+                } else {
+                    0L
+                }
                 Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
                 notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
                 Log.d(TAG, "Successfully advanced cyclic schedule for ${medication.name}")
@@ -136,6 +140,7 @@ class MidnightWorker(
             }
         }
     }
+
 
 
     private suspend fun processDailySchedule(
