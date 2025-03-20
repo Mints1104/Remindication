@@ -294,7 +294,7 @@ class MainActivity : AppCompatActivity() {
                 updateToolbar(
                     showBackArrow = true,
                     menuResId = null,
-                    title = "Test"
+                    title = "Medication Info"
                 )
             }
 

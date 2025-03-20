@@ -37,7 +37,7 @@
         android:id="@+id/btnViewFullDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View Full Details"
+        android:text="Fetch medication information"
         android:layout_gravity="center"
         android:layout_marginBottom="16dp" />
 

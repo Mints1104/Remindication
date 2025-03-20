@@ -43,6 +43,7 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
             }
             findNavController().navigate(R.id.global_action_to_testFragment, bundle)
             dismiss()
+
         }
     }
 
