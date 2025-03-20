@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://rxnav.nlm.nih.gov/"
+    private const val BASE_URL = "https://api.fda.gov/"
 
     private val retrofit by lazy {
         Retrofit.Builder()
@@ -13,7 +13,7 @@ object RetrofitClient {
             .build()
     }
 
-    val rxNormApi: RxNormApi by lazy {
-        retrofit.create(RxNormApi::class.java)
+    val fdaApi: FDAApi by lazy {
+        retrofit.create(FDAApi::class.java)
     }
 }

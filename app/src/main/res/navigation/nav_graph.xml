@@ -22,8 +22,8 @@
         app:popExitAnim="@anim/slide_out_right" />
 
     <action
-        android:id="@+id/global_action_to_testFragment"
-        app:destination="@id/testFragment"
+        android:id="@+id/global_action_to_medicationInfoFragment"
+        app:destination="@id/medicationInfoFragment"
         app:enterAnim="@anim/slide_in_right"
         app:exitAnim="@anim/slide_out_left"
         app:popEnterAnim="@anim/slide_in_left"
@@ -333,8 +333,8 @@
     </fragment>
 
     <fragment
-        android:id="@+id/testFragment"
-        android:name="com.mints.mobilehealthapplication.ui.TestFragment"
+        android:id="@+id/medicationInfoFragment"
+        android:name="com.mints.mobilehealthapplication.ui.MedicationInfoFragment"
         tools:layout="@layout/fragment_test">
         <argument
             android:name="MEDICATION_NAME"
@@ -342,7 +342,7 @@
 
 
     <action
-            android:id="@+id/action_testFragment_to_homeFragment"
+            android:id="@+id/action_medicationInfoFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"

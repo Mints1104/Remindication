@@ -31,7 +31,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.InternetConnectionChecker
-import com.mints.mobilehealthapplication.data.NHSMedication
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModelFactory
 
@@ -73,10 +72,9 @@ class MainActivity : AppCompatActivity() {
         }
         checkNetworkState()
 
-        val nhsMedication = NHSMedication()
         val callApiButton = findViewById<MaterialButton>(R.id.call_Api)
         callApiButton.setOnClickListener {
-            navController.navigate(R.id.global_action_to_testFragment)
+            navController.navigate(R.id.global_action_to_medicationInfoFragment)
         }
     }
 
@@ -289,7 +287,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-            R.id.testFragment -> {
+            R.id.medicationInfoFragment -> {
                 hideFAB()
                 updateToolbar(
                     showBackArrow = true,

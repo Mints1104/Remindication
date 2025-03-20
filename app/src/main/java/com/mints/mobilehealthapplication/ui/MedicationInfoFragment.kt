@@ -12,15 +12,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.card.MaterialCardView
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.data.MedicationResult
+import com.mints.mobilehealthapplication.data.RetrofitClient
 import com.mints.mobilehealthapplication.databinding.FragmentTestBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
+import retrofit2.HttpException
 
-class TestFragment : Fragment() {
+class MedicationInfoFragment : Fragment() {
     private var _binding: FragmentTestBinding? = null
     private val binding get() = _binding!!
 
@@ -41,7 +41,6 @@ class TestFragment : Fragment() {
             showError("No medication name provided")
         } else {
             (requireActivity() as MainActivity).updateToolBarTitle("Medication Info for ${medicationName!!}")
-
             fetchMedicationInfo(medicationName!!)
         }
     }
@@ -53,54 +52,36 @@ class TestFragment : Fragment() {
         binding.errorMessage.visibility = View.GONE
         binding.medicationHeaderCard.visibility = View.GONE
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch {
             try {
                 Log.d("TestFragment", "Starting fetch for: $drugName")
-                val apiUrl = "https://api.fda.gov/drug/label.json?search=openfda.brand_name:$drugName&limit=1"
-                val url = URL(apiUrl)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.connectTimeout = 10000
-                connection.readTimeout = 10000
+                val searchQuery = "openfda.brand_name:$drugName"
 
-                val responseCode = connection.responseCode
-                Log.d("TestFragment", "Response code: $responseCode")
-
-                if (responseCode == 200) {
-                    val responseText = connection.inputStream.bufferedReader().use { it.readText() }
-                    val json = JSONObject(responseText)
-
-                    if (json.has("results") && json.getJSONArray("results").length() > 0) {
-                        val results = json.getJSONArray("results").getJSONObject(0)
-
-                        withContext(Dispatchers.Main) {
-                            binding.loadingIndicator.visibility = View.GONE
-                            binding.infoContainer.visibility = View.VISIBLE
-                            binding.medicationHeaderCard.visibility = View.VISIBLE
-
-                            displayMedicationInfo(results)
-                        }
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            showError("No information found for $drugName")
-                        }
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        val errorMessage = if (responseCode == 404) {
-                            "No information found for $drugName"
-                        } else {
-                            "Unable to retrieve information. Please try again later."
-                        }
-                        showError(errorMessage)
-
-                    }
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.fdaApi.getMedicationInfo(searchQuery)
                 }
+
+                if (response.results.isNotEmpty()) {
+                    val result = response.results[0]
+                    binding.loadingIndicator.visibility = View.GONE
+                    binding.infoContainer.visibility = View.VISIBLE
+                    binding.medicationHeaderCard.visibility = View.VISIBLE
+
+                    displayMedicationInfo(result)
+                } else {
+                    showError("No information found for $drugName")
+                }
+            } catch (e: HttpException) {
+                Log.e("TestFragment", "HTTP error: ${e.code()}", e)
+                val errorMessage = if (e.code() == 404) {
+                    "No information found for $drugName"
+                } else {
+                    "Unable to retrieve information. Please try again later."
+                }
+                showError(errorMessage)
             } catch (e: Exception) {
                 Log.e("TestFragment", "Error fetching medication info", e)
-                withContext(Dispatchers.Main) {
-                    showError("Error fetching data: ${e.message}")
-                }
+                showError("Error fetching data: ${e.message}")
             }
         }
     }
@@ -113,60 +94,53 @@ class TestFragment : Fragment() {
         binding.errorMessage.text = message
     }
 
-    private fun displayMedicationInfo(results: JSONObject) {
+    private fun displayMedicationInfo(result: MedicationResult) {
         // Clear any existing content
         binding.infoContainer.removeAllViews()
 
         // Display medication name and generic name in the header
-        val openfda = results.optJSONObject("openfda")
-        val brandName = openfda?.optJSONArray("brand_name")?.optString(0) ?: "Unknown"
-        val genericName = openfda?.optJSONArray("generic_name")?.optString(0) ?: "Unknown"
+        val brandName = result.openfda?.brand_name?.firstOrNull() ?: "Unknown"
+        val genericName = result.openfda?.generic_name?.firstOrNull() ?: "Unknown"
 
         binding.medicationNameHeader.text = brandName
         binding.medicationGenericName.text = genericName
 
         // Key medication information sections (expanded by default)
         addInfoSection(R.drawable.ic_directions, "How to Use",
-            results, "dosage_and_administration", true)
+            result.dosage_and_administration?.firstOrNull(), true)
 
         addInfoSection(R.drawable.ic_warning, "Warnings & Precautions",
-            results, "warnings", true)
+            result.warnings?.firstOrNull(), true)
 
         addInfoSection(R.drawable.ic_uses, "Uses",
-            results, "indications_and_usage", true)
+            result.indications_and_usage?.firstOrNull(), true)
 
         // Secondary information (collapsed by default)
         addInfoSection(R.drawable.ic_ingredient, "Active Ingredients",
-            results, "active_ingredient", false)
+            result.active_ingredient?.firstOrNull(), false)
 
         addInfoSection(R.drawable.ic_stop, "When to Stop Use",
-            results, "stop_use", false)
+            result.stop_use?.firstOrNull(), false)
 
-        addInfoSection(R.drawable.ic_exclamation, "Do Not Use If",
-            results, "do_not_use", false)
+        addInfoSection(R.drawable.ic_warning, "Do Not Use If",
+            result.do_not_use?.firstOrNull(), false)
 
         addInfoSection(R.drawable.ic_ask_doctor, "Ask Doctor",
-            results, "ask_doctor", false)
+            result.ask_doctor?.firstOrNull(), false)
 
         addInfoSection(R.drawable.ic_pregnancy, "Pregnancy or Breastfeeding",
-            results, "pregnancy_or_breast_feeding", false)
+            result.pregnancy_or_breast_feeding?.firstOrNull(), false)
 
         addInfoSection(R.drawable.ic_storage, "Storage Information",
-            results, "storage_and_handling", false)
+            result.storage_and_handling?.firstOrNull(), false)
 
         addInfoSection(R.drawable.ic_ingredient, "Inactive Ingredients",
-            results, "inactive_ingredient", false)
+            result.inactive_ingredient?.firstOrNull(), false)
     }
 
-    private fun addInfoSection(iconResId: Int, title: String, results: JSONObject,
-                               jsonKey: String, expandedByDefault: Boolean) {
-        // Skip if this section doesn't exist
-        if (!results.has(jsonKey) || results.getJSONArray(jsonKey).length() == 0) {
-            return
-        }
-
-        val content = results.getJSONArray(jsonKey).getString(0)
-        if (content.isBlank()) return
+    private fun addInfoSection(iconResId: Int, title: String, content: String?, expandedByDefault: Boolean) {
+        // Skip if content is null or empty
+        if (content.isNullOrBlank()) return
 
         // Inflate the section card
         val inflater = LayoutInflater.from(requireContext())
@@ -175,7 +149,6 @@ class TestFragment : Fragment() {
             binding.infoContainer,
             false
         ) as MaterialCardView
-
 
         // Set up the card content
         val sectionIcon = sectionCard.findViewById<ImageView>(R.id.section_icon)
@@ -252,4 +225,6 @@ class TestFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
 }
