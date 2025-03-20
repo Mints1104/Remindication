@@ -228,13 +228,13 @@ import java.time.LocalDateTime
         private fun handleDisplayingNotes(medication: Medication) {
             if (medication.notes.isNotEmpty()) {
                 val addMedicationNotesBottomSheet =
-                    MedicationNotesBottomSheet.newInstance(medication.notes)
+                    MedicationNotesBottomSheet.newInstance(medication.name, medication.notes)
                 addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
-
             } else {
                 displayMessage("No notes available for ${medication.name}")
             }
         }
+
 
         private fun getUncompletedMedicationsForToday(medications: List<Medication>): List<Medication> {
             val today = LocalDate.now()

@@ -5,27 +5,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.BottomsheetMedicationNotesBinding
 
 class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
 
-    private lateinit var db: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
-    private var notes: String? = null
-
     private var _binding: BottomsheetMedicationNotesBinding? = null
     private val binding get() = _binding!!
-    private var tag = "BottomSheet"
+    private var medicationName: String? = null
+    private var medicationNotes: String? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = BottomsheetMedicationNotesBinding.inflate(inflater, container, false)
         return binding.root
@@ -34,15 +27,21 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d(tag, "We are in medication notes bottom sheet.")
-        db = Firebase.firestore
-        auth = Firebase.auth
-
-        notes = arguments?.getString("NOTES_KEY")
-        Log.d(tag, "Notes: $notes")
-        binding.notesTextView.text = notes ?: "No notes available"
+        medicationName = arguments?.getString("MEDICATION_NAME")
+        medicationNotes = arguments?.getString("MEDICATION_NOTES")
+        Log.d("MedicationNotesBottomSheet", "Medication Name: $medicationName")
+        Log.d("MedicationNotesBottomSheet", "Notes: $medicationNotes")
+        binding.notesTextView.text = medicationNotes ?: "No notes available"
 
         binding.closeNotesDialogButton.setOnClickListener {
+            dismiss()
+        }
+
+        binding.btnViewFullDetails.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("MEDICATION_NAME", medicationName)
+            }
+            findNavController().navigate(R.id.global_action_to_testFragment, bundle)
             dismiss()
         }
     }
@@ -53,10 +52,11 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        fun newInstance(notes: String): MedicationNotesBottomSheet {
+        fun newInstance(name: String, notes: String): MedicationNotesBottomSheet {
             val fragment = MedicationNotesBottomSheet()
             val args = Bundle()
-            args.putString("NOTES_KEY", notes)
+            args.putString("MEDICATION_NAME", name)
+            args.putString("MEDICATION_NOTES", notes)
             fragment.arguments = args
             return fragment
         }

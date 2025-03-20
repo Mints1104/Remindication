@@ -33,7 +33,13 @@
 
     </com.google.android.material.textview.MaterialTextView>
 
-
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnViewFullDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Full Details"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/closeNotesDialogButton"

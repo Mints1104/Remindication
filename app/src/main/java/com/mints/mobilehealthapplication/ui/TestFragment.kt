@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.mints.mobilehealthapplication.databinding.FragmentTestBinding
@@ -20,6 +19,9 @@ class TestFragment : Fragment() {
     private var _binding: FragmentTestBinding? = null
     private val binding get() = _binding!!
 
+    // We'll receive the medication name via arguments.
+    private var medicationName: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -30,33 +32,38 @@ class TestFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.searchButton.setOnClickListener {
-            val drugName = binding.medicationSearchInput.text.toString().trim()
-            if (drugName.isNotEmpty()) {
-                fetchMedicationInfo(drugName)
-            } else {
-                Toast.makeText(requireContext(), "Please enter a medication name", Toast.LENGTH_SHORT).show()
-            }
+        // Get the medication name from arguments
+        medicationName = arguments?.getString("MEDICATION_NAME")
+        if (medicationName.isNullOrEmpty()) {
+            binding.medicationInfo.text = "No medication name provided."
+        } else {
+            // Update header with the medication name
+            binding.medicationNameHeader.text = medicationName
+            // Automatically fetch data for the given medication name
+            fetchMedicationInfo(medicationName!!)
         }
     }
 
     private fun fetchMedicationInfo(drugName: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
+                Log.d("TestFragment", "Starting fetch for: $drugName")
                 val apiUrl = "https://api.fda.gov/drug/label.json?search=openfda.brand_name:$drugName&limit=1"
                 val url = URL(apiUrl)
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
+                connection.connectTimeout = 10000
+                connection.readTimeout = 10000
 
                 val responseCode = connection.responseCode
+                Log.d("TestFragment", "Response code: $responseCode")
                 if (responseCode == 200) {
-                    val responseText = url.readText()
+                    val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                    Log.d("TestFragment", "Fetched data: $responseText")
                     val json = JSONObject(responseText)
-
                     if (json.has("results") && json.getJSONArray("results").length() > 0) {
                         val results = json.getJSONArray("results").getJSONObject(0)
                         val medicationInfo = buildMedicationInfoString(results)
-
                         withContext(Dispatchers.Main) {
                             binding.medicationInfo.text = medicationInfo
                         }
@@ -67,7 +74,8 @@ class TestFragment : Fragment() {
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        binding.medicationInfo.text = "Error: API returned status code $responseCode"
+                        binding.medicationInfo.text =  "No information found for $drugName"
+                        Log.d("TestFragment", "Error: API returned status code $responseCode")
                     }
                 }
             } catch (e: Exception) {
@@ -78,6 +86,7 @@ class TestFragment : Fragment() {
             }
         }
     }
+
 
     private fun buildMedicationInfoString(results: JSONObject): String {
         val stringBuilder = StringBuilder()
@@ -127,25 +136,15 @@ class TestFragment : Fragment() {
         // Convert blocks of text to bullet points for better readability
         val lines = text.split(". ")
         val formattedText = StringBuilder()
-
         for (line in lines) {
             if (line.trim().isNotEmpty()) {
                 val formattedLine = line.trim().replace("\n", " ")
-
-                // Check if the line already ends with a period
-                val lineWithPeriod = if (formattedLine.endsWith(".")) {
-                    formattedLine
-                } else {
-                    "$formattedLine."
-                }
-
+                val lineWithPeriod = if (formattedLine.endsWith(".")) formattedLine else "$formattedLine."
                 formattedText.append("• $lineWithPeriod\n")
             }
         }
-
         return formattedText.toString()
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

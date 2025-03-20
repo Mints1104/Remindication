@@ -335,9 +335,13 @@
     <fragment
         android:id="@+id/testFragment"
         android:name="com.mints.mobilehealthapplication.ui.TestFragment"
-        tools:layout="@layout/fragment_userprofile">
+        tools:layout="@layout/fragment_test">
+        <argument
+            android:name="MEDICATION_NAME"
+            app:argType="string" />
 
-        <action
+
+    <action
             android:id="@+id/action_testFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"

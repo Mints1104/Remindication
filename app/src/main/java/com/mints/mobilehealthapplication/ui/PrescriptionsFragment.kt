@@ -142,7 +142,8 @@ class PrescriptionsFragment : Fragment() {
 
 
             if (medication.notes.isNotEmpty()) {
-                val addMedicationNotesBottomSheet = MedicationNotesBottomSheet.newInstance(medication.notes)
+                val addMedicationNotesBottomSheet =MedicationNotesBottomSheet.newInstance(medication.name, medication.notes)
+
                 addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
 
             } else {
