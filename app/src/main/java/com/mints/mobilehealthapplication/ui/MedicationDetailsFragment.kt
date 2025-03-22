@@ -48,7 +48,10 @@ class MedicationDetailFragment : Fragment() {
         binding.visualiseAdherenceButton.setOnClickListener {
             val action = MedicationDetailFragmentDirections
                 .actionMedicationDetailFragmentToMedicationTrendsFragment(medicationId)
-            findNavController().navigate(action)
+            val navController = findNavController()
+            if (navController.currentDestination?.id == R.id.medicationDetailFragment) {
+                navController.navigate(action)
+            }
         }
 
 

@@ -157,6 +157,11 @@ class AddMedicationFrequencyFragment : Fragment() {
         return findNavController().currentDestination?.id == R.id.addMedicationFrequencyFragment
     }
 
+    override fun onResume() {
+        super.onResume()
+        setUpUI()
+    }
+
 
     /**
      * Displays a message in a Snackbar at the bottom of the screen.

@@ -211,7 +211,6 @@ class RescheduleWorker(
             }
         }
 
-        // Adjust weekly due dates using ScheduleHelper.
         val updatedDates = schedule.nextDueDates.map { dueDate ->
             if (dueDate.isBefore(now)) ScheduleHelper.adjustWeeklyDueDate(dueDate, now) else dueDate
         }.sorted()

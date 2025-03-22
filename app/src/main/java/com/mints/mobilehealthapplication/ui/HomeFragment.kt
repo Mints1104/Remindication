@@ -534,7 +534,10 @@ import java.time.LocalDateTime
             val fab = requireActivity().findViewById<ExtendedFloatingActionButton>(R.id.add_medication_fab)
             fab.setOnClickListener {
                 if(deviceConnected) {
-                findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
+                    val navController = findNavController()
+                    if(navController.currentDestination?.id == R.id.homeFragment) {
+                        findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
+                    }
             } else {
                 displayMessage("Device not connected to internet")
                 }

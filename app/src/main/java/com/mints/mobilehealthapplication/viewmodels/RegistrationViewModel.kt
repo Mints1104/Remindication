@@ -24,7 +24,6 @@ import java.util.Locale
 class RegistrationViewModel : ViewModel() {
     private val auth = Firebase.auth
 
-    // Encapsulated MutableStateFlows
     private val _registrationData = MutableStateFlow(RegistrationData())
     val registrationData = _registrationData.asStateFlow()
 

@@ -16,7 +16,6 @@ class MedicationRecyclerView(
     private val onClick: (Medication) -> Unit
 ) : RecyclerView.Adapter<MedicationRecyclerView.MedicationViewHolder>() {
 
-    // Flag to control the visibility of medicationDay for every item.
     private var hideMedicationDays: Boolean = false
 
     class MedicationViewHolder(val binding: ItemMedicationBinding) :
@@ -38,24 +37,20 @@ class MedicationRecyclerView(
 
         val medicationSchedule = medication.schedule
 
-        // Handle OnDemand schedule first, as it hides both views.
         if (medicationSchedule is MedicationSchedule.OnDemand) {
             holder.binding.medicationDay.visibility = View.GONE
             holder.binding.medicationTime.visibility = View.GONE
             holder.binding.medicationDay.text = context.getString(R.string.empty_string)
             holder.binding.medicationTime.text = context.getString(R.string.empty_string)
         } else {
-            // Update medicationTime regardless of hideMedicationDays flag.
             holder.binding.medicationTime.visibility = View.VISIBLE
             holder.binding.medicationTime.text = context.getString(R.string.time_of_medication, medication.schedule.formattedTimes)
 
-            // Now update medicationDay based on hideMedicationDays flag.
             if (hideMedicationDays) {
                 holder.binding.medicationDay.visibility = View.GONE
             } else {
                 holder.binding.medicationDay.visibility = View.VISIBLE
 
-                // For Daily schedule
                 if (medicationSchedule is MedicationSchedule.Daily) {
                     holder.binding.medicationDay.text = context.getString(
                         R.string.medication_date,
@@ -64,7 +59,6 @@ class MedicationRecyclerView(
                             .replaceFirstChar { it.uppercase() }
                     )
                 }
-                // For WeeklySchedule
                 if (medicationSchedule is MedicationSchedule.WeeklySchedule) {
                     holder.binding.medicationDay.text = context.getString(
                         R.string.medication_date,
@@ -76,7 +70,6 @@ class MedicationRecyclerView(
             }
         }
 
-        // Set the click listener.
         holder.binding.root.setOnClickListener {
             onClick(medication)
         }

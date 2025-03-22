@@ -64,8 +64,8 @@ class AddMedicationBasicInfoFragment : Fragment() {
         val args: AddMedicationBasicInfoFragmentArgs by navArgs()
 
         val medicationId = args.medicationId
-        viewModel.setIsEditing(true)
         if (medicationId.isNotEmpty()) {
+            viewModel.setIsEditing(true)
             mainActivity.updateToolBarTitle("Edit Medication")
             lifecycleScope.launch {
                 viewModel.getMedicationDetails(uid, medicationId)
@@ -145,6 +145,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        setUpUI()
         Log.d(tag, "onResume called, current name: ${viewModel.getName()}")
     }
 

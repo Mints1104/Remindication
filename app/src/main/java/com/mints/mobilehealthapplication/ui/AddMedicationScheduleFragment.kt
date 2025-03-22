@@ -480,6 +480,12 @@ class AddMedicationScheduleFragment : Fragment() {
             .show()
     }
 
+    override fun onResume() {
+        super.onResume()
+        setupViews()
+
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -70,6 +70,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun displayMessage(msgTxt: String) {
+        if(_binding == null) return
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()

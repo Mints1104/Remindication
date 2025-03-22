@@ -26,7 +26,6 @@ class MedicationEventAdapter(private var events: List<MedicationEvent>) :
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val event = events[position]
         holder.binding.eventTypeText.text = event.type.name
-     //   val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         holder.binding.eventDateText.text = event.getFormattedDate()
     }
 

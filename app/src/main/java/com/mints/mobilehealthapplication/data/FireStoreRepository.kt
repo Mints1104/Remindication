@@ -166,8 +166,7 @@ object FireStoreRepository {
                 "lastAdherenceDate" to if (adherentToday) Timestamp.now() else null
             )
 
-            // Use set() instead of update() to avoid errors if the document doesn't exist.
-            // Use set() with merge option to update fields in the user document
+
             db.collection("users")
                 .document(userId)
                 .set(data, SetOptions.merge())
@@ -191,7 +190,6 @@ object FireStoreRepository {
             val documentPath = "users/$userId/medications/$medicationId"
             Log.d("FireStoreRepo", "Updating medication history at path: [$documentPath] with event type: ${event::class.simpleName}")
 
-            // Use the mapper's extension function:
             val eventMap = with(mappers) { event.toMap() }
 
             db.collection("users")
@@ -221,10 +219,8 @@ object FireStoreRepository {
             val documentPath = "users/$userId/medications/$medicationId"
             Log.d("FireStoreRepo", "Updating medication history at path: [$documentPath] with multiple events.")
 
-            // Map each event to its corresponding Map representation using your mappers
             val eventMaps = events.map { with(mappers) { it.toMap() } }
 
-            // Use the spread operator to pass all event maps to arrayUnion
             db.collection("users")
                 .document(userId)
                 .collection("medications")
@@ -244,7 +240,7 @@ object FireStoreRepository {
     }
 
 
-    fun calculateCyclicDueDates(
+    private fun calculateCyclicDueDates(
         intakeDays: Int,
         times: List<LocalTime>,
         currentCycleStartDate: Timestamp?
@@ -268,7 +264,6 @@ object FireStoreRepository {
 
 
 
-    // Update the parsing method to handle potential null cases
     private fun parseMedicationHistory(historyMap: Map<String, Any>?): MedicationHistory {
         if (historyMap == null) return MedicationHistory()
 
@@ -546,7 +541,6 @@ object FireStoreRepository {
         newDates: List<LocalDateTime>
     ): Boolean {
         return try {
-            // Use our mapper's extension function for each date.
             val firestoreDates = newDates.map { with(mappers) { it.toFirebaseTimestamp() } }
 
             db.collection("users")

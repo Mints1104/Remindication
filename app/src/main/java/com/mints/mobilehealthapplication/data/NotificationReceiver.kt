@@ -63,8 +63,10 @@ class NotificationReceiver : BroadcastReceiver() {
                     Log.d("NotifDebug","Successfully showed notification for $medicationName")
                     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                     val backupEnabled = prefs.getBoolean("enabled_backup_reminder",true)
+                    val isABackupNotification = notificationHelper.getIsNotificationBackup()
                     Log.d("NotifDebug","Is backups enabled: $backupEnabled")
-                    if(backupEnabled) {
+                    //Only schedule a backup notification if the notification received was not a backup notification
+                    if(backupEnabled && !isABackupNotification) {
                         val backupDelayMinutes = prefs.getString("backup_reminder_delay","30")?.toLong()?:30L
                         val backupDelayMillis = backupDelayMinutes * 60 * 1000L
                         val backupTime = System.currentTimeMillis() + backupDelayMillis

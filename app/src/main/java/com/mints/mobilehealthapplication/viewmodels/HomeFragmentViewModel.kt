@@ -654,7 +654,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
 
         fun onMedicationClicked(medication: Medication) {
-            _navigateToDetails.value = medication // Trigger navigation
+            _navigateToDetails.value = medication
         }
 
 

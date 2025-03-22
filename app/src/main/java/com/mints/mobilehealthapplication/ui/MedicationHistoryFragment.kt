@@ -36,7 +36,10 @@ class MedicationHistoryFragment : Fragment() {
         setUpRecyclerView()
         fetchUserMedication()
         binding.visualiseAdherenceButton.setOnClickListener {
-            findNavController().navigate(R.id.action_medicationHistoryFragment_to_medicationTrendsFragment)
+            val navController = findNavController()
+            if(navController.currentDestination?.id == R.id.medicationHistoryFragment) {
+                navController.navigate(R.id.action_medicationHistoryFragment_to_medicationTrendsFragment)
+            }
 
         }
 

@@ -23,7 +23,6 @@ import androidx.navigation.navOptions
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -70,20 +69,14 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity","Initial internet check is false")
 
         }
-        checkNetworkState()
 
-        val callApiButton = findViewById<MaterialButton>(R.id.call_Api)
-        callApiButton.setOnClickListener {
-            navController.navigate(R.id.global_action_to_medicationInfoFragment)
-        }
+
+
     }
 
     fun checkNetworkState(): Boolean {
         return internetChecker.isConnected
     }
-
-
-
 
         private fun setUpAlarmManager() {
         Log.d("AlarmDebug", "Setting up alarm manager")
@@ -91,15 +84,11 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
                 Log.d("AlarmDebug", "Exact alarm permission already granted")
-            //    scheduleExactAlarm()
             } else {
                 Log.w("AlarmDebug", "Exact alarm permission NOT granted")
                 requestPermission()
             }
-        } else {
-          //  scheduleExactAlarm()
         }
-
     }
 
 
@@ -109,7 +98,6 @@ class MainActivity : AppCompatActivity() {
     ) { _ ->
         if (alarmManager.canScheduleExactAlarms()) {
             Log.d("AlarmDebug", "Exact alarm permission granted")
-            //scheduleExactAlarm()
         } else {
             Log.w("AlarmDebug", "Exact alarm permission denied")
             Toast.makeText(
@@ -131,39 +119,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    private fun scheduleExactAlarm() {
-//        val triggerTime = System.currentTimeMillis() + 5000
-//        Log.d("AlarmDebug", "Scheduling exact alarm at ${Date(triggerTime)}")
-//        Log.d("AlarmDebug", "Creating PendingIntent with requestCode 0")
-//
-//        // Step 1: Create the intent to trigger when the alarm goes off
-//        val intent = Intent(this, NotificationReceiver::class.java).apply {
-//            // Add any extras if needed, like medication details
-//            putExtra("medication_name", "Aspirin")
-//            putExtra("dosage", "500mg")
-//        }
-//
-//        // Step 2: Create the PendingIntent to trigger the notification
-//        val pendingIntent = PendingIntent.getBroadcast(
-//            this,
-//            0,  // You can use a unique request code here
-//            intent,
-//            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-//        )
-//
-//        // Step 3: Schedule the alarm with AlarmManager using setExact
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//            alarmManager.setExact(
-//                AlarmManager.RTC_WAKEUP,  // Wake the device if it's asleep
-//                triggerTime,  // Trigger time in milliseconds
-//                pendingIntent  // PendingIntent that will be triggered
-//            )
-//        } else {
-//            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-//        }
-//
-//        Log.d("Alarm", "Exact alarm set for: $triggerTime")
-//    }
 
 
     private fun requestNotificationPermission() {

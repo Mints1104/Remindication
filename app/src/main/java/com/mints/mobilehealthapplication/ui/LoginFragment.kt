@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
@@ -24,6 +25,7 @@ class LoginFragment : Fragment() {
     private val viewModel: LoginViewModel by viewModels()
     private var _binding: FragmentLoginscreenBinding? = null
     private val binding get() = _binding!!
+    private lateinit var navController: NavController
 
     /**
      * Inflates the layout for this fragment and initializes the UI components.
@@ -32,10 +34,11 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         _binding = FragmentLoginscreenBinding.inflate(inflater, container, false)
         Log.d("LoginFragment", "This is the login fragment.")
         setUpUI()
-
+        navController = findNavController()
         return binding.root
     }
 
@@ -47,13 +50,17 @@ class LoginFragment : Fragment() {
         val forgotPasswordText: TextView = binding.forgotUserPasswordText
         val loginButton: Button = binding.loginButton
         forgotPasswordText.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_resetPasswordFragment)
+            if (navController.currentDestination?.id == R.id.loginFragment) {
+                navController.navigate(R.id.action_loginFragment_to_resetPasswordFragment)
+            }
         }
         loginButton.setOnClickListener {
             loginClick()
         }
         signUpText.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_userInfoFragment)
+            if(navController.currentDestination?.id == R.id.loginFragment) {
+                navController.navigate(R.id.action_loginFragment_to_userInfoFragment)
+            }
         }
     }
 
@@ -63,7 +70,9 @@ class LoginFragment : Fragment() {
         val passwordText = binding.passwordEditText.text.toString().trim()
         viewModel.login(emailText, passwordText) { success, message ->
             if (success) {
-                findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                if(navController.currentDestination?.id == R.id.loginFragment) {
+                    navController.navigate(R.id.action_loginFragment_to_homeFragment)
+                }
             } else {
                 displayMessage(message)
             }

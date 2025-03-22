@@ -13,7 +13,6 @@ class MedicationAnalyticsViewModel: ViewModel() {
     private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
 
-    // Add a LiveData for adherence percentage
     private val _adherencePercentage = MutableLiveData<Float>()
     val adherencePercentage: LiveData<Float> get() = _adherencePercentage
 
@@ -51,16 +50,13 @@ class MedicationAnalyticsViewModel: ViewModel() {
 
         Log.d(tag, "Collecting events for ${medications.size} medications")
 
-        // Collect all events in a single list
         val allEvents = mutableListOf<MedicationEvent>()
         medications.forEach { medication ->
             allEvents.addAll(medication.medicationHistory.getAllEvents())
         }
 
-        // Post the events for chart display
         _medicationEvents.postValue(allEvents)
 
-        // We're not calculating adherence here, just collecting events for visualization
         Log.d(tag, "Collected ${allEvents.size} medication events for visualization")
     }
 }

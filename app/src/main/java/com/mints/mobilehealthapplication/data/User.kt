@@ -76,12 +76,10 @@ data class MedicationHistory(
         return events
     }
 
-    // Get all events for a specific status using the new EventType
     fun getEventsByType(type: MedicationEvent.EventType): List<MedicationEvent> {
         return events.filter { it.type == type }
     }
 
-    // Get events within a specific date range
     fun getEventsInDateRange(start: LocalDateTime, end: LocalDateTime): List<MedicationEvent> {
         return events.filter {
             (it.date.isEqual(start) || it.date.isAfter(start)) &&
@@ -89,17 +87,14 @@ data class MedicationHistory(
         }
     }
 
-    // Get the latest event if available
     fun getLastEvent(): MedicationEvent? {
-        return events.firstOrNull() // Since we keep the list sorted, first is most recent
+        return events.firstOrNull()
     }
 
-    // Get the last event of a specific type
     fun getLastEventOfType(type: MedicationEvent.EventType): MedicationEvent? {
         return events.firstOrNull { it.type == type }
     }
 
-    // Get events from the last n days
     fun getEventsFromLastDays(days: Int): List<MedicationEvent> {
         val startDate = LocalDateTime.now().minusDays(days.toLong())
         return events.filter { it.date.isAfter(startDate) }
@@ -134,12 +129,10 @@ data class MedicationHistory(
         return events.count { it.type == type }
     }
 
-    // Clear events older than a certain date
     fun clearEventsOlderThan(date: LocalDateTime) {
         events.removeAll { it.date.isBefore(date) }
     }
 
-    // Check if medication was taken today
     fun wasTakenToday(): Boolean {
         val today = LocalDate.now()
         return events.any {
@@ -279,7 +272,6 @@ val DayOfWeek.shortName: String get() = when (this) {
     DayOfWeek.SUNDAY -> "Sun"
 }
 
-// Rest of your existing classes
 data class RefillInfo(
     val pillsRemaining: Int,
     val totalPills: Int,

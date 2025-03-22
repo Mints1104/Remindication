@@ -64,7 +64,10 @@ class UserInfoFragment : Fragment() {
                 this.password = password
             }
 
-            findNavController().navigate(R.id.action_userInfoFragment_to_healthInfoFragment)
+            val navController = findNavController()
+            if(navController.currentDestination?.id == R.id.userInfoFragment) {
+                navController.navigate(R.id.action_userInfoFragment_to_healthInfoFragment)
+            }
         }
     }
 

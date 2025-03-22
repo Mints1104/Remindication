@@ -41,7 +41,10 @@ class ResetPasswordFragment : Fragment() {
         }
 
         goBackButton.setOnClickListener {
-            findNavController().navigate(R.id.action_resetPasswordFragment_to_loginFragment)
+            val navController = findNavController()
+            if(navController.currentDestination?.id == R.id.resetPasswordFragment) {
+                navController.navigate(R.id.action_resetPasswordFragment_to_loginFragment)
+            }
         }
 
         return binding.root

@@ -200,7 +200,10 @@ class PrescriptionsFragment : Fragment() {
                     val medicationId = medication.id
                     val action = PrescriptionsFragmentDirections
                         .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
-                    findNavController().navigate(action)
+                    val navController = findNavController()
+                    if(navController.currentDestination?.id == R.id.prescriptionsFragment) {
+                        navController.navigate(action)
+                    }
 
                 } else {
                     displayMessage("Device not connected to internet")
@@ -218,17 +221,14 @@ class PrescriptionsFragment : Fragment() {
 
 
     private fun showUndoSnackbar(medication: Medication, position: Int) {
-        // Create a copy of the current list
         val currentList = adapter.getMedicationList().toMutableList()
         val removedItem = currentList.removeAt(position)
 
-        // Update adapter with new list and notify only about the removed item
         adapter.updateMedicationList(currentList)
         adapter.notifyItemRemoved(position)
 
         Snackbar.make(binding.root, "${medication.name} deleted", Snackbar.LENGTH_LONG)
             .setAction("UNDO") {
-                // Re-insert at original position
                 currentList.add(position, removedItem)
                 adapter.updateMedicationList(currentList)
                 adapter.notifyItemInserted(position)
@@ -237,7 +237,6 @@ class PrescriptionsFragment : Fragment() {
             .addCallback(object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION) {
-                        // Delete from ViewModel after confirmation
                         medication.id?.let {
                             viewModel.deleteMedication(uid, it) {
                             }

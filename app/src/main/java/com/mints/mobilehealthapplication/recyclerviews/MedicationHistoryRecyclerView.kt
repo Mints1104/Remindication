@@ -34,7 +34,6 @@ class MedicationHistoryRecyclerView(
 
         holder.binding.medicationName.text = medication.name
 
-        // Set the click listener.
         holder.binding.root.setOnClickListener {
             Log.d(TAG, "onBindViewHolder: ${medication.name} clicked")
             onClick(medication)

@@ -28,7 +28,6 @@ class MidnightWorker(
     private val notificationHelper: NotificationHelper
 ) : CoroutineWorker(context, workerParams) {
 
-    // Instantiate NotificationHelper using the application context.
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -36,7 +35,6 @@ class MidnightWorker(
             val userId = FireStoreRepository.getUser()?.uid ?: ""
             val medications = FireStoreRepository.getMedications(userId)
 
-            // Process each medication based on its schedule type.
             medications.forEach { medication ->
                 when (val schedule = medication.schedule) {
                     is MedicationSchedule.Daily -> {
@@ -55,10 +53,8 @@ class MidnightWorker(
                 }
             }
 
-            // Re-schedule MidnightWorker for the next midnight.
             scheduleNextMidnightWork(applicationContext)
 
-            // Broadcast refresh intent for UI updates.
             val refreshIntent = Intent(REFRESH_ACTION)
             LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(refreshIntent)
 
@@ -107,7 +103,6 @@ class MidnightWorker(
             }
         }
 
-        // Calculate new due dates for the cycle using our updated helper
         val newDueDates = ScheduleHelper.calculateCyclicDueDates(
             intakeDays = schedule.intakeDays,
             pauseDays = schedule.pauseDays,
@@ -115,7 +110,6 @@ class MidnightWorker(
             currentCycleStartDate = schedule.currentCycleStartDate
         )
 
-        // Update Firestore with the new due dates
         medication.id?.let { medId ->
             val success = FireStoreRepository.updateMedicationDates(
                 userId = userId,
@@ -156,7 +150,6 @@ class MidnightWorker(
             val missedEvents = mutableListOf<MedicationEvent>()
 
             missedDueDates.forEach { missedDateTime ->
-                // Use the shared ScheduleHelper function.
                 val missedDates = ScheduleHelper.getDatesBetween(
                     start = missedDateTime.toLocalDate(),
                     end = now.toLocalDate().minusDays(1)
@@ -231,7 +224,6 @@ class MidnightWorker(
             }
         }
 
-        // Adjust weekly due dates using ScheduleHelper.
         val updatedDates = schedule.nextDueDates.map { dueDate ->
             if (dueDate.isBefore(now)) ScheduleHelper.adjustWeeklyDueDate(dueDate, now) else dueDate
         }.sorted()

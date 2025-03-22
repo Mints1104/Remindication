@@ -24,6 +24,7 @@ class NotificationHelper(private val context: Context) {
         const val NOTIFICATION_ACTION = "MEDICATION_NOTIFICATION_ACTION"
         const val SNOOZE_ACTION = "MEDICATION_SNOOZE_ACTION"
     }
+    private var isBackupNotification = false
 
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -179,14 +180,21 @@ class NotificationHelper(private val context: Context) {
         notificationManager.cancel(requestCode)
     }
 
-
+    fun getIsNotificationBackup(): Boolean {
+        return isBackupNotification
+    }
+    private fun setIsNotificationBackup(isBackup: Boolean) {
+        isBackupNotification = isBackup
+    }
 
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleNotification(medicationName: String, timeInMillis:Long, isBackup:Boolean = false) {
         val uriPath = if(isBackup) "backup" else medicationName
         val uniqueUri = if(isBackup) {
+            setIsNotificationBackup(true)
             Uri.parse("mints://notification/$uriPath/$medicationName")
         } else {
+            setIsNotificationBackup(false)
             Uri.parse("mints://notification/$uriPath/$timeInMillis")
         }
         val intent = Intent(context, NotificationReceiver::class.java).apply {
