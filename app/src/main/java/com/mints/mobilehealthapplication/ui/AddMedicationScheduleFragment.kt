@@ -288,7 +288,6 @@ class AddMedicationScheduleFragment : Fragment() {
         val time = parseTime(binding.dailyTimeInput.text.toString())
         return if (time != null) {
             viewModel.setSelectedTimes(listOf(time))
-            viewModel.setWithFoodStatus(binding.withFoodSwitch.isChecked)
             true
         } else {
             displayMessage("Please select a time")
@@ -315,7 +314,6 @@ class AddMedicationScheduleFragment : Fragment() {
             }
             else -> {
                 viewModel.setSelectedTimes(listOf(firstTime, secondTime))
-                viewModel.setWithFoodStatus(binding.twiceDailyWithFoodSwitch.isChecked)
                 true
             }
         }
@@ -394,7 +392,6 @@ class AddMedicationScheduleFragment : Fragment() {
         Log.d(tag,"Saving medication!")
         val currentTime = LocalTime.now()
         val medicationName = viewModel.getName()
-        val medicationDosage = viewModel.getDosage()
         if(viewModel.getFrequencyType() != "On Demand") {
             val selectedLocalTime: LocalTime = viewModel.getSelectedTimes()?.get(0) ?: currentTime
             var scheduledDateTime = LocalDateTime.of(LocalDate.now(), selectedLocalTime)

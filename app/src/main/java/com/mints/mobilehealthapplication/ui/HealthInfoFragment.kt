@@ -99,7 +99,6 @@ class HealthInfoFragment : Fragment() {
                         // Optionally show loading indicator
                     }
                     RegistrationViewModel.RegistrationState.Initial -> {
-                        // Initial state, no action needed
                     }
                 }
             }

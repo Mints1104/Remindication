@@ -16,7 +16,7 @@ class MaterialSwipeCallback(
     private val context: Context,
     private val swipeLeftAction: SwipeAction,
     private val swipeRightAction: SwipeAction,
-    private val onSwipeLeft: (Int) -> Unit = {}, // Add these callback parameters
+    private val onSwipeLeft: (Int) -> Unit = {},
     private val onSwipeRight: (Int) -> Unit = {}
 ) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 

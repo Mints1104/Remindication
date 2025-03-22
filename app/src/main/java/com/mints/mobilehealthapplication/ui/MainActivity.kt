@@ -42,7 +42,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private var shouldShowMenu = false
     private lateinit var alarmManager: AlarmManager
-    private val REQUEST_PERMISSION_CODE = 1001
     lateinit var internetChecker: InternetConnectionChecker
         private var currentMenu: Int? = null
 
@@ -288,7 +287,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateToolbar(showBackArrow: Boolean, menuResId: Int?, title: String) {
         mToolbar.title = title
-        // Configure back navigation
         if (showBackArrow) {
             mToolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24)
             mToolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed()
@@ -297,11 +295,9 @@ class MainActivity : AppCompatActivity() {
             mToolbar.navigationIcon = null
         }
 
-        // Store the menu resource ID for later use
         currentMenu = menuResId
         shouldShowMenu = menuResId != null
 
-        // Force menu recreation
         invalidateOptionsMenu()
     }
 
@@ -326,11 +322,6 @@ class MainActivity : AppCompatActivity() {
                 navController.navigate(R.id.global_action_to_settingsFragment)
                 true
             }
-//            R.id.action_logout -> {
-//                auth.signOut()
-//                navController.navigate(R.id.global_action_to_loginFragment)
-//                true
-//            }
             R.id.profile_tab -> {
                 navController.navigate(R.id.global_action_to_userProfileFragment)
                 true

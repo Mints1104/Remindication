@@ -9,7 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.mints.mobilehealthapplication.BuildConfig
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.FragmentUserprofileBinding
 import com.mints.mobilehealthapplication.viewmodels.ProfileViewModel
@@ -17,10 +17,10 @@ import com.mints.mobilehealthapplication.viewmodels.ProfileViewModel
 class ProfileFragment : Fragment() {
     private var _binding: FragmentUserprofileBinding? = null
     private val binding get() = _binding!!
-
+    private var uid = ""
     private val viewModel: ProfileViewModel by viewModels()
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private var totalMedicationCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -36,6 +36,21 @@ class ProfileFragment : Fragment() {
         viewModel.loadUserProfile()
         (requireActivity() as MainActivity).hideBottomNav()
 
+        // Initialize ProfileViewModel functions
+        viewModel.startListeningToAdherenceStreak()
+        viewModel.checkMedicationHistory()
+        viewModel.calculatePerfectWeeks()
+         uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        viewModel.getMedications(uid)
+        setupDebugMode()
+        setupObservers()
+
+        // Handle button clicks
+        binding.btnChangePassword.setOnClickListener { changePassword() }
+        binding.btnLogout.setOnClickListener { logoutUser() }
+    }
+
+    private fun setupObservers() {
         // Observe profile data and update UI
         viewModel.userProfile.observe(viewLifecycleOwner) { user ->
             binding.profileFullName.text = "${user.firstName} ${user.lastName}"
@@ -45,12 +60,57 @@ class ProfileFragment : Fragment() {
             binding.profileUserId.text = user.uid
         }
 
-        // Handle button clicks
-        binding.btnChangePassword.setOnClickListener { changePassword() }
-        binding.btnLogout.setOnClickListener { logoutUser() }
+        // Observe adherence streak
+        viewModel.adherenceStreak.observe(viewLifecycleOwner) { streak ->
+            binding.streakCount.text = streak.toString()
+
+            // Update streak progress (7-day streak achievement)
+            val progress = minOf(streak, 7)
+            binding.streakProgress.progress = progress * 100 / 7
+            binding.streakProgressText.text = "$progress/7"
+        }
+
+        // Observe if user has taken medication before
+        viewModel.hasEverTakenMedication.observe(viewLifecycleOwner) { hasTaken ->
+            // Update first medication badge (make it fully visible if achieved)
+            binding.firstMedicationBadge.alpha = if (hasTaken) 1.0f else 0.5f
+            binding.firstMedicationBadgeText.text = if (hasTaken) "✓" else "X"
+
+        }
+
+        // Observe perfect weeks count
+        viewModel.perfectWeeks.observe(viewLifecycleOwner) { perfectWeeks ->
+            binding.perfectWeekCount.text = "$perfectWeeks"
+        }
+
+
+
+        viewModel.totalDosesTaken.observe(viewLifecycleOwner) {
+            binding.medicationMilestoneProgress.progress = it
+            binding.medicationMilestoneProgressText.text = "$it/100"
+        }
+
+
+        viewModel.medications.observe(viewLifecycleOwner) { list ->
+           totalMedicationCount = list.size
+            binding.medicationCount.text = "$totalMedicationCount"
+        }
+        }
+
+
+
+
+
+
+    private fun setupDebugMode() {
+        // Only show debug toggle in debug builds
+        if (BuildConfig.DEBUG) {
+            binding.debugModeSwitch.visibility = View.VISIBLE
+            binding.debugModeSwitch.setOnCheckedChangeListener { _, isChecked ->
+                binding.debugUserIdContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+            }
+        }
     }
-
-
 
     private fun changePassword() {
         auth.sendPasswordResetEmail(auth.currentUser?.email ?: "").addOnCompleteListener { task ->
@@ -66,7 +126,6 @@ class ProfileFragment : Fragment() {
         auth.signOut()
         displayMessage("Logged out")
         findNavController().navigate(R.id.global_action_to_loginFragment)
-
     }
 
     private fun displayMessage(msgTxt: String) {
@@ -74,7 +133,6 @@ class ProfileFragment : Fragment() {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()
-
     }
 
     override fun onDestroyView() {

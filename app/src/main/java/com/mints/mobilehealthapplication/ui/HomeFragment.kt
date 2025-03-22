@@ -111,9 +111,8 @@ import java.time.LocalDateTime
             if (uid.isEmpty()) {
                 Log.e(tag, "User is not authenticated")
                 Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
-                showContent() // Hide shimmer if there's an error
+                showContent()
             } else {
-                // Set up the observer once using viewLifecycleOwner
                 viewModel.medications.observe(viewLifecycleOwner) { list ->
                     if (!list.isNullOrEmpty()) {
                         showContent()
@@ -123,11 +122,10 @@ import java.time.LocalDateTime
                         }
                     } else {
                         Log.d(tag, "No medications found")
-                        showContent() // Hide shimmer even if no medications found
+                        showContent()
                     }
                 }
 
-                // Trigger the snapshot listener; this updates the LiveData
                 viewModel.getMedications(uid)
             }
 
@@ -141,9 +139,8 @@ import java.time.LocalDateTime
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == REFRESH_ACTION) {
                     Log.d(tag, "Received refresh broadcast, updating UI")
-                    // Refresh your data from the ViewModel
-                    viewModel.invalidateCache() // Clear cache to force refresh
-                    viewModel.getMedications(uid) // Fetch fresh data
+                    viewModel.invalidateCache()
+                    viewModel.getMedications(uid)
                 }
             }
         }
@@ -193,8 +190,6 @@ import java.time.LocalDateTime
             binding.medicationsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
             addSwipeFunctionality()
             viewModel.medications.observe(viewLifecycleOwner) { medications ->
-                // In here if the scheduled meds isn't empty then we'll hide the motivational message
-
                 Log.d(tag, "Observed ${medications.size} medications in LiveData")
 
                 val filteredMeds = getUncompletedMedicationsForToday(medications)
@@ -369,54 +364,6 @@ import java.time.LocalDateTime
         }
 
 
-//        private fun showUndoMedicationSnackbar(medication: Medication,position: Int) {
-//            val currentList = adapter.getMedicationList().toMutableList()
-//
-//            Snackbar.make(binding.root,"${medication.name} taken", Snackbar.LENGTH_LONG)
-//                .setAction("UNDO") {
-//                    viewModel.undoLastTaken(medication)
-//                    adapter.updateMedicationList(currentList)
-//                    adapter.notifyItemChanged(position)
-//
-//                }
-//                .addCallback(object : Snackbar.Callback() {
-//                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-//                        if (event != DISMISS_EVENT_ACTION) {
-//                            viewModel.markMedicationAsTaken(uid,medication)
-//                            adapter.updateMedicationList(currentList)
-//                            adapter.notifyItemChanged(position)
-//                        }
-//                    }
-//                })
-//                .show()
-//        }
-//
-//
-//        private fun showUndoSkipMedicationSnackbar(medication: Medication,position: Int) {
-//            val currentList = adapter.getMedicationList().toMutableList()
-//
-//            Snackbar.make(binding.root,"${medication.name} skipped", Snackbar.LENGTH_LONG)
-//                .setAction("UNDO") {
-//                    viewModel.undoLastTaken(medication)
-//                    adapter.updateMedicationList(currentList)
-//                    adapter.notifyItemChanged(position)
-//
-//                }
-//                .addCallback(object : Snackbar.Callback() {
-//                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-//                        if (event != DISMISS_EVENT_ACTION) {
-//                            viewModel.markMedicationAsSkipped(uid,medication)
-//
-//                            adapter.updateMedicationList(currentList)
-//                            adapter.notifyItemChanged(position)
-//                        }
-//                    }
-//                })
-//                .show()
-//        }
-
-
-
         private fun getClosestDate(currentList: List<Medication>) {
             Log.d(tag, "Starting getClosestDate function")
             Log.d(tag, "Current medication list size: ${currentList.size}")
@@ -479,8 +426,6 @@ import java.time.LocalDateTime
 
 
         }
-
-        // Kotlin
         private fun revealMotivationContent() {
             val sharedPref = requireContext().getSharedPreferences("motivation_prefs", Context.MODE_PRIVATE)
             val alreadyUncovered = sharedPref.getBoolean("already_uncovered", false)

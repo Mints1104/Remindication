@@ -180,12 +180,11 @@ class NotificationHelper(private val context: Context) {
         notificationManager.cancel(requestCode)
     }
 
-    fun getIsNotificationBackup(): Boolean {
-        return isBackupNotification
+    private fun getRequestCode(medicationName: String, timeInMillis: Long, isBackup: Boolean): Int {
+        return "$medicationName-$timeInMillis-$isBackup".hashCode()
     }
-    private fun setIsNotificationBackup(isBackup: Boolean) {
-        isBackupNotification = isBackup
-    }
+
+
 
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleNotification(medicationName: String, timeInMillis:Long, isBackup:Boolean = false) {

@@ -9,6 +9,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.mints.mobilehealthapplication.data.DailyFrequency
 import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
@@ -84,6 +85,7 @@ class MidnightWorker(
                 missedDates.forEach { date ->
                     val eventDateTime = date.atTime(missedDateTime.toLocalTime())
                     Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
+
                     medication.markAsMissed(eventDateTime)
                     missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
                 }
@@ -149,6 +151,15 @@ class MidnightWorker(
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()
 
+            when(schedule.frequency) {
+                DailyFrequency.ONCE -> {
+                    Log.d("MW","${medication.name} is a once daily medication")
+                }
+                DailyFrequency.TWICE -> {
+                    Log.d("MW","${medication.name} is a twice daily medication")
+                }
+            }
+
             missedDueDates.forEach { missedDateTime ->
                 val missedDates = ScheduleHelper.getDatesBetween(
                     start = missedDateTime.toLocalDate(),
@@ -188,12 +199,18 @@ class MidnightWorker(
                 newDates = updatedDates
             )
             if (success) {
-                val nextDueTimeMillis = updatedDates.minByOrNull { it }
-                    ?.atZone(ZoneId.systemDefault())
-                    ?.toInstant()
-                    ?.toEpochMilli() ?: 0L
-                Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
-                notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
+                val upcomingDates = updatedDates.filter { it.isAfter(now) || it.isEqual(now)}
+                upcomingDates.forEach { dueDate ->
+                    val dueTimeMillis = dueDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    Log.d(TAG, "Scheduling notification for ${medication.name} at $dueTimeMillis")
+                    notificationHelper.scheduleNotification(medication.name, dueTimeMillis)
+                }
+//                val nextDueTimeMillis = updatedDates.minByOrNull { it }
+//                    ?.atZone(ZoneId.systemDefault())
+//                    ?.toInstant()
+//                    ?.toEpochMilli() ?: 0L
+//                Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
+//                notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
                 Log.d(TAG, "Successfully advanced daily schedule for ${medication.name}")
             } else {
                 Log.e(TAG, "Failed to update daily schedule for ${medication.name}")

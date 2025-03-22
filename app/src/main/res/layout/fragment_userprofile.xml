@@ -54,6 +54,351 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Badges Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/profile_badges_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardElevation="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="?attr/colorTertiaryContainer"
+        app:strokeWidth="0dp"
+        app:layout_constraintTop_toBottomOf="@id/profile_header_card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/your_badges"
+                android:textColor="?attr/colorOnTertiaryContainer"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/badges_description"
+                android:layout_marginTop="4dp"
+                android:textColor="?attr/colorOnTertiaryContainer"
+                android:textSize="14sp" />
+
+            <!-- Badge categories -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Streak Badges -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="16dp">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/streak_badge"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            app:cardElevation="4dp"
+                            app:cardCornerRadius="40dp"
+                            app:strokeWidth="0dp"
+                            app:cardBackgroundColor="?attr/colorSecondaryContainer">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:src="@drawable/fire_white_icon"
+                                    android:contentDescription="@string/streak_badge"
+                                    app:tint="?attr/colorOnSecondaryContainer" />
+
+                                <TextView
+                                    android:id="@+id/streak_count"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/streak_count_default"
+                                    android:textColor="?attr/colorOnSecondaryContainer"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/streak_title"
+                            android:layout_marginTop="8dp"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <!-- Medication Count Badges -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="16dp">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/medication_count_badge"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            app:cardElevation="4dp"
+                            app:cardCornerRadius="40dp"
+                            app:strokeWidth="0dp"
+                            app:cardBackgroundColor="?attr/colorPrimaryContainer">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:src="@drawable/baseline_pill_24px"
+                                    android:contentDescription="@string/medication_badge"
+                                    app:tint="?attr/colorOnPrimaryContainer" />
+
+                                <TextView
+                                    android:id="@+id/medication_count"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/medication_count_default"
+                                    android:textColor="?attr/colorOnPrimaryContainer"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/medication_title"
+                            android:layout_marginTop="8dp"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <!-- Perfect Week Badge -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="16dp">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/perfect_week_badge"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            app:cardElevation="4dp"
+                            app:cardCornerRadius="40dp"
+                            app:strokeWidth="0dp"
+                            app:cardBackgroundColor="?attr/colorErrorContainer">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:src="@drawable/ic_calendar_week"
+                                    android:contentDescription="@string/perfect_week_badge"
+                                    app:tint="?attr/colorOnErrorContainer" />
+
+                                <TextView
+                                    android:id="@+id/perfect_week_count"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/perfect_week_count_default"
+                                    android:textColor="?attr/colorOnErrorContainer"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/perfect_week_title"
+                            android:layout_marginTop="8dp"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <!-- First Medication Badge -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/first_medication_badge"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            app:cardElevation="4dp"
+                            app:cardCornerRadius="40dp"
+                            app:strokeWidth="0dp"
+                            app:cardBackgroundColor="?attr/colorTertiary">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:src="@drawable/ic_trophy"
+                                    android:contentDescription="@string/first_medication_badge"
+                                    app:tint="?attr/colorOnTertiary" />
+
+                                <TextView
+                                    android:id="@+id/first_medication_badge_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/first_medication_achieved"
+                                    android:textColor="?attr/colorOnTertiary"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/first_medication_title"
+                            android:layout_marginTop="8dp"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Achievement Progress -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/next_achievements"
+                android:layout_marginTop="24dp"
+                android:textColor="?attr/colorOnTertiaryContainer"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- 7-Day Streak Progress -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/seven_day_streak"
+                        android:textColor="?attr/colorOnTertiaryContainer"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/streak_progress_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/default_streak_progress"
+                        android:textColor="?attr/colorOnTertiaryContainer"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/streak_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    app:trackCornerRadius="8dp"
+                    app:trackThickness="8dp"
+                    app:indicatorColor="?attr/colorPrimary"
+                    app:trackColor="?attr/colorSurfaceVariant"
+                    android:progress="3" />
+            </LinearLayout>
+
+            <!-- Medication Milestone Progress -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/medication_milestone"
+                        android:textColor="?attr/colorOnTertiaryContainer"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/medication_milestone_progress_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/default_medication_milestone_progress"
+                        android:textColor="?attr/colorOnTertiaryContainer"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/medication_milestone_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    app:trackCornerRadius="8dp"
+                    app:trackThickness="8dp"
+                    app:indicatorColor="?attr/colorPrimary"
+                    app:trackColor="?attr/colorSurfaceVariant"
+                    android:progress="50" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <!-- Profile Details Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/profile_details_card"
@@ -64,7 +409,7 @@
         app:cardCornerRadius="16dp"
         app:cardBackgroundColor="?attr/colorSurfaceVariant"
         app:strokeWidth="0dp"
-        app:layout_constraintTop_toBottomOf="@id/profile_header_card"
+        app:layout_constraintTop_toBottomOf="@id/profile_badges_card"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

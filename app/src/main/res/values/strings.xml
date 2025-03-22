@@ -220,6 +220,26 @@
     <string name="user_full_name">Name:</string>
     <string name="profile">Profile</string>
     <string name="user">User</string>
+    <!-- Badge-related strings -->
+    <string name="your_badges">Your Badges</string>
+    <string name="badges_description">Complete activities to earn badges and track your progress</string>
+    <string name="streak_badge">Adherence Streak Badge</string>
+    <string name="streak_count_default">5</string>
+    <string name="streak_title">Day Streak</string>
+    <string name="medication_badge">Medication Count Badge</string>
+    <string name="medication_count_default">3</string>
+    <string name="medication_title">Medications Added</string>
+    <string name="perfect_week_badge">Perfect Week Badge</string>
+    <string name="perfect_week_count_default">2</string>
+    <string name="perfect_week_title">Perfect Weeks</string>
+    <string name="first_medication_badge">First Medication Badge</string>
+    <string name="first_medication_achieved">✓</string>
+    <string name="first_medication_title">First Med Taken</string>
+    <string name="next_achievements">Next Achievements</string>
+    <string name="seven_day_streak">7-Day Perfect Streak</string>
+    <string name="default_streak_progress">3/7</string>
+    <string name="medication_milestone">100 Doses Taken</string>
+    <string name="default_medication_milestone_progress">50/100</string>
 
 
 </resources>

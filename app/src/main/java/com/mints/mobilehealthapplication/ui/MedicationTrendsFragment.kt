@@ -59,7 +59,6 @@ class MedicationTrendsFragment : Fragment() {
             } else {
                 val medication = medications.find { it.id == medicationId }
                 Log.d(tag, "Medication Name: ${medication?.name}")
-                // Update the toolbar title using the medication name
                 (requireActivity() as MainActivity).updateToolBarTitle("${medication!!.name} Trends")
                 medication.medicationHistory.getAllEvents()
             }
