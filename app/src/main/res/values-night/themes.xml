@@ -41,7 +41,7 @@
         <item name="colorOnBackground">@color/md_theme_inverseOnSurface</item>
         <item name="colorSurface">@color/current_app_background_dark</item>
         <item name="colorOnSurface">@color/md_theme_inverseOnSurface</item>
-        <item name="colorSurfaceVariant">@color/md_theme_surfaceContainerHigh</item>
+        <item name="colorSurfaceVariant">@color/md_theme_inverseSurface</item>
         <item name="colorOnSurfaceVariant">@color/md_theme_inverseOnSurface</item>
         <item name="colorSurfaceContainerLowest">@color/md_theme_surfaceContainerLowest_mediumContrast</item>
         <item name="colorSurfaceContainerLow">@color/md_theme_surfaceContainerLow_mediumContrast</item>

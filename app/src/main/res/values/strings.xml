@@ -225,7 +225,7 @@
     <string name="badges_description">Complete activities to earn badges and track your progress</string>
     <string name="streak_badge">Adherence Streak Badge</string>
     <string name="streak_count_default">5</string>
-    <string name="streak_title">Day Streak</string>
+    <string name="streak_title">Day Adherence Streak</string>
     <string name="medication_badge">Medication Count Badge</string>
     <string name="medication_count_default">3</string>
     <string name="medication_title">Medications Added</string>
