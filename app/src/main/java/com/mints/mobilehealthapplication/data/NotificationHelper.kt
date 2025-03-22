@@ -191,10 +191,8 @@ class NotificationHelper(private val context: Context) {
     fun scheduleNotification(medicationName: String, timeInMillis:Long, isBackup:Boolean = false) {
         val uriPath = if(isBackup) "backup" else medicationName
         val uniqueUri = if(isBackup) {
-            setIsNotificationBackup(true)
             Uri.parse("mints://notification/$uriPath/$medicationName")
         } else {
-            setIsNotificationBackup(false)
             Uri.parse("mints://notification/$uriPath/$timeInMillis")
         }
         val intent = Intent(context, NotificationReceiver::class.java).apply {
@@ -204,6 +202,7 @@ class NotificationHelper(private val context: Context) {
             putExtra("schedule_time", timeInMillis)
             putExtra("thread", Thread.currentThread().name)
             putExtra("context_hash", context.hashCode())
+            putExtra("notification_is_backup", isBackup)
         }
 
         val requestCode = uniqueUri.hashCode()

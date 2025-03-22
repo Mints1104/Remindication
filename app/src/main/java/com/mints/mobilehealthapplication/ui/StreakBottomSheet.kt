@@ -68,7 +68,6 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
             // Only update UI if we have a valid binding
             if (snapshot != null && snapshot.exists() && _binding != null) {
                 val streak = snapshot.getLong("adherenceStreak")?.toInt() ?: 0
-                // Use _binding instead of binding to avoid the getter which could throw NPE
                 _binding?.currentStreakText?.text = "Current Adherence Streak: $streak"
                 Log.d("AdherenceListener", "Current adherence streak: $streak")
             }
