@@ -206,6 +206,9 @@ sealed class MedicationSchedule {
         val instructions: String = ""
     ) : MedicationSchedule()
 
+
+
+
     // Formatting properties
     val formattedFrequency: String
         get() = when (this) {
@@ -252,7 +255,14 @@ sealed class MedicationSchedule {
         }
 }
 
-
+fun MedicationSchedule.getNextDueDates(): List<LocalDateTime> {
+    return when (this) {
+        is MedicationSchedule.Daily -> this.nextDueDates
+        is MedicationSchedule.WeeklySchedule -> this.nextDueDates
+        is MedicationSchedule.Cyclic -> this.nextDueDates
+        else -> emptyList()
+    }
+}
 
 
 

@@ -39,6 +39,7 @@ class PrescriptionsFragment : Fragment() {
     private lateinit var notificationHelper: NotificationHelper
     private var tag = "PrescriptionsFrag"
     private var deviceConnected = false
+    private var meds = mutableListOf<Medication>()
 
     private val viewModel: HomeFragmentViewModel by activityViewModels(
         factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
@@ -156,7 +157,9 @@ class PrescriptionsFragment : Fragment() {
         addSwipeFunctionality()
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
             Log.d(tag, "Observed ${medications.size} medications in LiveData")
-            adapter.updateMedicationList(medications)
+            meds = medications.toMutableList()
+            meds.sortBy { it.name.lowercase() }
+            adapter.updateMedicationList(meds)
         }
 
         Log.d(tag, "RecyclerView setup complete")

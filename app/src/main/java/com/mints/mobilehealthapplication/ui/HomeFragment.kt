@@ -18,9 +18,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-    import androidx.work.OneTimeWorkRequestBuilder
-    import androidx.work.WorkManager
-    import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
@@ -29,6 +27,7 @@ import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.MotivationManager
 import com.mints.mobilehealthapplication.data.NotificationHelper
+import com.mints.mobilehealthapplication.data.getNextDueDates
 import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
@@ -210,6 +209,9 @@ import java.time.LocalDateTime
 
                 scheduledMeds.forEach { Log.d("ScheduledMeds","Test: ${it.name}") }
                 onDemandMeds.forEach { Log.d("OnDemandMeds","TestOD: ${it.name}") }
+                scheduledMeds.sortBy { medication ->
+                    medication.schedule.getNextDueDates().first()
+                }
                 adapter.updateMedicationList(scheduledMeds)
                 adapter.hideAllMedicationDays()
                 getClosestDate(scheduledMeds)
