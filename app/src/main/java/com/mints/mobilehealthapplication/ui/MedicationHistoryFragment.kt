@@ -30,6 +30,7 @@ class MedicationHistoryFragment : Fragment() {
     private val tag = "MedHistory"
     private var uid = ""
     private var medicationList = MutableLiveData<List<Medication>>()
+    private var meds = mutableListOf<Medication>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentMedicationhistoryBinding.inflate(inflater, container, false)
@@ -63,7 +64,8 @@ class MedicationHistoryFragment : Fragment() {
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         viewModel.medications.observe(viewLifecycleOwner) { medications ->
             val filteredList = medications.filter { med -> !med.medicationHistory.isEmpty() }
-            adapter.updateMedicationList(filteredList)
+            val sortedList = filteredList.sortedBy { med -> med.name.lowercase() }
+            adapter.updateMedicationList(sortedList)
             val (totalTaken, totalMissed, totalSkipped) = filteredList.fold(Triple(0, 0, 0)) { acc, med ->
                 Triple(
                     acc.first + med.medicationHistory.getEventCount(MedicationEvent.EventType.TAKEN),
