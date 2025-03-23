@@ -44,9 +44,13 @@ class MedicationHistoryFragment : Fragment() {
 
         }
 
+        setUpUI()
+        return binding.root
+    }
+
+    private fun setUpUI() {
         val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
-        return binding.root
     }
 
     private fun setUpRecyclerView() {
@@ -96,7 +100,10 @@ class MedicationHistoryFragment : Fragment() {
         }
     }
 
-
+    override fun onResume() {
+        super.onResume()
+        setUpUI()
+    }
 
 
 

@@ -68,13 +68,14 @@ class PrescriptionsFragment : Fragment() {
         deviceConnected = isDeviceConnected()
         observeNetworkState()
 
+        setUpUI()
+
+
+    }
+
+    private fun setUpUI() {
         val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
-
-
-
-
-
     }
 
     private fun observeNetworkState() {
@@ -259,6 +260,13 @@ class PrescriptionsFragment : Fragment() {
             .show()
 
     }
+
+    override fun onResume() {
+        super.onResume()
+        setUpUI()
+    }
+
+
 
     /**
      * Cleans up ViewBinding to prevent memory leaks.

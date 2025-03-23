@@ -42,7 +42,7 @@ class MedicationTrendsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setUpUI()
         val medicationId = args.medicationId
         Log.d(tag, "Passed in medicationID: $medicationId")
 
@@ -68,7 +68,10 @@ class MedicationTrendsFragment : Fragment() {
             setupDailyTimingChart(events)
         }
     }
-
+    private fun setUpUI() {
+        val mainActivity = activity as MainActivity
+        mainActivity.showBottomNav()
+    }
 
     private fun setupAdherenceChart(events: List<MedicationEvent>) {
         val chart = binding.adherenceChart
@@ -247,6 +250,10 @@ class MedicationTrendsFragment : Fragment() {
         chart.invalidate()
     }
 
+    override fun onResume() {
+        super.onResume()
+        setUpUI()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

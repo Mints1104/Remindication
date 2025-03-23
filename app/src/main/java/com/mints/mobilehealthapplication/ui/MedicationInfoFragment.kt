@@ -35,7 +35,7 @@ class MedicationInfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setUpUI()
         medicationName = arguments?.getString("MEDICATION_NAME")
         if (medicationName.isNullOrEmpty()) {
             showError("No medication name provided")
@@ -43,6 +43,11 @@ class MedicationInfoFragment : Fragment() {
             (requireActivity() as MainActivity).updateToolBarTitle("Medication Info for ${medicationName!!}")
             fetchMedicationInfo(medicationName!!)
         }
+    }
+
+    private fun setUpUI() {
+        val mainActivity = activity as MainActivity
+        mainActivity.showBottomNav()
     }
 
     private fun fetchMedicationInfo(drugName: String) {
@@ -220,6 +225,11 @@ class MedicationInfoFragment : Fragment() {
         }
 
         return formattedText.toString().trim()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setUpUI()
     }
 
     override fun onDestroyView() {

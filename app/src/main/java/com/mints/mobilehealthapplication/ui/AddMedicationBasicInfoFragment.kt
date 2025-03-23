@@ -173,7 +173,6 @@ class AddMedicationBasicInfoFragment : Fragment() {
         viewModel.validationState.removeObservers(viewLifecycleOwner)
         super.onDestroyView()
         Log.d("AddMedicationBasicInfoFragment", "onDestroyView called")
-        revertUI()
         _binding = null
     }
 }
