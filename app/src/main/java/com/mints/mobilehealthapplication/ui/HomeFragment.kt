@@ -93,8 +93,7 @@ import java.time.LocalDateTime
             }
 
 
-            val mainActivity = requireActivity() as MainActivity
-            mainActivity.showAllUI()
+            setUpUI()
             setupFAB()
             setUpRecyclerView()
             showLoadingState()
@@ -133,6 +132,10 @@ import java.time.LocalDateTime
             viewModel.getCurrentDay()
         }
 
+        private fun setUpUI() {
+            val mainActivity = requireActivity() as MainActivity
+            mainActivity.showAllUI()
+        }
 
 
         private val refreshReceiver = object : BroadcastReceiver() {
@@ -504,6 +507,8 @@ import java.time.LocalDateTime
 
         override fun onResume() {
             super.onResume()
+            setUpUI()
+            Log.d(tag,"On Resume!")
             binding.shimmerLayout.startShimmer()
         }
 

@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity() {
             navController.navigate(R.id.loginFragment)
         } else if (currentUser != null && currentDestination != R.id.homeFragment) {
             navController.navigate(R.id.homeFragment, null, navOptions {
-                popUpTo(R.id.loginFragment) { inclusive = true }
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
                 launchSingleTop = true
             })
         }

@@ -59,6 +59,11 @@ class AddMedicationBasicInfoFragment : Fragment() {
         checkIfEditingMedication(mainActivity)
     }
 
+    private fun revertUI() {
+        val mainActivity = activity as MainActivity
+        mainActivity.showBottomNav()
+    }
+
 
     private fun checkIfEditingMedication(mainActivity: MainActivity) {
         val args: AddMedicationBasicInfoFragmentArgs by navArgs()
@@ -168,6 +173,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
         viewModel.validationState.removeObservers(viewLifecycleOwner)
         super.onDestroyView()
         Log.d("AddMedicationBasicInfoFragment", "onDestroyView called")
+        revertUI()
         _binding = null
     }
 }

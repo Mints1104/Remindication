@@ -87,6 +87,7 @@ class MedicationInfoFragment : Fragment() {
     }
 
     private fun showError(message: String) {
+        if(_binding == null) return
         binding.loadingIndicator.visibility = View.GONE
         binding.infoContainer.visibility = View.GONE
         binding.medicationHeaderCard.visibility = View.GONE
