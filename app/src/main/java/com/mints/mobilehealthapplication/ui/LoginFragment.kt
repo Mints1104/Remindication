@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.mints.mobilehealthapplication.R
+import com.mints.mobilehealthapplication.application.MedicationApp
 import com.mints.mobilehealthapplication.databinding.FragmentLoginscreenBinding
 import com.mints.mobilehealthapplication.viewmodels.LoginViewModel
 
@@ -70,6 +71,8 @@ class LoginFragment : Fragment() {
         val passwordText = binding.passwordEditText.text.toString().trim()
         viewModel.login(emailText, passwordText) { success, message ->
             if (success) {
+                MedicationApp.scheduleRescheduleWorker(requireContext())
+
                 if(navController.currentDestination?.id == R.id.loginFragment) {
                     navController.navigate(R.id.action_loginFragment_to_homeFragment)
                 }

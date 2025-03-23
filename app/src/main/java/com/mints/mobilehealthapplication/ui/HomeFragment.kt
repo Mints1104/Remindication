@@ -4,29 +4,31 @@
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-    import android.content.SharedPreferences
-    import android.os.Bundle
+import android.content.SharedPreferences
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-    import androidx.core.view.isVisible
-    import androidx.fragment.app.Fragment
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    import androidx.work.OneTimeWorkRequestBuilder
+    import androidx.work.WorkManager
+    import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
-    import com.mints.mobilehealthapplication.data.MotivationManager
-    import com.mints.mobilehealthapplication.data.NotificationHelper
+import com.mints.mobilehealthapplication.data.MotivationManager
+import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.databinding.FragmentHomeBinding
 import com.mints.mobilehealthapplication.recyclerviews.MedicationRecyclerView
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
@@ -211,6 +213,7 @@ import java.time.LocalDateTime
                 adapter.updateMedicationList(scheduledMeds)
                 adapter.hideAllMedicationDays()
                 getClosestDate(scheduledMeds)
+                checkDateInPast(medications)
 
             }
 
@@ -364,6 +367,27 @@ import java.time.LocalDateTime
                     }
                 })
                 .show()
+        }
+
+        private fun checkDateInPast(currentList: List<Medication>) {
+            val today = LocalDateTime.now()
+            val regularSchedList = currentList.filter {
+                it.schedule is MedicationSchedule.Daily || it.schedule is MedicationSchedule.WeeklySchedule || it.schedule is MedicationSchedule.Cyclic
+            }
+            regularSchedList.forEach { medication ->
+                val nextDueDates = when (val sched = medication.schedule) {
+                    is MedicationSchedule.Daily -> sched.nextDueDates
+                    is MedicationSchedule.WeeklySchedule -> sched.nextDueDates
+                    is MedicationSchedule.Cyclic -> sched.nextDueDates
+                    else -> emptyList()
+
+
+                }
+                if(nextDueDates.any { it.isBefore(today) }) {
+                    Log.d(tag, "Medication ${medication.name} has a date in the past")
+
+                }
+            }
         }
 
 
