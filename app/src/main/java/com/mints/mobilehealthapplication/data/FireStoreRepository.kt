@@ -533,6 +533,37 @@ object FireStoreRepository {
         }
     }
 
+    suspend fun updateCyclicMedication(
+        userId: String,
+        medicationId: String,
+        newDates: List<LocalDateTime>,
+        newCycleStartDate: Timestamp
+    ): Boolean {
+        return try {
+            val firestoreDates = newDates.map { with(mappers) { it.toFirebaseTimestamp() } }
+
+            db.collection("users")
+                .document(userId)
+                .collection("medications")
+                .document(medicationId)
+                .update(
+                    mapOf(
+                        "schedule.nextDueDates" to firestoreDates,
+                        "schedule.currentCycleStartDate" to newCycleStartDate
+                    )
+                )
+                .await()
+
+            newDates.lastOrNull()?.let { date ->
+                Log.d("FIRESTORE_UPDATE", "Success, new date: $date, new cycle start: $newCycleStartDate")
+            }
+
+            true
+        } catch (e: Exception) {
+            Log.e("FIRESTORE_UPDATE", "Failed to update cyclic medication", e)
+            false
+        }
+    }
 
 
     suspend fun updateMedicationDates(

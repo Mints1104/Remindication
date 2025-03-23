@@ -45,7 +45,6 @@ class InternetConnectionChecker(private val context: Context) {
             return false
         }
 
-        // Check if the device has internet capability
         val hasInternet = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 
@@ -54,7 +53,6 @@ class InternetConnectionChecker(private val context: Context) {
         if (hasInternet) {
             Log.d(TAG, "Internet connection available")
 
-            // Determine connection type for more detailed logging
             val connectionType = when {
                 networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WiFi"
                 networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "Cellular"
@@ -85,14 +83,12 @@ class InternetConnectionChecker(private val context: Context) {
      * This should be called only once, preferably when the app starts
      */
     fun registerNetworkCallback() {
-        // Avoid registering multiple callbacks
         if (networkCallback != null) return
 
         networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
                 Log.d(TAG, "Network available")
-                // Don't immediately update state here - wait for capabilities check
             }
 
             override fun onLost(network: Network) {

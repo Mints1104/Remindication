@@ -57,11 +57,10 @@ class RescheduleWorker(
         medication: Medication,
         schedule: MedicationSchedule.Cyclic,
         now: LocalDateTime,
-        userId: String
+        userId: String,
     ) {
-        Log.d(tag, "Processing cyclic schedule for ${medication.name}")
+        Log.d(TAG, "Processing cyclic schedule for ${medication.name}")
 
-        // Check if the medication has past due dates (missed doses)
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()
@@ -72,7 +71,8 @@ class RescheduleWorker(
                 )
                 missedDates.forEach { date ->
                     val eventDateTime = date.atTime(missedDateTime.toLocalTime())
-                    Log.d(tag, "Marking ${medication.name} as missed at $eventDateTime")
+                    Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
+
                     medication.markAsMissed(eventDateTime)
                     missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
                 }
@@ -85,38 +85,44 @@ class RescheduleWorker(
                     events = missedEvents
                 )
                 if (updateSuccess) {
-                    Log.d(tag, "Medication history updated with missed events for ${medication.name}")
+                    Log.d(TAG, "Medication history updated with missed events for ${medication.name}")
                 } else {
-                    Log.e(tag, "Failed to update medication history for ${medication.name}")
+                    Log.e(TAG, "Failed to update medication history for ${medication.name}")
                 }
             }
         }
 
-        // Determine new due dates for the cycle
-        val newDueDates = ScheduleHelper.calculateCyclicDueDates(
+        // Get both new due dates and the updated cycle start date
+        val (newDueDates, newCycleStartDate) = ScheduleHelper.calculateCyclicDueDates(
             intakeDays = schedule.intakeDays,
             pauseDays = schedule.pauseDays,
             times = schedule.times,
             currentCycleStartDate = schedule.currentCycleStartDate
         )
 
-        // Update Firestore with new due dates
         medication.id?.let { medId ->
-            val success = FireStoreRepository.updateMedicationDates(
+            // Update both the due dates and cycle start date
+            val success = FireStoreRepository.updateCyclicMedication(
                 userId = userId,
                 medicationId = medId,
-                newDates = newDueDates
+                newDates = newDueDates,
+                newCycleStartDate = newCycleStartDate
             )
+
             if (success) {
-                val nextDueTimeMillis = newDueDates.minByOrNull { it }
-                    ?.atZone(ZoneId.systemDefault())
-                    ?.toInstant()
-                    ?.toEpochMilli() ?: 0L
-                Log.d(tag, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
+                // Filter out due dates that are not after the current time
+                val upcomingDueDates = newDueDates.filter { it.isAfter(now) }
+                val nextDueTimeMillis = if (upcomingDueDates.isNotEmpty()) {
+                    upcomingDueDates.minByOrNull { it }?.atZone(ZoneId.systemDefault())
+                        ?.toInstant()?.toEpochMilli() ?: 0L
+                } else {
+                    0L
+                }
+                Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
                 notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
-                Log.d(tag, "Successfully advanced cyclic schedule for ${medication.name}")
+                Log.d(TAG, "Successfully advanced cyclic schedule for ${medication.name}")
             } else {
-                Log.e(tag, "Failed to update cyclic schedule for ${medication.name}")
+                Log.e(TAG, "Failed to update cyclic schedule for ${medication.name}")
             }
         }
     }

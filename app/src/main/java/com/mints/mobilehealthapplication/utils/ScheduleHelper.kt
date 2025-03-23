@@ -5,6 +5,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
+import java.util.Date
 
 object ScheduleHelper {
 
@@ -40,7 +42,7 @@ object ScheduleHelper {
         pauseDays: Int,
         times: List<LocalTime>,
         currentCycleStartDate: Timestamp?
-    ): List<LocalDateTime> {
+    ): Pair<List<LocalDateTime>, Timestamp> {  // Return both due dates and the new cycle start timestamp
         // Convert Timestamp to LocalDate (default to today if null)
         val cycleStartDate: LocalDate = currentCycleStartDate?.toDate()?.toInstant()
             ?.atZone(ZoneId.systemDefault())
@@ -48,13 +50,23 @@ object ScheduleHelper {
 
         val today = LocalDate.now()
         val cycleLength = intakeDays + pauseDays
-        val cycleEndDate = cycleStartDate.plusDays(intakeDays.toLong())
 
-        // Advance cycle if today is on or after the cycle end date
-        val newCycleStartDate = if (today.isAfter(cycleEndDate) || today.isEqual(cycleEndDate)) {
-            cycleStartDate.plusDays(cycleLength.toLong())
-        } else {
-            cycleStartDate
+        // Calculate how many full cycles have passed since the start date
+        var newCycleStartDate = cycleStartDate
+        if (today.isAfter(cycleStartDate)) {
+            val daysSinceStart = ChronoUnit.DAYS.between(cycleStartDate, today)
+            val completedCycles = daysSinceStart / cycleLength
+            // If cycles completed, advance the start date by that many cycles
+            if (completedCycles > 0) {
+                newCycleStartDate = cycleStartDate.plusDays(completedCycles * cycleLength)
+            }
+
+            // Check if we're in the pause period of the current cycle
+            val daysIntoCurrentCycle = daysSinceStart % cycleLength
+            if (daysIntoCurrentCycle >= intakeDays) {
+                // We're in the pause period, the next active cycle hasn't started yet
+                // No need to advance further
+            }
         }
 
         val newDueDates = mutableListOf<LocalDateTime>()
@@ -64,7 +76,17 @@ object ScheduleHelper {
                 newDueDates.add(LocalDateTime.of(date, time))
             }
         }
-        return newDueDates.sorted()
+
+        // Convert new cycle start date back to Timestamp
+        val newCycleStartTimestamp = Timestamp(
+            Date.from(
+                newCycleStartDate.atStartOfDay()
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+            )
+        )
+
+        return Pair(newDueDates.sorted(), newCycleStartTimestamp)
     }
 
 

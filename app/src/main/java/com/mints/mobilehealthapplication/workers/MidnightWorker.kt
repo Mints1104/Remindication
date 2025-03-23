@@ -105,7 +105,8 @@ class MidnightWorker(
             }
         }
 
-        val newDueDates = ScheduleHelper.calculateCyclicDueDates(
+        // Get both new due dates and the updated cycle start date
+        val (newDueDates, newCycleStartDate) = ScheduleHelper.calculateCyclicDueDates(
             intakeDays = schedule.intakeDays,
             pauseDays = schedule.pauseDays,
             times = schedule.times,
@@ -113,11 +114,14 @@ class MidnightWorker(
         )
 
         medication.id?.let { medId ->
-            val success = FireStoreRepository.updateMedicationDates(
+            // Update both the due dates and cycle start date
+            val success = FireStoreRepository.updateCyclicMedication(
                 userId = userId,
                 medicationId = medId,
-                newDates = newDueDates
+                newDates = newDueDates,
+                newCycleStartDate = newCycleStartDate
             )
+
             if (success) {
                 // Filter out due dates that are not after the current time
                 val upcomingDueDates = newDueDates.filter { it.isAfter(now) }
@@ -135,8 +139,6 @@ class MidnightWorker(
             }
         }
     }
-
-
 
     private suspend fun processDailySchedule(
         medication: Medication,
