@@ -209,12 +209,19 @@ import java.time.LocalDateTime
 
                 scheduledMeds.forEach { Log.d("ScheduledMeds","Test: ${it.name}") }
                 onDemandMeds.forEach { Log.d("OnDemandMeds","TestOD: ${it.name}") }
-               val sortedMeds =  scheduledMeds.sortedBy { medication ->
-                    medication.schedule.getNextDueDates().first()
-                }
                 val today = LocalDate.now()
-              val finalMeds =   sortedMeds.filter { it -> it.schedule.getNextDueDates().any { it.toLocalDate() == today } }
-                adapter.updateMedicationList(finalMeds)
+                val sortedMeds = scheduledMeds
+                    .filter { medication ->
+                        medication.schedule.getNextDueDates().any { it.toLocalDate() == today }
+                    }
+                    .sortedBy { medication ->
+                        medication.schedule.getNextDueDates()
+                            .first { it.toLocalDate() == today }  // Get the first due date for today
+                            .toLocalTime()  // Sort by the time
+                    }
+
+
+                adapter.updateMedicationList(sortedMeds)
                 adapter.hideAllMedicationDays()
                 getClosestDate(scheduledMeds)
                 checkDateInPast(medications)
