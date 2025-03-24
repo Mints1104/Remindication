@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.google.firebase.Timestamp
 import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
@@ -92,13 +93,32 @@ class RescheduleWorker(
             }
         }
 
-        // Get both new due dates and the updated cycle start date
-        val (newDueDates, newCycleStartDate) = ScheduleHelper.calculateCyclicDueDates(
+        // Initial calculation
+        var newDueDates: List<LocalDateTime>
+        var newCycleStartDate: Timestamp
+
+        val initialCalculation = ScheduleHelper.calculateCyclicDueDates(
             intakeDays = schedule.intakeDays,
             pauseDays = schedule.pauseDays,
             times = schedule.times,
             currentCycleStartDate = schedule.currentCycleStartDate
         )
+
+        newDueDates = initialCalculation.first
+        newCycleStartDate = initialCalculation.second
+
+        // If all calculated dates are in the past, recalculate for next cycle
+        if (newDueDates.all { it.isBefore(now) }) {
+            Log.d(TAG, "All dates in the past, recalculating with new cycle start")
+            val recalculation = ScheduleHelper.calculateCyclicDueDates(
+                intakeDays = schedule.intakeDays,
+                pauseDays = schedule.pauseDays,
+                times = schedule.times,
+                currentCycleStartDate = newCycleStartDate
+            )
+            newDueDates = recalculation.first
+            newCycleStartDate = recalculation.second
+        }
 
         medication.id?.let { medId ->
             // Update both the due dates and cycle start date
@@ -110,23 +130,30 @@ class RescheduleWorker(
             )
 
             if (success) {
+                Log.d(TAG, "All new due dates: $newDueDates")
+
                 // Filter out due dates that are not after the current time
                 val upcomingDueDates = newDueDates.filter { it.isAfter(now) }
-                val nextDueTimeMillis = if (upcomingDueDates.isNotEmpty()) {
-                    upcomingDueDates.minByOrNull { it }?.atZone(ZoneId.systemDefault())
-                        ?.toInstant()?.toEpochMilli() ?: 0L
+                Log.d(TAG, "Upcoming due dates after filtering: $upcomingDueDates")
+
+                if (upcomingDueDates.isNotEmpty()) {
+                    val nextDueDate = upcomingDueDates.minByOrNull { it }!!
+                    val nextDueTimeMillis = nextDueDate
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
+
+                    Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
+                    notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
+                    Log.d(TAG, "Successfully advanced cyclic schedule for ${medication.name}")
                 } else {
-                    0L
+                    Log.w(TAG, "No upcoming due dates for ${medication.name} even after recalculation!")
                 }
-                Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
-                notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
-                Log.d(TAG, "Successfully advanced cyclic schedule for ${medication.name}")
             } else {
                 Log.e(TAG, "Failed to update cyclic schedule for ${medication.name}")
             }
         }
     }
-
 
     private suspend fun processDailySchedule(
         medication: Medication,

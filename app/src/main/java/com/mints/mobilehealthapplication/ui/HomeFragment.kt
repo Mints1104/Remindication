@@ -209,10 +209,12 @@ import java.time.LocalDateTime
 
                 scheduledMeds.forEach { Log.d("ScheduledMeds","Test: ${it.name}") }
                 onDemandMeds.forEach { Log.d("OnDemandMeds","TestOD: ${it.name}") }
-                scheduledMeds.sortBy { medication ->
+               val sortedMeds =  scheduledMeds.sortedBy { medication ->
                     medication.schedule.getNextDueDates().first()
                 }
-                adapter.updateMedicationList(scheduledMeds)
+                val today = LocalDate.now()
+              val finalMeds =   sortedMeds.filter { it -> it.schedule.getNextDueDates().any { it.toLocalDate() == today } }
+                adapter.updateMedicationList(finalMeds)
                 adapter.hideAllMedicationDays()
                 getClosestDate(scheduledMeds)
                 checkDateInPast(medications)
@@ -229,14 +231,11 @@ import java.time.LocalDateTime
 
 
         private fun handleDisplayingNotes(medication: Medication) {
-            if (medication.notes.isNotEmpty()) {
                 val addMedicationNotesBottomSheet =
                     MedicationNotesBottomSheet.newInstance(medication.name, medication.notes)
                 addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
-            } else {
-                displayMessage("No notes available for ${medication.name}")
             }
-        }
+
 
 
         private fun getUncompletedMedicationsForToday(medications: List<Medication>): List<Medication> {
