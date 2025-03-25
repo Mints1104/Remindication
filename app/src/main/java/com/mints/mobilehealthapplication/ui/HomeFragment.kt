@@ -51,6 +51,7 @@ import java.time.LocalDateTime
         private var deviceConnected = false
         private var scheduledMeds = mutableListOf<Medication>()
         private var onDemandMeds = mutableListOf<Medication>()
+        private var fullListOfMeds = mutableListOf<Medication>()
 
         private val viewModel: HomeFragmentViewModel by activityViewModels(
             factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
@@ -195,7 +196,7 @@ import java.time.LocalDateTime
             addSwipeFunctionality()
             viewModel.medications.observe(viewLifecycleOwner) { medications ->
                 Log.d(tag, "Observed ${medications.size} medications in LiveData")
-
+                fullListOfMeds = medications.toMutableList()
                 val filteredMeds = getUncompletedMedicationsForToday(medications)
                  scheduledMeds = filteredMeds.filter {
                      it.schedule !is MedicationSchedule.OnDemand
@@ -446,7 +447,7 @@ import java.time.LocalDateTime
                     binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toLocalTime().toString())
                 }
             } else {
-                if(scheduledMeds.isEmpty()) {
+                if(fullListOfMeds.isEmpty()) {
                     binding.nextMedicationName.text = getString(R.string.add_your_first_medication)
                     binding.nextMedicationTime.isVisible = false
                 } else {
