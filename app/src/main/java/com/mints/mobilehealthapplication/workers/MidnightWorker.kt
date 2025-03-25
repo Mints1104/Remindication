@@ -85,11 +85,16 @@ class MidnightWorker(
                     end = now.toLocalDate().minusDays(1)
                 )
                 missedDates.forEach { date ->
-                    val eventDateTime = date.atTime(missedDateTime.toLocalTime())
-                    Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
+                    if(!medication.medicationHistory.hadEventOnSpecificDay(date)) {
+                        val eventDateTime = date.atTime(missedDateTime.toLocalTime())
+                        Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
 
-                    medication.markAsMissed(eventDateTime)
-                    missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
+                        medication.markAsMissed(eventDateTime)
+                        missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
+                    } else {
+                        Log.d(TAG,"${medication.name} already had an event on $date")
+                    }
+
                 }
             }
 

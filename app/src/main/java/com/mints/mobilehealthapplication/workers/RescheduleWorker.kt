@@ -49,7 +49,7 @@ class RescheduleWorker(
             }
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Error in RescheduleWorker: ${e.message}")
+            Log.e(tag, "Error in RescheduleWorker: ${e.message}")
             Result.retry()
         }
     }
@@ -60,7 +60,7 @@ class RescheduleWorker(
         now: LocalDateTime,
         userId: String,
     ) {
-        Log.d(TAG, "Processing cyclic schedule for ${medication.name}")
+        Log.d(tag, "Processing cyclic schedule for ${medication.name}")
 
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
@@ -71,12 +71,16 @@ class RescheduleWorker(
                     end = now.toLocalDate().minusDays(1)
                 )
                 missedDates.forEach { date ->
+                    if(!medication.medicationHistory.hadEventOnSpecificDay(date)) {
                     val eventDateTime = date.atTime(missedDateTime.toLocalTime())
-                    Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
+                    Log.d(tag, "Marking ${medication.name} as missed at $eventDateTime")
 
                     medication.markAsMissed(eventDateTime)
                     missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
-                }
+                } else {
+                    Log.d(tag, "Event already exists for ${medication.name} on $date")
+                    }
+                    }
             }
 
             if (missedEvents.isNotEmpty() && medication.id != null) {
@@ -86,9 +90,9 @@ class RescheduleWorker(
                     events = missedEvents
                 )
                 if (updateSuccess) {
-                    Log.d(TAG, "Medication history updated with missed events for ${medication.name}")
+                    Log.d(tag, "Medication history updated with missed events for ${medication.name}")
                 } else {
-                    Log.e(TAG, "Failed to update medication history for ${medication.name}")
+                    Log.e(tag, "Failed to update medication history for ${medication.name}")
                 }
             }
         }

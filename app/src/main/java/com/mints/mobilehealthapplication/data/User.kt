@@ -117,6 +117,12 @@ data class MedicationHistory(
 
     }
 
+    fun hadEventOnSpecificDay(day: LocalDate): Boolean {
+        return events.any {
+            it.date.toLocalDate() == day
+        }
+    }
+
     fun hadEventYesterday(): Boolean {
         val yesterday = LocalDate.now().minusDays(1)
         return events.any {

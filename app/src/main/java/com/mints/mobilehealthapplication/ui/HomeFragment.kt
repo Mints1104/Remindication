@@ -446,7 +446,14 @@ import java.time.LocalDateTime
                     binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toLocalTime().toString())
                 }
             } else {
-                handleAllMedicationsCompleted()
+                if(scheduledMeds.isEmpty()) {
+                    binding.nextMedicationName.text = getString(R.string.add_your_first_medication)
+                    binding.nextMedicationTime.isVisible = false
+                } else {
+                    handleAllMedicationsCompleted()
+
+                }
+
 
             }
 

@@ -12,14 +12,14 @@ object MotivationManager {
     private val quotes = listOf(
         "Small steps lead to big victories. Great job taking care of yourself today!",
         "Self-care isn't selfish, it's necessary. You're doing great!",
-        "Consistency is the foundation of progress. Well done on staying on track!",
-        "Your health is an investment, not an expense. Proud of you for investing today!",
+        "Consistency builds strength. You're proving that one day at a time!",
+        "Every dose is an act of self-care. Be proud of yourself today!",
         "Today's effort is tomorrow's strength. You're building a healthier future!",
-        "Every pill taken is a promise kept to yourself. Well done!",
-        "Health is wealth, and you're getting richer every day!",
-        "The best project you'll ever work on is you. Great job today!",
-        "Your resilience is inspiring. Another day of taking care of yourself!",
-        "Progress happens one day at a time. You've made today count!",
+        "Health is a journey, not a race. Keep moving forward at your own pace!",
+        "Each small habit today makes a healthier you tomorrow. Keep stacking those wins!",
+        "You showed up for yourself today, and that matters more than you know.",
+        "Your well-being is worth the effort. Keep investing in yourself!",
+        "You’re not alone in this journey. Every small victory counts—this is one of them!",
         "Healthy habits create a healthy life. You're on the right path!",
         "Each dose is a step toward better health. You took all your steps today!"
     )
