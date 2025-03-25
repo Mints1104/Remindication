@@ -8,6 +8,10 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Date
 
+fun Timestamp.toLocalDateTime(): LocalDateTime {
+    return this.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+}
+
 object ScheduleHelper {
 
     fun adjustDailyDueDate(dueDate: LocalDateTime, now: LocalDateTime): LocalDateTime {

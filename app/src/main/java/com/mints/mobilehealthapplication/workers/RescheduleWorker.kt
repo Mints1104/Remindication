@@ -11,6 +11,8 @@ import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.utils.ScheduleHelper
+import com.mints.mobilehealthapplication.utils.toLocalDateTime
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -54,6 +56,8 @@ class RescheduleWorker(
         }
     }
 
+
+
     private suspend fun processCyclicSchedule(
         medication: Medication,
         schedule: MedicationSchedule.Cyclic,
@@ -63,24 +67,49 @@ class RescheduleWorker(
         Log.d(tag, "Processing cyclic schedule for ${medication.name}")
 
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
-        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
+        if (missedDueDates.isNotEmpty()) {
             val missedEvents = mutableListOf<MedicationEvent>()
-            missedDueDates.forEach { missedDateTime ->
-                val missedDates = ScheduleHelper.getDatesBetween(
-                    start = missedDateTime.toLocalDate(),
-                    end = now.toLocalDate().minusDays(1)
-                )
-                missedDates.forEach { date ->
-                    if(!medication.medicationHistory.hadEventOnSpecificDay(date)) {
-                    val eventDateTime = date.atTime(missedDateTime.toLocalTime())
-                    Log.d(tag, "Marking ${medication.name} as missed at $eventDateTime")
+            val cycleLength = schedule.intakeDays + schedule.pauseDays
 
-                    medication.markAsMissed(eventDateTime)
-                    missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
-                } else {
-                    Log.d(tag, "Event already exists for ${medication.name} on $date")
+            // Use schedule's currentCycleStartDate to determine cycle position
+            val cycleStartDate = schedule.currentCycleStartDate?.toLocalDateTime()?.toLocalDate()
+                ?: missedDueDates.minByOrNull { it }?.toLocalDate()
+                ?: now.toLocalDate()
+
+            // Track dates we've already processed to avoid duplicates
+            val processedDates = mutableSetOf<LocalDate>()
+
+            missedDueDates.forEach { missedDateTime ->
+                val startDate = missedDateTime.toLocalDate()
+                val endDate = now.toLocalDate().minusDays(1)
+
+                var currentDate = startDate
+                while (!currentDate.isAfter(endDate)) {
+                    if (currentDate in processedDates) {
+                        currentDate = currentDate.plusDays(1)
+                        continue
                     }
+
+                    // Calculate day position in the cycle
+                    val daysSinceCycleStart = java.time.temporal.ChronoUnit.DAYS.between(cycleStartDate, currentDate)
+                    val dayInCycle = (daysSinceCycleStart % cycleLength).toInt()
+
+                    // Only mark as missed if:
+                    // 1. It's an intake day (day falls within intake period)
+                    // 2. No event exists for this specific day
+                    if (dayInCycle < schedule.intakeDays && !medication.medicationHistory.hadEventOnSpecificDay(currentDate)) {
+                        val eventDateTime = currentDate.atTime(missedDateTime.toLocalTime())
+                        Log.d(tag, "Marking ${medication.name} as missed at $eventDateTime")
+
+                        medication.markAsMissed(eventDateTime)
+                        missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
+                        processedDates.add(currentDate)
+                    } else {
+                        Log.d(tag, "Skipping ${medication.name} on $currentDate - either not an intake day or event already exists")
                     }
+
+                    currentDate = currentDate.plusDays(1)
+                }
             }
 
             if (missedEvents.isNotEmpty() && medication.id != null) {
