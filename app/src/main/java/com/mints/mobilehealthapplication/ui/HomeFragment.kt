@@ -464,7 +464,7 @@ import java.time.LocalDateTime
         private fun handleAllMedicationsCompleted() {
             Log.d(tag, "No more scheduled medications to complete!")
             binding.nextMedicationName.text = getString(R.string.no_medications_left)
-            binding.nextMedicationTime.text = ""
+            binding.nextMedicationTime.visibility = View.GONE
             binding.motivationCover.visibility = View.VISIBLE
 
 
