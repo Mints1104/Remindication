@@ -257,6 +257,8 @@ import java.time.LocalTime
                 updateFrequencyType(med.schedule.frequencyType)
                 updateMedicationId(med.id!!)
         }
+
+
         fun saveMedication(userId: String) {
                 viewModelScope.launch {
                     try {
