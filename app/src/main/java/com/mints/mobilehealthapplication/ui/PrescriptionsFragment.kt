@@ -171,7 +171,6 @@ class PrescriptionsFragment : Fragment() {
 
 
     private fun addSwipeFunctionality() {
-
         val swipeCallback = MaterialSwipeCallback(
             context = requireContext(),
             swipeLeftAction = MaterialSwipeCallback.SwipeAction(
@@ -183,68 +182,72 @@ class PrescriptionsFragment : Fragment() {
                 iconRes = R.drawable.baseline_edit_24px,
                 backgroundColorRes = R.color.material_yellow,
                 label = "Edit Medication"
-
             ),
-            onSwipeLeft = { position ->
-                val medicationName = adapter.getMedicationNameAt(position)
-                if(deviceConnected) {
-                    val medication = adapter.getMedicationAt(position)
-                    displayMessage("Delete medication: $medicationName")
-                    showUndoSnackbar(medication, position)
+            onSwipeLeft = { position, onActionCompleted ->
+                val medication = adapter.getMedicationAt(position)
+                if (deviceConnected) {
+                    displayMessage("Delete medication: ${medication.name}")
+                    showUndoSnackbar(medication, position, onActionCompleted)
                 } else {
                     displayMessage("Device not connected to internet")
-
+                    onActionCompleted()
                 }
-                adapter.notifyItemChanged(position)
-
             },
-            onSwipeRight = { position ->
+            onSwipeRight = { position, onActionCompleted ->
                 val medication = adapter.getMedicationAt(position)
-                if(deviceConnected) {
+                if (deviceConnected) {
                     val medicationId = medication.id
                     val action = PrescriptionsFragmentDirections
                         .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
                     val navController = findNavController()
-                    if(navController.currentDestination?.id == R.id.prescriptionsFragment) {
+                    if (navController.currentDestination?.id == R.id.prescriptionsFragment) {
                         navController.navigate(action)
                     }
-
+                    onActionCompleted()
                 } else {
                     displayMessage("Device not connected to internet")
+                    onActionCompleted()
                 }
-                adapter.notifyItemChanged(position)
             }
-
         )
-
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
     }
 
 
 
+    private fun showUndoSnackbar(medication: Medication, position: Int, onActionCompleted: () -> Unit) {
+        // Get the current list and remove the medication
+        val oldList = adapter.getMedicationList().toMutableList()
+        val removedIndex = oldList.indexOf(medication)
+        if (removedIndex == -1) {
+            Log.e("SwipeDebug", "Medication ${medication.name} not found in list!")
+            onActionCompleted()
+            return
+        }
+        oldList.removeAt(removedIndex)
+        adapter.updateMedicationList(oldList) // This uses DiffUtil to remove it
 
-
-    private fun showUndoSnackbar(medication: Medication, position: Int) {
-        val currentList = adapter.getMedicationList().toMutableList()
-        val removedItem = currentList.removeAt(position)
-
-        adapter.updateMedicationList(currentList)
-        adapter.notifyItemRemoved(position)
+        Log.d("SwipeDebug", "After remove: $oldList, size: ${oldList.size}")
 
         Snackbar.make(binding.root, "${medication.name} deleted", Snackbar.LENGTH_LONG)
             .setAction("UNDO") {
-                currentList.add(position, removedItem)
-                adapter.updateMedicationList(currentList)
-                adapter.notifyItemInserted(position)
-
+                val currentList = adapter.getMedicationList().toMutableList()
+                currentList.add(removedIndex, medication)
+                adapter.updateMedicationList(currentList) // DiffUtil adds it back
+                Log.d("SwipeDebug", "After undo: $currentList, size: ${currentList.size}")
+                onActionCompleted()
             }
             .addCallback(object : Snackbar.Callback() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION) {
-                        medication.id?.let {
-                            viewModel.deleteMedication(uid, it) {
+                        medication.id?.let { id ->
+                            viewModel.deleteMedication(uid, id) {
+                                Log.d("SwipeDebug", "Deleted ${medication.name} from backend")
+                                onActionCompleted()
                             }
-                        }
+                        } ?: onActionCompleted()
+                    } else {
+                        onActionCompleted()
                     }
                 }
             })

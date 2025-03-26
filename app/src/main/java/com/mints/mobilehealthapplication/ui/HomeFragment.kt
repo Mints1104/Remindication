@@ -221,6 +221,9 @@ import java.time.LocalDateTime
                             .toLocalTime()  // Sort by the time
                     }
 
+                if(sortedMeds.isEmpty()) {
+                    handleAllMedicationsCompleted()
+                }
 
                 adapter.updateMedicationList(sortedMeds)
                 adapter.hideAllMedicationDays()
@@ -317,66 +320,192 @@ import java.time.LocalDateTime
                     iconRes = R.drawable.baseline_check_24px,
                     backgroundColorRes = R.color.darker_green_primary_button,
                     label = "Mark as Taken"
-
                 ),
-                onSwipeLeft = { position ->
+                onSwipeLeft = { position, onActionCompleted ->
                     val medication = adapter.getMedicationAt(position)
-                    if(deviceConnected) {
+                    if (deviceConnected) {
                         displayMessage("Mark ${medication.name} as skipped")
-                        showUndoSnackbar(medication, position, true)
+                        showUndoSnackbar(medication,position,true, onActionCompleted)
                     } else {
                         displayMessage("Device not connected to internet")
-                        Log.d(tag,"Cannot mark as skipped as device not connected to internet")
-
+                        Log.d(tag, "Cannot mark as skipped as device not connected to internet")
+                        onActionCompleted() // Unlock swipes since nothing happened
                     }
-                    adapter.notifyItemChanged(position)
-
-
+                    // Ditch the adapter.notifyItemChanged(position) here
                 },
-                onSwipeRight = { position ->
+                onSwipeRight = { position, onActionCompleted ->
                     val medication = adapter.getMedicationAt(position)
-                    if(deviceConnected) {
+                    if (deviceConnected) {
                         displayMessage("Mark ${medication.name} as taken")
-                        showUndoSnackbar(medication, position, false)
-
+                        showUndoSnackbar(medication, position,false, onActionCompleted)
                     } else {
                         displayMessage("Device not connected to internet")
-                        Log.d(tag,"Cannot mark as taken as device not connected to internet")
+                        Log.d(tag, "Cannot mark as taken as device not connected to internet")
+                        onActionCompleted() // Unlock swipes since nothing happened
                     }
-                    adapter.notifyItemChanged(position)
-
-
+                    // Ditch the adapter.notifyItemChanged(position) here too
                 }
             )
-
             ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
         }
 
+        private fun showUndoSnackbar(medication: Medication, position: Int, onActionCompleted: () -> Unit) {
+            // Get the current list and remove the medication
+            val oldList = adapter.getMedicationList().toMutableList()
+            val removedIndex = oldList.indexOf(medication)
+            if (removedIndex == -1) {
+                Log.e("SwipeDebug", "Medication ${medication.name} not found in list!")
+                onActionCompleted()
+                return
+            }
+            oldList.removeAt(removedIndex)
+            adapter.updateMedicationList(oldList) // This uses DiffUtil to remove it
 
-        private fun showUndoSnackbar(medication: Medication, position: Int, isSkipped: Boolean) {
-            val currentList = adapter.getMedicationList().toMutableList()
-            val message = if (isSkipped) "${medication.name} skipped" else "${medication.name} taken"
-            Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+            Log.d("SwipeDebug", "After remove: $oldList, size: ${oldList.size}")
+
+            Snackbar.make(binding.root, "${medication.name} deleted", Snackbar.LENGTH_LONG)
                 .setAction("UNDO") {
-                    viewModel.undoLastTaken(medication)
-                    adapter.updateMedicationList(currentList)
-                    adapter.notifyItemChanged(position)
+                    val currentList = adapter.getMedicationList().toMutableList()
+                    currentList.add(removedIndex, medication)
+                    adapter.updateMedicationList(currentList) // DiffUtil adds it back
+                    Log.d("SwipeDebug", "After undo: $currentList, size: ${currentList.size}")
+                    onActionCompleted()
                 }
                 .addCallback(object : Snackbar.Callback() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         if (event != DISMISS_EVENT_ACTION) {
-                            if (isSkipped) {
-                                viewModel.markMedicationAsSkipped(uid, medication)
-                            } else {
-                                viewModel.markMedicationAsTaken(uid, medication)
-                            }
-                            adapter.updateMedicationList(currentList)
-                            adapter.notifyItemChanged(position)
+                            medication.id?.let { id ->
+                                viewModel.deleteMedication(uid, id) {
+                                    Log.d("SwipeDebug", "Deleted ${medication.name} from backend")
+                                    onActionCompleted()
+                                }
+                            } ?: onActionCompleted()
+                        } else {
+                            onActionCompleted()
                         }
                     }
                 })
                 .show()
         }
+
+
+
+
+        private fun showUndoSnackbar(
+            medication: Medication,
+            position: Int,
+            isSkipped: Boolean,
+            onActionCompleted: () -> Unit
+        ) {
+            // Get the current list and update the medication’s state
+            val oldList = adapter.getMedicationList().toMutableList()
+            val targetIndex = oldList.indexOf(medication)
+            if (targetIndex == -1) {
+                Log.e("SwipeDebug", "Medication ${medication.name} not found in list!")
+                onActionCompleted()
+                return
+            }
+
+            // Update the medication locally
+            val updatedMedication = medication.copy()
+            if (isSkipped) updatedMedication.markAsSkipped(dateTime = LocalDateTime.now())
+            else updatedMedication.markAsTaken(dateTime = LocalDateTime.now())
+            oldList[targetIndex] = updatedMedication
+            adapter.updateMedicationList(oldList) // DiffUtil updates the UI
+            updateNextMedicationCard(oldList) // Sync card with adapter
+
+            Log.d("SwipeDebug", "After mark: $oldList, size: ${oldList.size}")
+
+            val message = if (isSkipped) "${medication.name} skipped" else "${medication.name} taken"
+            Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+                .setAction("UNDO") {
+                    val currentList = adapter.getMedicationList().toMutableList()
+                    currentList[targetIndex] = medication // Revert to original state locally
+                    adapter.updateMedicationList(currentList) // DiffUtil reverts it
+                    updateNextMedicationCard(currentList) // Sync card with adapter
+                    Log.d("SwipeDebug", "After undo: $currentList, size: ${currentList.size}")
+                    onActionCompleted()
+                }
+                .addCallback(object : Snackbar.Callback() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        if (event != DISMISS_EVENT_ACTION) {
+                            // Commit the mark action
+                            medication.id?.let {
+                                if (isSkipped) {
+                                    viewModel.markMedicationAsSkipped(uid, updatedMedication) {
+                                        Log.d("SwipeDebug", "Marked ${medication.name} as skipped in backend")
+                                        onActionCompleted()
+                                    }
+                                } else {
+                                    viewModel.markMedicationAsTaken(uid, updatedMedication) {
+                                        Log.d("SwipeDebug", "Marked ${medication.name} as taken in backend")
+                                        onActionCompleted()
+                                    }
+                                }
+                            } ?: onActionCompleted()
+                        } else {
+                            // Undo was pressed—revert backend state
+                            medication.id?.let {
+                                viewModel.undoLastTaken(medication)
+                                val finalList = adapter.getMedicationList().toMutableList()
+                                val index = finalList.indexOfFirst { it.id == medication.id }
+                                if (index == -1) {
+                                    if (targetIndex < finalList.size) {
+                                        finalList.add(targetIndex, medication)
+                                    } else {
+                                        finalList.add(medication)
+                                    }
+                                } else {
+                                    finalList[index] = medication
+                                }
+                                adapter.updateMedicationList(finalList)
+                                updateNextMedicationCard(finalList) // Sync card with adapter
+                                Log.d("SwipeDebug", "Undone ${medication.name} in backend, list: $finalList, size: ${finalList.size}")
+                            }
+                            onActionCompleted()
+                        }
+                    }
+                })
+                .show()
+
+            // Force animation reset since DiffUtil alone isn’t enough for updates
+            adapter.notifyItemChanged(position)
+        }
+
+        private fun updateNextMedicationCard(medications: List<Medication>) {
+            if (medications.isEmpty()) {
+                binding.nextMedicationName.text = getString(R.string.no_medications_left)
+                binding.nextMedicationTime.visibility = View.GONE
+                binding.motivationCover.visibility = View.VISIBLE
+            } else {
+                val now = LocalDateTime.now()
+                val closestMedication = medications.minByOrNull { med ->
+                    val nextDueDates = med.schedule.getNextDueDates()
+                    val closestDate = nextDueDates.filter { it.isAfter(now) || (it.isBefore(now) && !med.medicationHistory.hasEventToday()) }
+                        .minOrNull() ?: LocalDateTime.MAX
+                    closestDate
+                }
+                if (closestMedication != null) {
+                    val nextDueDates = closestMedication.schedule.getNextDueDates()
+                    val closestDueDate = nextDueDates.filter { it.isAfter(now) || (it.isBefore(now) && !closestMedication.medicationHistory.hasEventToday()) }
+                        .minOrNull()
+                    binding.nextMedicationName.text = getString(R.string.name_of_next_med, closestMedication.name)
+                    if (closestDueDate != null) {
+                        binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toLocalTime().toString())
+                        binding.nextMedicationTime.visibility = View.VISIBLE
+                    } else {
+                        binding.nextMedicationTime.visibility = View.GONE
+                    }
+                    binding.motivationCover.visibility = View.GONE
+                } else {
+                    binding.nextMedicationName.text = getString(R.string.no_medications_left)
+                    binding.nextMedicationTime.visibility = View.GONE
+                    binding.motivationCover.visibility = View.VISIBLE
+                }
+            }
+        }
+
+
 
         private fun checkDateInPast(currentList: List<Medication>) {
             val today = LocalDateTime.now()
@@ -450,9 +579,6 @@ import java.time.LocalDateTime
                 if(fullListOfMeds.isEmpty()) {
                     binding.nextMedicationName.text = getString(R.string.add_your_first_medication)
                     binding.nextMedicationTime.isVisible = false
-                } else {
-                    handleAllMedicationsCompleted()
-
                 }
 
 

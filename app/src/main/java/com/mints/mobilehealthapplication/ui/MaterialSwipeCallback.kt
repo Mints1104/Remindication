@@ -16,8 +16,8 @@ class MaterialSwipeCallback(
     private val context: Context,
     private val swipeLeftAction: SwipeAction,
     private val swipeRightAction: SwipeAction,
-    private val onSwipeLeft: (Int) -> Unit = {},
-    private val onSwipeRight: (Int) -> Unit = {}
+    private val onSwipeLeft: (Int, () -> Unit) -> Unit = { _, _ -> },
+    private val onSwipeRight: (Int, () -> Unit) -> Unit = { _, _ -> }
 ) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
     data class SwipeAction(
@@ -26,11 +26,17 @@ class MaterialSwipeCallback(
         val label: String
     )
 
+    private var isSwipeInProgress = false
     private val iconSize = context.resources.getDimensionPixelSize(R.dimen.material_touch_target_size)
     private val background = MaterialShapeDrawable().apply {
         shapeAppearanceModel = ShapeAppearanceModel.Builder()
             .setAllCornerSizes(context.resources.getDimension(R.dimen.material_corner_radius))
             .build()
+    }
+
+    // Add this to block swipes while one’s active
+    override fun isItemViewSwipeEnabled(): Boolean {
+        return !isSwipeInProgress
     }
 
     override fun onMove(
@@ -40,6 +46,10 @@ class MaterialSwipeCallback(
     ): Boolean = false
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        if (isSwipeInProgress) {
+            return // Extra safety, but isItemViewSwipeEnabled should catch it
+        }
+        isSwipeInProgress = true
         val position = viewHolder.adapterPosition
         when (direction) {
             ItemTouchHelper.LEFT -> handleSwipeAction(swipeLeftAction, position)
@@ -49,13 +59,10 @@ class MaterialSwipeCallback(
 
     private fun handleSwipeAction(action: SwipeAction, position: Int) {
         when (action) {
-            swipeLeftAction -> onSwipeLeft(position)
-            swipeRightAction -> onSwipeRight(position)
+            swipeLeftAction -> onSwipeLeft(position) { isSwipeInProgress = false }
+            swipeRightAction -> onSwipeRight(position) { isSwipeInProgress = false }
         }
-
-
     }
-
 
     override fun onChildDraw(
         canvas: Canvas,
@@ -67,8 +74,6 @@ class MaterialSwipeCallback(
         isCurrentlyActive: Boolean
     ) {
         val itemView = viewHolder.itemView
-
-        // Apply material elevation when active
         val elevation = if (isCurrentlyActive) {
             context.resources.getDimension(R.dimen.m3_elevation_level2)
         } else {
@@ -93,26 +98,15 @@ class MaterialSwipeCallback(
         background.apply {
             setTint(ContextCompat.getColor(context, action.backgroundColorRes))
             this.elevation = elevation
-            setBounds(
-                itemView.left,
-                itemView.top,
-                itemView.left + dX.toInt(),
-                itemView.bottom
-            )
+            setBounds(itemView.left, itemView.top, itemView.left + dX.toInt(), itemView.bottom)
             draw(canvas)
         }
 
-        // Draw icon with material ripple effect
         ContextCompat.getDrawable(context, action.iconRes)?.let { icon ->
             val iconMargin = (itemView.height - iconSize) / 2
             val iconTop = itemView.top + iconMargin
             val iconLeft = itemView.left + iconMargin
-            icon.setBounds(
-                iconLeft,
-                iconTop,
-                iconLeft + iconSize,
-                iconTop + iconSize
-            )
+            icon.setBounds(iconLeft, iconTop, iconLeft + iconSize, iconTop + iconSize)
             icon.draw(canvas)
         }
     }
@@ -127,27 +121,21 @@ class MaterialSwipeCallback(
         background.apply {
             setTint(ContextCompat.getColor(context, action.backgroundColorRes))
             this.elevation = elevation
-            setBounds(
-                itemView.right + dX.toInt(),
-                itemView.top,
-                itemView.right,
-                itemView.bottom
-            )
+            setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
             draw(canvas)
         }
 
-        // Draw icon with material ripple effect
         ContextCompat.getDrawable(context, action.iconRes)?.let { icon ->
             val iconMargin = (itemView.height - iconSize) / 2
             val iconTop = itemView.top + iconMargin
             val iconRight = itemView.right - iconMargin
-            icon.setBounds(
-                iconRight - iconSize,
-                iconTop,
-                iconRight,
-                iconTop + iconSize
-            )
+            icon.setBounds(iconRight - iconSize, iconTop, iconRight, iconTop + iconSize)
             icon.draw(canvas)
         }
+    }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        viewHolder.itemView.translationX = 0f
     }
 }

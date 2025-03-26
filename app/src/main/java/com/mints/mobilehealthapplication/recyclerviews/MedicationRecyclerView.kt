@@ -52,6 +52,7 @@ class MedicationRecyclerView(
                 holder.binding.medicationDay.visibility = View.VISIBLE
 
                 if (medicationSchedule is MedicationSchedule.Daily) {
+
                     holder.binding.medicationDay.text = context.getString(
                         R.string.medication_date,
                         medicationSchedule.nextDueDates[0].dayOfWeek.toString()
@@ -67,6 +68,7 @@ class MedicationRecyclerView(
                         }
                     )
                 }
+
             }
         }
 

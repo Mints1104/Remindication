@@ -146,50 +146,50 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
 
 
-    fun markMedicationAsTaken(userId: String, medication: Medication) {
+    fun markMedicationAsTaken(userId: String, medication: Medication, onComplete: () -> Unit) {
         val currentDateTime = LocalDateTime.now()
         val today = LocalDate.now()
         viewModelScope.launch {
             medication.id?.let { medId ->
-               try {
-                   val eventDateTime = when(val schedule = medication.schedule) {
-                       is MedicationSchedule.Daily -> schedule.nextDueDates.firstOrNull()
-                       is MedicationSchedule.WeeklySchedule -> schedule.nextDueDates.firstOrNull()
-                       is MedicationSchedule.Cyclic -> schedule.nextDueDates.firstOrNull { it.toLocalDate() == today }
-                       else -> LocalDateTime.now()
-                   } ?: LocalDateTime.now()
-                   medication.markAsTaken(dateTime = currentDateTime)
+                try {
+                    val eventDateTime = when (val schedule = medication.schedule) {
+                        is MedicationSchedule.Daily -> schedule.nextDueDates.firstOrNull()
+                        is MedicationSchedule.WeeklySchedule -> schedule.nextDueDates.firstOrNull()
+                        is MedicationSchedule.Cyclic -> schedule.nextDueDates.firstOrNull { it.toLocalDate() == today }
+                        else -> LocalDateTime.now()
+                    } ?: LocalDateTime.now()
 
+                    medication.markAsTaken(dateTime = currentDateTime)
 
-                   val success = FireStoreRepository.updateMedicationHistory(
-                       userId = userId,
-                       medicationId = medId,
-                       event = MedicationEvent.Taken(date = currentDateTime)
-                   )
+                    val success = FireStoreRepository.updateMedicationHistory(
+                        userId = userId,
+                        medicationId = medId,
+                        event = MedicationEvent.Taken(date = currentDateTime)
+                    )
 
-                 if(success) {
-                     _medications.value = _medications.value?.map {
-                         if(it.id == medication.id) medication else it
-                     }
-                     NotificationHelper(notificationHelper.getContext()).cancelBackupNotification(medication.name)
-                     // Convert eventDateTime to epoch millis
-                     val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
-                         .toInstant().toEpochMilli()
-                     // Cancel the regular notification for that scheduled dose
-                     NotificationHelper(notificationHelper.getContext())
-                         .cancelRegularNotification(medication.name, dueTimeMillis)
-                     val streakUpdated = FireStoreRepository.updateAdherenceStreak(userId)
-                     if (!streakUpdated) {
-                         Log.e("HomeViewModel", "Failed to update adherence streak.")
-                     }
-                 } else {
-                     Log.e("HomeViewModel","Error marking ${medication.name} as taken")
-                 }
-
-                   } catch(e:Exception) {
-                       Log.e("HomeViewModel","Exception marking medication as taken",e)
-                   }
-               }
+                    if (success) {
+                        _medications.value = _medications.value?.map {
+                            if (it.id == medication.id) medication else it
+                        }
+                        NotificationHelper(notificationHelper.getContext()).cancelBackupNotification(medication.name)
+                        val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
+                            .toInstant().toEpochMilli()
+                        NotificationHelper(notificationHelper.getContext())
+                            .cancelRegularNotification(medication.name, dueTimeMillis)
+                        val streakUpdated = FireStoreRepository.updateAdherenceStreak(userId)
+                        if (!streakUpdated) {
+                            Log.e("HomeViewModel", "Failed to update adherence streak.")
+                        } else {
+                            Log.d("HomeViewModel","Successfully updated adherence streak")
+                        }
+                    } else {
+                        Log.e("HomeViewModel", "Error marking ${medication.name} as taken")
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "Exception marking medication as taken", e)
+                }
+            }
+            onComplete() // Call this after the async work, success or fail
         }
     }
 
@@ -214,7 +214,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         }
     }
 
-    fun markMedicationAsSkipped(userId: String, medication: Medication) {
+    fun markMedicationAsSkipped(userId: String, medication: Medication, onComplete: () -> Unit) {
         val today = LocalDate.now()
 
         viewModelScope.launch {
@@ -257,6 +257,8 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                     Log.e("HomeViewModel","Exception marking medication as skipped",e)
                 }
             }
+            onComplete()
+
         }
     }
 

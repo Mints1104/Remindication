@@ -62,7 +62,6 @@ class MedicationDetailFragment : Fragment() {
 
               val complianceRate =   it.medicationHistory.getComplianceRate()
                 val rounded = BigDecimal(complianceRate).setScale(2,RoundingMode.HALF_UP).toDouble()
-                // Update adherence summary using actual data
                 binding.complianceRateText.text = getString(R.string.compliance_rate_value, rounded)
                 binding.takenCountText.text = "Taken: ${it.medicationHistory.getEventCount(MedicationEvent.EventType.TAKEN)}"
                 binding.missedCountText.text = "Missed: ${it.medicationHistory.getEventCount(MedicationEvent.EventType.MISSED)}"
