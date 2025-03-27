@@ -29,7 +29,10 @@ class AddMedicationBasicInfoFragment : Fragment() {
     private var tag = "BasicInfoFragment"
     private var uid = ""
     private val viewModel: AddMedicationViewModel by activityViewModels()
-
+    private var deviceConnected = false
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
 
     /**
      * Inflates the layout and initializes UI elements for the fragment.
@@ -48,19 +51,29 @@ class AddMedicationBasicInfoFragment : Fragment() {
         setupContinueButton()
         observeValidationState()
         Log.d(tag,"UserId: $uid")
+        deviceConnected = isDeviceConnected()
+        observeNetworkState()
+
+        if(!deviceConnected) {
+            displayMessage("Internet connection lost")
+            findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
+        } else {
+            Log.d(tag, "Device is connected to the internet")
+        }
+
         return view
     }
 
 
     private fun setUpUI() {
-        val mainActivity = activity as MainActivity
-        mainActivity.hideFAB()
-        mainActivity.hideBottomNav()
+        mainActivity.apply {
+            hideFAB()
+            hideBottomNav()
+        }
         checkIfEditingMedication(mainActivity)
     }
 
     private fun revertUI() {
-        val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
     }
 
@@ -139,6 +152,21 @@ class AddMedicationBasicInfoFragment : Fragment() {
 
     private fun isCurrentDestinationValid(): Boolean {
         return findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment
+    }
+
+    private fun observeNetworkState() {
+        mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
+            if (!isConnected) {
+                displayMessage("Internet connection lost")
+                if (findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment) {
+                    findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
+                }
+            }
+        }
+    }
+
+    private fun isDeviceConnected(): Boolean {
+        return mainActivity.checkNetworkState()
     }
 
 

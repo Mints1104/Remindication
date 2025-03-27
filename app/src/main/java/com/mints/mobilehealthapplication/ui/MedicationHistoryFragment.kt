@@ -31,7 +31,9 @@ class MedicationHistoryFragment : Fragment() {
     private var uid = ""
     private var medicationList = MutableLiveData<List<Medication>>()
     private var meds = mutableListOf<Medication>()
-
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentMedicationhistoryBinding.inflate(inflater, container, false)
         setUpRecyclerView()
@@ -49,7 +51,6 @@ class MedicationHistoryFragment : Fragment() {
     }
 
     private fun setUpUI() {
-        val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
     }
 

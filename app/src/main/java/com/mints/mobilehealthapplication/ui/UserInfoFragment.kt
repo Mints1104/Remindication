@@ -21,7 +21,9 @@ class UserInfoFragment : Fragment() {
     private lateinit var viewModel: RegistrationViewModel
     private var _binding: FragmentRegistrationBinding? = null
     private val binding get() = _binding!!
-
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -29,12 +31,13 @@ class UserInfoFragment : Fragment() {
         _binding = FragmentRegistrationBinding.inflate(inflater, container, false)
 
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
-        val mainActivity = requireActivity() as MainActivity
         mainActivity.showAppBar()
         setUpUI()
         handleContinueRegistration()
         return binding.root
     }
+
+
 
     private fun handleContinueRegistration() {
         binding.continueButton.setOnClickListener {

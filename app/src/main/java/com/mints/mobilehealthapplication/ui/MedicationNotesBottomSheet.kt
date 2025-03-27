@@ -18,7 +18,9 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
     private var medicationName: String? = null
     private var medicationNotes: String? = null
     private var deviceConnected = false
-
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -73,7 +75,6 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
         _binding = null
     }
     private fun isDeviceConnected(): Boolean {
-        val mainActivity = requireActivity() as MainActivity
         return mainActivity.checkNetworkState()
     }
 

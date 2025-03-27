@@ -32,7 +32,9 @@ class MedicationTrendsFragment : Fragment() {
     private var tag = "MedicationTrendsFragment"
 
     private val viewModel: MedicationAnalyticsViewModel by activityViewModels()
-
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -59,7 +61,7 @@ class MedicationTrendsFragment : Fragment() {
             } else {
                 val medication = medications.find { it.id == medicationId }
                 Log.d(tag, "Medication Name: ${medication?.name}")
-                (requireActivity() as MainActivity).updateToolBarTitle("${medication!!.name} Trends")
+                mainActivity.updateToolBarTitle("${medication!!.name} Trends")
                 medication.medicationHistory.getAllEvents()
             }
 
@@ -69,7 +71,6 @@ class MedicationTrendsFragment : Fragment() {
         }
     }
     private fun setUpUI() {
-        val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
     }
 

@@ -44,6 +44,9 @@ class PrescriptionsFragment : Fragment() {
     private val viewModel: HomeFragmentViewModel by activityViewModels(
         factoryProducer = { (requireActivity() as MainActivity).homeFragmentViewModelFactory }
     )
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
     /**
      * Inflates the fragment layout using ViewBinding.
      */
@@ -74,19 +77,16 @@ class PrescriptionsFragment : Fragment() {
     }
 
     private fun setUpUI() {
-        val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
     }
 
     private fun observeNetworkState() {
-        val mainActivity = requireActivity() as MainActivity
         mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
             deviceConnected = isConnected
         }
     }
 
     private fun isDeviceConnected(): Boolean {
-        val mainActivity = requireActivity() as MainActivity
         return mainActivity.checkNetworkState()
     }
 

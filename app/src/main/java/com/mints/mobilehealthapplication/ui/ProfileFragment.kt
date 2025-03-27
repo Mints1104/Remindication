@@ -21,7 +21,9 @@ class ProfileFragment : Fragment() {
     private val viewModel: ProfileViewModel by viewModels()
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private var totalMedicationCount = 0
-
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -34,7 +36,7 @@ class ProfileFragment : Fragment() {
 
         // Load user details
         viewModel.loadUserProfile()
-        (requireActivity() as MainActivity).hideBottomNav()
+       mainActivity.hideBottomNav()
 
         // Initialize ProfileViewModel functions
         viewModel.startListeningToAdherenceStreak()

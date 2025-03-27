@@ -37,7 +37,10 @@ class AddMedicationScheduleFragment : Fragment() {
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     private val tag = "ScheduleFragment"
     private var userId = ""
-
+    private var deviceConnected = false
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,14 +59,38 @@ class AddMedicationScheduleFragment : Fragment() {
         Log.d(tag,"Get frequency: ${viewModel.getFrequency()}")
 
         Log.d(tag,"Get frequencyType: ${viewModel.getFrequencyType()}")
+        deviceConnected = isDeviceConnected()
+        observeNetworkState()
+
+        if(!deviceConnected) {
+            displayMessage("Internet connection lost")
+            findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
+        } else {
+            Log.d(tag, "Device is connected to the internet")
+        }
 
     }
 
-    private fun setupViews() {
-        (activity as? MainActivity)?.apply {
-            hideFAB()
-            hideBottomNav()
+    private fun observeNetworkState() {
+        mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
+            if (!isConnected) {
+                displayMessage("Internet connection lost")
+                if (findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment) {
+                    findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
+                }
+            }
         }
+    }
+
+    private fun isDeviceConnected(): Boolean {
+        return mainActivity.checkNetworkState()
+    }
+
+    private fun setupViews() {
+      mainActivity.apply {
+          hideFAB()
+          hideBottomNav()
+      }
         resetContainerVisibility()
         setContainerVisibility()
         handleIsEditing()

@@ -23,7 +23,11 @@ class AddMedicationFrequencyFragment : Fragment() {
     private val binding get() = _binding!!
     private var tag = "M.FrequencyFragment"
     private val viewModel: AddMedicationViewModel by activityViewModels()
+    private var deviceConnected = false
 
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
 
     /**
      * Inflates the layout and initializes UI elements for the fragment.
@@ -40,18 +44,43 @@ class AddMedicationFrequencyFragment : Fragment() {
         setUpRadioButtonListeners()
         setupContinueButton()
         observeValidationState()
+        deviceConnected = isDeviceConnected()
+        observeNetworkState()
+
+        if(!deviceConnected) {
+            displayMessage("Internet connection lost")
+            findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
+        } else {
+            Log.d(tag, "Device is connected to the internet")
+        }
         return view
     }
 
+    private fun observeNetworkState() {
+        mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
+            if (!isConnected) {
+                displayMessage("Internet connection lost")
+                if (findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment) {
+                    findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
+                }
+            }
+        }
+    }
+
+    private fun isDeviceConnected(): Boolean {
+        return mainActivity.checkNetworkState()
+    }
+
     private fun setUpUI() {
-        val mainActivity = activity as MainActivity
-        mainActivity.hideFAB()
-        mainActivity.hideBottomNav()
-        setUpForEditing(mainActivity)
+        mainActivity.apply {
+            hideFAB()
+            hideBottomNav()
+        }
+        setUpForEditing()
     }
 
 
-    private fun setUpForEditing(mainActivity: MainActivity) {
+    private fun setUpForEditing() {
         val isEditing = viewModel.getIsEditing()
         if(isEditing == true) {
             mainActivity.updateToolBarTitle("Edit Medication")

@@ -25,7 +25,9 @@ class MedicationInfoFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var medicationName: String? = null
-
+    private val mainActivity: MainActivity by lazy {
+        requireActivity() as MainActivity
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -40,13 +42,12 @@ class MedicationInfoFragment : Fragment() {
         if (medicationName.isNullOrEmpty()) {
             showError("No medication name provided")
         } else {
-            (requireActivity() as MainActivity).updateToolBarTitle("Medication Info for ${medicationName!!}")
+            mainActivity.updateToolBarTitle("Medication Info for ${medicationName!!}")
             fetchMedicationInfo(medicationName!!)
         }
     }
 
     private fun setUpUI() {
-        val mainActivity = activity as MainActivity
         mainActivity.showBottomNav()
     }
 
