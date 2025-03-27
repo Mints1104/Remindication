@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
@@ -546,15 +547,29 @@ class AddMedicationScheduleFragment : Fragment() {
 
     private fun navigateToNextFragment() {
         if (isAdded && !isStateSaved) {
-
-            if(viewModel.getIsEditing() == true) {
-                findNavController().navigate(R.id.action_addMedicationScheduleFragment_to_prescriptionsFragment)
-            } else {
+            if (viewModel.getIsEditing() == true) {
+                // Clear all fragments up to home, then navigate to prescriptions
                 findNavController().navigate(
-                    R.id.action_addMedicationScheduleFragment_to_homeFragment
+                    R.id.action_addMedicationScheduleFragment_to_prescriptionsFragment,
+                    null,
+                    navOptions {
+                        popUpTo(R.id.homeFragment) {
+                            inclusive = false  // Keep home fragment as base
+                        }
+                    }
+                )
+            } else {
+                // Navigate to home and clear everything else
+                findNavController().navigate(
+                    R.id.action_addMedicationScheduleFragment_to_homeFragment,
+                    null,
+                    navOptions {
+                        popUpTo(R.id.homeFragment) {
+                            inclusive = true  // Clear everything including home
+                        }
+                    }
                 )
             }
-
         }
     }
 
