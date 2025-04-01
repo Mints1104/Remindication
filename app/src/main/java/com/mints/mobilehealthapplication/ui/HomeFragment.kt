@@ -221,7 +221,7 @@ import java.time.LocalDateTime
                             .toLocalTime()  // Sort by the time
                     }
 
-                if(sortedMeds.isEmpty()) {
+                if(sortedMeds.isEmpty() && fullListOfMeds.isNotEmpty()) {
                     handleAllMedicationsCompleted()
                 }
 

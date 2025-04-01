@@ -2,7 +2,6 @@ package com.mints.mobilehealthapplication.recyclerviews
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.databinding.MedicationEventItemBinding
@@ -29,7 +28,7 @@ class MedicationEventAdapter(private var events: List<MedicationEvent>) :
         holder.binding.eventTypeText.text = event.type.name
         when(event) {
             is MedicationEvent.Missed -> {
-                holder.binding.eventDateText.isVisible = false
+                holder.binding.eventDateText.text = event.getFormattedDateForMissed()
             }
             else -> {
                 holder.binding.eventDateText.text = event.getFormattedDate()
@@ -55,9 +54,9 @@ class MedicationEventAdapter(private var events: List<MedicationEvent>) :
         val yesterday = today.minusDays(1)
 
         return when (this.date.toLocalDate()) {
-            today -> "Today at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
-            yesterday -> "Yesterday at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
-            else -> this.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a"))
+            today -> "Today"
+            yesterday -> "Yesterday"
+            else -> this.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
         }
     }
 
