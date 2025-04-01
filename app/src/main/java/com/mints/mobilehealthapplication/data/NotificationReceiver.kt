@@ -9,6 +9,8 @@ import androidx.preference.PreferenceManager
 import com.mints.mobilehealthapplication.data.NotificationHelper.Companion.NOTIFICATION_ACTION
 import com.mints.mobilehealthapplication.data.NotificationHelper.Companion.SNOOZE_ACTION
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 
 class NotificationReceiver : BroadcastReceiver() {
@@ -53,6 +55,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 val scheduleTime = intent.getLongExtra("schedule_time",0)
                 Log.d("NotifDebug","Extracted medName: $medicationName")
                 Log.d("NotifDebug","Extracted schedule time: ${Instant.ofEpochMilli(scheduleTime)}")
+
                 if (medicationName.isNullOrEmpty()) {
                     Log.e("NotifDebug","Medication name is null or empty")
                     return
@@ -75,7 +78,12 @@ class NotificationReceiver : BroadcastReceiver() {
 
                         //Schedule a backup notification for this medication
                         notificationHelper.scheduleNotification(medicationName,backupTime,true)
-                        Log.d("NotifDebug", "Backup notification scheduled for $medicationName for ${Instant.ofEpochMilli(backupTime)}")
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(
+                            ZoneId.systemDefault())
+                        formatter.format(Instant.ofEpochMilli(backupTime))
+                        val formattedDate = formatter.format(Instant.ofEpochMilli(backupTime))
+
+                        Log.d("NotifDebug", "Backup notification scheduled for $medicationName for $formattedDate")
 
 
                     }

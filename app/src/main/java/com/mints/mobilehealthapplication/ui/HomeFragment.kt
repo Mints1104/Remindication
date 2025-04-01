@@ -491,7 +491,7 @@ import java.time.LocalDateTime
                         .minOrNull()
                     binding.nextMedicationName.text = getString(R.string.name_of_next_med, closestMedication.name)
                     if (closestDueDate != null) {
-                        binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toLocalTime().toString())
+                        binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toString())
                         binding.nextMedicationTime.visibility = View.VISIBLE
                     } else {
                         binding.nextMedicationTime.visibility = View.GONE

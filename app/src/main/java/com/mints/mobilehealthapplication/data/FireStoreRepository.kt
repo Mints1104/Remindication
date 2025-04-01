@@ -16,7 +16,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 
 
 object FireStoreRepository {
@@ -348,6 +347,8 @@ object FireStoreRepository {
                 )
             }
 
+            Log.d("FireStoreRepo", "Scheduled times: ${medication.schedule.formattedTimes}")
+
             val documentReference = db.collection("users")
                 .document(uid)
                 .collection("medications")
@@ -385,8 +386,10 @@ object FireStoreRepository {
 
 
     private fun LocalDateTime.toFirestoreTimestamp(): Timestamp {
-        return Timestamp(this.toEpochSecond(ZoneOffset.UTC), 0)
+        val zoneId = ZoneId.systemDefault()
+        return Timestamp(this.atZone(zoneId).toEpochSecond(), 0)
     }
+
 
 
     private fun convertScheduleToMap(schedule: MedicationSchedule): Map<String, Any> {
