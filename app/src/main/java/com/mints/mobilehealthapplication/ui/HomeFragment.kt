@@ -412,7 +412,7 @@ import java.time.LocalDateTime
             else updatedMedication.markAsTaken(dateTime = LocalDateTime.now())
             oldList[targetIndex] = updatedMedication
             adapter.updateMedicationList(oldList) // DiffUtil updates the UI
-            updateNextMedicationCard(oldList) // Sync card with adapter
+          //  updateNextMedicationCard(oldList) // Sync card with adapter
 
             Log.d("SwipeDebug", "After mark: $oldList, size: ${oldList.size}")
 
