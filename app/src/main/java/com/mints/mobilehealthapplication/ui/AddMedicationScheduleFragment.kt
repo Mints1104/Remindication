@@ -417,7 +417,6 @@ class AddMedicationScheduleFragment : Fragment() {
             displayMessage("User not authenticated")
             return
         }
-        Log.d(tag,"Saving medication!")
         val currentTime = LocalTime.now()
         val medicationName = viewModel.getName()
 

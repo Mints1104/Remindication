@@ -58,9 +58,13 @@ class MedicationHistoryFragment : Fragment() {
         adapter = MedicationHistoryRecyclerView(emptyList()) { medication ->
             val medId = medication.id
             if (medId != null) {
-                val action = MedicationHistoryFragmentDirections
-                    .actionMedicationHistoryFragmentToMedicationDetailFragment(medId)
-                findNavController().navigate(action)
+                val navController = findNavController()
+                if(navController.currentDestination?.id == R.id.medicationHistoryFragment) {
+                    val action = MedicationHistoryFragmentDirections
+                        .actionMedicationHistoryFragmentToMedicationDetailFragment(medId)
+                    navController.navigate(action)
+                }
+
             } else {
                 Snackbar.make(binding.root, "Medication ID is missing", Snackbar.LENGTH_SHORT).show()
             }

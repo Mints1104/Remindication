@@ -10,7 +10,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.google.firebase.Timestamp
-import com.mints.mobilehealthapplication.data.DailyFrequency
 import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
@@ -18,13 +17,13 @@ import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.ui.HomeFragment.Companion.REFRESH_ACTION
 import com.mints.mobilehealthapplication.utils.ScheduleHelper
+import com.mints.mobilehealthapplication.utils.toLocalDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
-import com.mints.mobilehealthapplication.utils.toLocalDateTime
-import java.time.LocalDate
 
 class MidnightWorker(
     context: Context,
@@ -211,14 +210,6 @@ class MidnightWorker(
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()
 
-            when(schedule.frequency) {
-                DailyFrequency.ONCE -> {
-                    Log.d("MW","${medication.name} is a once daily medication")
-                }
-                DailyFrequency.TWICE -> {
-                    Log.d("MW","${medication.name} is a twice daily medication")
-                }
-            }
 
             missedDueDates.forEach { missedDateTime ->
                 val missedDates = ScheduleHelper.getDatesBetween(

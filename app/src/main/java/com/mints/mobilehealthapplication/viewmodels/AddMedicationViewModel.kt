@@ -147,7 +147,6 @@ import java.time.LocalTime
                 _validationState.value = ValidationState.Invalid("Frequency is required")
                 false
             } else {
-                // Update both validation state AND current stage
                 _validationState.value = ValidationState.Valid
                 _currentStage.value = FormStage.SCHEDULE
                 true
@@ -258,6 +257,18 @@ import java.time.LocalTime
                 updateMedicationId(med.id!!)
         }
 
+        private fun createMedication(): Medication {
+            return Medication(
+                name = _medicationName.value ?: "",
+                dosage = _dosage.value ?: "",
+                schedule = createSchedule(),
+                notes = _notes.value ?: "",
+                createdAt = Timestamp.now(),
+                active = true,
+                lastModified = Timestamp.now()
+            )
+        }
+
 
         fun saveMedication(userId: String) {
                 viewModelScope.launch {
@@ -293,17 +304,7 @@ import java.time.LocalTime
             }
         }
 
-        private fun createMedication(): Medication {
-            return Medication(
-                name = _medicationName.value ?: "",
-                dosage = _dosage.value ?: "",
-                schedule = createSchedule(),
-                notes = _notes.value ?: "",
-                createdAt = Timestamp.now(),
-                active = true,
-                lastModified = Timestamp.now()
-            )
-        }
+
 
 
 
@@ -468,7 +469,6 @@ import java.time.LocalTime
                     false
                 }
                 else -> {
-                    // Update both validation state AND current stage
                     _validationState.value = ValidationState.Valid
                     _currentStage.value = FormStage.FREQUENCY
                     true
