@@ -5,7 +5,10 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.Instant
 
 data class Medication(
     var id: String? = null,
@@ -20,45 +23,66 @@ data class Medication(
     val medicationHistory: MedicationHistory = MedicationHistory()
 ) {
     fun markAsTaken(dateTime: LocalDateTime = LocalDateTime.now()) {
-        medicationHistory.addEvent(MedicationEvent.Taken(date = dateTime))
+        // Convert the user-provided LocalDateTime into an Instant
+        medicationHistory.addEvent(
+            MedicationEvent.Taken(
+                instant = dateTime.atZone(ZoneId.systemDefault()).toInstant()
+            )
+        )
     }
 
     fun markAsSkipped(dateTime: LocalDateTime = LocalDateTime.now()) {
-        medicationHistory.addEvent(MedicationEvent.Skipped(date = dateTime))
+        medicationHistory.addEvent(
+            MedicationEvent.Skipped(
+                instant = dateTime.atZone(ZoneId.systemDefault()).toInstant()
+            )
+        )
     }
 
     fun markAsMissed(dateTime: LocalDateTime = LocalDateTime.now()) {
-        medicationHistory.addEvent(MedicationEvent.Missed(date = dateTime))
+        medicationHistory.addEvent(
+            MedicationEvent.Missed(
+                instant = dateTime.atZone(ZoneId.systemDefault()).toInstant()
+            )
+        )
     }
 
 
 }
 
 
+
+
 sealed class MedicationEvent {
-    abstract val date: LocalDateTime
+    abstract val instant: Instant
     abstract val type: EventType
 
+    // Convert the stored Instant to a LocalDateTime in the system default zone
+    val date: LocalDateTime
+        get() = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+
     enum class EventType {
-        TAKEN, SKIPPED, MISSED
+        TAKEN,
+        SKIPPED,
+        MISSED
     }
 
     data class Taken(
-        override val date: LocalDateTime = LocalDateTime.now(),
+        override val instant: Instant = Instant.now()
     ) : MedicationEvent() {
         override val type = EventType.TAKEN
     }
 
-    data class Skipped(
-        override val date: LocalDateTime = LocalDateTime.now(),
-    ) : MedicationEvent() {
-        override val type = EventType.SKIPPED
-    }
-
     data class Missed(
-        override val date: LocalDateTime = LocalDateTime.now(),
+        override val instant: Instant = Instant.now()
     ) : MedicationEvent() {
         override val type = EventType.MISSED
+    }
+
+    data class Skipped(
+        override val instant: Instant = Instant.now()
+    ) : MedicationEvent() {
+        override val type = EventType.SKIPPED
     }
 }
 
@@ -75,6 +99,13 @@ data class MedicationHistory(
     fun getAllEvents(): MutableList<MedicationEvent> {
         return events
     }
+
+    fun getDateOfEvent(event: MedicationEvent): LocalDateTime {
+        return events.firstOrNull { it == event }?.date ?: LocalDateTime.now()
+    }
+
+
+
 
     fun getEventsByType(type: MedicationEvent.EventType): List<MedicationEvent> {
         return events.filter { it.type == type }

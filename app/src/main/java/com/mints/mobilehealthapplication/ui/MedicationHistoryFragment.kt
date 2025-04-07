@@ -45,7 +45,6 @@ class MedicationHistoryFragment : Fragment() {
             }
 
         }
-
         setUpUI()
         return binding.root
     }

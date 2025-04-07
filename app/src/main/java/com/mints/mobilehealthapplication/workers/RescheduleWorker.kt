@@ -107,7 +107,11 @@ class RescheduleWorker(
                         Log.d(tag, "Marking ${medication.name} as missed at $eventDateTime")
 
                         medication.markAsMissed(eventDateTime)
-                        missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
+                        missedEvents.add(
+                            MedicationEvent.Missed(
+                                instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                            )
+                        )
                         processedDates.add(currentDate)
                     } else {
                         Log.d(tag, "Skipping ${medication.name} on $currentDate - either not an intake day or event already exists")
@@ -216,8 +220,11 @@ class RescheduleWorker(
                     val eventDateTime = date.atTime(missedDateTime.toLocalTime())
                     Log.d(tag, "Marking ${medication.name} as missed at $eventDateTime")
                     medication.markAsMissed(eventDateTime)
-                    missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
-                }
+                    missedEvents.add(
+                        MedicationEvent.Missed(
+                            instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                        )
+                    )                }
             }
 
             if (missedEvents.isNotEmpty() && medication.id != null) {
@@ -277,7 +284,9 @@ class RescheduleWorker(
                 FireStoreRepository.updateMedicationHistory(
                     userId = userId,
                     medicationId = it,
-                    event = MedicationEvent.Missed(date = missedDateTime)
+                    event = MedicationEvent.Missed(
+                        instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                    )
                 )
             }
         }

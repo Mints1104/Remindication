@@ -1,11 +1,14 @@
 package com.mints.mobilehealthapplication.recyclerviews
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.databinding.MedicationEventItemBinding
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class MedicationEventAdapter(private var events: List<MedicationEvent>) :
@@ -26,37 +29,55 @@ class MedicationEventAdapter(private var events: List<MedicationEvent>) :
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val event = events[position]
         holder.binding.eventTypeText.text = event.type.name
-        when(event) {
+
+        val eventDateTime: LocalDateTime =
+            event.instant.atZone(ZoneId.of("UTC")).toLocalDateTime()
+
+        Log.d("EventAdapter", "Stored Instant: ${event.instant}")
+        Log.d("EventAdapter", "Local DateTime: $eventDateTime")
+
+        // Display the formatted date based on event type.
+        when (event) {
             is MedicationEvent.Missed -> {
-                holder.binding.eventDateText.text = event.getFormattedDateForMissed()
+                holder.binding.eventDateText.text = getFormattedDateForMissed(eventDateTime)
             }
             else -> {
-                holder.binding.eventDateText.text = event.getFormattedDate()
-
+                holder.binding.eventDateText.text = getFormattedDate(eventDateTime)
             }
-
         }
     }
 
-    private fun MedicationEvent.getFormattedDate(): String {
+    private fun getFormattedDate(date: LocalDateTime): String {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
-
-        return when (this.date.toLocalDate()) {
-            today -> "Today at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
-            yesterday -> "Yesterday at ${this.date.format(DateTimeFormatter.ofPattern("h:mm a"))}"
-            else -> this.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a"))
+        val eventLocalDate = date.toLocalDate()
+        return when (eventLocalDate) {
+            today -> {
+                val timeFormat = DateTimeFormatter.ofPattern("h:mm a")
+                "Today at ${date.format(timeFormat)}"
+            }
+            yesterday -> {
+                val timeFormat = DateTimeFormatter.ofPattern("h:mm a")
+                "Yesterday at ${date.format(timeFormat)}"
+            }
+            else -> {
+                val dateTimeFormat = DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a")
+                date.format(dateTimeFormat)
+            }
         }
     }
 
-    private fun MedicationEvent.getFormattedDateForMissed(): String {
+    private fun getFormattedDateForMissed(date: LocalDateTime): String {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
-
-        return when (this.date.toLocalDate()) {
+        val eventLocalDate = date.toLocalDate()
+        return when (eventLocalDate) {
             today -> "Today"
             yesterday -> "Yesterday"
-            else -> this.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
+            else -> {
+                val dateFormat = DateTimeFormatter.ofPattern("MMM d, yyyy")
+                date.format(dateFormat)
+            }
         }
     }
 

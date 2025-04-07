@@ -118,7 +118,7 @@ class MidnightWorker(
                         Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
 
                         medication.markAsMissed(eventDateTime)
-                        missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
+                        missedEvents.add(MedicationEvent.Missed(instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()))
                         processedDates.add(currentDate)
                     }
 
@@ -225,7 +225,11 @@ class MidnightWorker(
                     val eventDateTime = date.atTime(missedDateTime.toLocalTime())
                     Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
                     medication.markAsMissed(eventDateTime)
-                    missedEvents.add(MedicationEvent.Missed(date = eventDateTime))
+                    missedEvents.add(
+                        MedicationEvent.Missed(
+                            instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                        )
+                    )
                 }
             }
 
@@ -292,7 +296,9 @@ class MidnightWorker(
                 FireStoreRepository.updateMedicationHistory(
                     userId = userId,
                     medicationId = it,
-                    event = MedicationEvent.Missed(date = missedDateTime)
+                    event = MedicationEvent.Missed(
+                        instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                    )
                 )
             }
         }

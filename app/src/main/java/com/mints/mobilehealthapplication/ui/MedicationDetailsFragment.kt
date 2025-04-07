@@ -1,6 +1,7 @@
 package com.mints.mobilehealthapplication.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,7 @@ import com.mints.mobilehealthapplication.recyclerviews.MedicationEventAdapter
 import com.mints.mobilehealthapplication.viewmodels.MedicationHistoryViewModel
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDateTime
 
 class MedicationDetailFragment : Fragment() {
 
@@ -50,6 +52,7 @@ class MedicationDetailFragment : Fragment() {
                 navController.navigate(action)
             }
         }
+        Log.d("MedicationTime", "Current time: ${LocalDateTime.now()}")
 
 
         // Observe medications from the shared ViewModel

@@ -16,6 +16,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.Instant
 
 
 object FireStoreRepository {
@@ -267,17 +268,14 @@ object FireStoreRepository {
         if (historyMap == null) return MedicationHistory()
 
         val events = (historyMap["events"] as? List<Map<String, Any>> ?: emptyList()).mapNotNull { eventMap ->
-            val date = (eventMap["date"] as? Timestamp)?.let { timestamp ->
-                LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
-            } ?: LocalDateTime.now()
-
+            val instant = (eventMap["date"] as? Timestamp)?.toDate()?.toInstant() ?: Instant.now()
             val notes = eventMap["notes"] as? String ?: ""
             val type = eventMap["type"] as? String
 
             when (type) {
-                "taken" -> MedicationEvent.Taken(date)
-                "skipped" -> MedicationEvent.Skipped(date)
-                "missed" -> MedicationEvent.Missed(date)
+                "taken" -> MedicationEvent.Taken(instant = instant)
+                "skipped" -> MedicationEvent.Skipped(instant = instant)
+                "missed" -> MedicationEvent.Missed(instant = instant)
                 else -> null
             }
         }

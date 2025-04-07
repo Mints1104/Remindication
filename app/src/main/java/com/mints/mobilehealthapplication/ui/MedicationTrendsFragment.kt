@@ -85,7 +85,6 @@ class MedicationTrendsFragment : Fragment() {
         val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
         val labelColor = if (isDarkMode) Color.WHITE else Color.BLACK
 
-        // Set X-Axis text color
         val xAxis = chart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.granularity = 1f
@@ -99,14 +98,10 @@ class MedicationTrendsFragment : Fragment() {
                 }
         )
 
-        // Set left Y-Axis and right Y-Axis text colors
         chart.axisLeft.textColor = labelColor
         chart.axisRight.textColor = labelColor
-
-        // Set legend text color
         chart.legend.textColor = labelColor
 
-        // Prepare your data set
         val eventsByDate: Map<String, List<MedicationEvent>> = events.groupBy { event ->
             event.date.toLocalDate().toString()
         }.toSortedMap()
@@ -128,7 +123,7 @@ class MedicationTrendsFragment : Fragment() {
         }
 
         chart.data = LineData(dataSet)
-        chart.invalidate()  // Refresh chart
+        chart.invalidate()
     }
 
 
