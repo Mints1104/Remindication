@@ -147,6 +147,14 @@ data class MedicationHistory(
         }
     }
 
+    fun wasTakenOnSpecificDay(day: LocalDate): Boolean {
+        return events.any {
+            it.type == MedicationEvent.EventType.TAKEN &&
+                    it.date.toLocalDate() == day
+        }
+    }
+
+
     fun isEmpty(): Boolean {
         return events.isEmpty()
     }

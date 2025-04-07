@@ -38,6 +38,11 @@ class MidnightWorker(
             val userId = FireStoreRepository.getUser()?.uid ?: ""
             val medications = FireStoreRepository.getMedications(userId)
 
+            val yesterday = LocalDate.now().minusDays(1)
+            val streakUpdated = FireStoreRepository.updateAdherenceStreak(userId, yesterday)
+            Log.d(TAG, "Adherence streak update for yesterday: $streakUpdated")
+
+
             medications.forEach { medication ->
                 when (val schedule = medication.schedule) {
                     is MedicationSchedule.Daily -> {

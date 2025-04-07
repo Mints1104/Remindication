@@ -129,12 +129,12 @@ object FireStoreRepository {
         }
     }
 
-    suspend fun updateAdherenceStreak(userId: String): Boolean {
+    suspend fun updateAdherenceStreak(userId: String, checkDate: LocalDate = LocalDate.now()): Boolean {
         return try {
             // Retrieve medications list.
             val medications = getMedications(userId)
             val currentDate = LocalDate.now()
-            val adherentToday = medications.any { it.medicationHistory.wasTakenToday() }
+            val adherentToday = medications.any { it.medicationHistory.wasTakenOnSpecificDay(checkDate) }
             Log.d("Adherence", "User adherent today: $adherentToday")
 
             // Fetch the user's current adherence data.

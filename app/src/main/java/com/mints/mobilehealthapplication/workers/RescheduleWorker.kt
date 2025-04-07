@@ -12,6 +12,7 @@ import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.utils.ScheduleHelper
 import com.mints.mobilehealthapplication.utils.toLocalDateTime
+import com.mints.mobilehealthapplication.workers.MidnightWorker.Companion
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -32,6 +33,10 @@ class RescheduleWorker(
             val userId = FireStoreRepository.getUser()?.uid ?: ""
             val medications = FireStoreRepository.getMedications(userId)
             val now = LocalDateTime.now()
+
+            val yesterday = LocalDate.now().minusDays(1)
+            val streakUpdated = FireStoreRepository.updateAdherenceStreak(userId, yesterday)
+            Log.d(TAG, "Adherence streak update for yesterday: $streakUpdated")
 
             medications.forEach { medication ->
                 when (val schedule = medication.schedule) {
