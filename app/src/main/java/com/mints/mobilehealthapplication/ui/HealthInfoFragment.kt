@@ -142,6 +142,9 @@ class HealthInfoFragment : Fragment() {
             }
 
             dobEditText.setText(dobString)
+            viewModel.updateRegistrationData {
+                this.dateOfBirth = dobString
+            }
         }
 
         datePicker?.addOnDismissListener {
@@ -168,6 +171,20 @@ class HealthInfoFragment : Fragment() {
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //Save current data before leaving the fragment
+        val firstName = binding.firstNameEditText.text.toString()
+        val lastName = binding.lastNameEditText.text.toString()
+        val dob = binding.dobEditText.text.toString()
+
+        viewModel.updateRegistrationData {
+            this.firstName = firstName
+            this.lastName = lastName
+            this.dateOfBirth = dob
+        }
     }
 
     override fun onDestroyView() {

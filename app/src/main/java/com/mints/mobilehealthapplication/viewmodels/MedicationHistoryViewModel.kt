@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
+import com.mints.mobilehealthapplication.data.MedicationHistory
 import kotlinx.coroutines.launch
 
 class MedicationHistoryViewModel : ViewModel() {
@@ -19,7 +20,14 @@ class MedicationHistoryViewModel : ViewModel() {
     private val _navigateToDetails = MutableLiveData<Medication?>()
     val navigateToDetails: LiveData<Medication?> get() = _navigateToDetails
 
+    private val _medicationHistories = MutableLiveData<Map<String, MedicationHistory>>()
+    val medicationHistories: LiveData<Map<String, MedicationHistory>> get() = _medicationHistories
+
+
     private val tag = "MHistoryViewModel"
+
+    private var currentUserId: String? = null
+
 
     fun getMedications(uid: String, onComplete: () -> Unit = {}) {
         Log.d(tag, "Starting real-time medication listener for user: $uid")
@@ -35,7 +43,48 @@ class MedicationHistoryViewModel : ViewModel() {
         }
     }
 
+    fun getMedicationsTwo(uid: String, onComplete: () -> Unit = {}) {
+        Log.d(tag, "Starting real-time medication listener for user: $uid")
+        currentUserId = uid
+        FireStoreRepository.getMedicationsSnapshot(uid) { meds, error ->
+            if (error != null) {
+                Log.e(tag, "Failed to get medications: ${error.message}")
+                onComplete()
+                return@getMedicationsSnapshot
+            }
+            Log.d(tag, "Fetched ${meds.size} medications from snapshot")
+            _medications.postValue(meds)
 
+            // Load histories for each medication
+            loadAllMedicationHistories(uid, meds)
+            onComplete()
+        }
+    }
+
+    private fun loadAllMedicationHistories(uid: String, medications: List<Medication>) {
+        viewModelScope.launch {
+            val historiesMap = mutableMapOf<String, MedicationHistory>()
+
+            medications.forEach { medication ->
+                try {
+                    val events =
+                        medication.id?.let { FireStoreRepository.getMedicationEvents(uid, it) }
+                    if (events != null) {
+                        historiesMap[medication.id ?: ""] = MedicationHistory(events.toMutableList())
+                    }
+                } catch (e: Exception) {
+                    Log.e(tag, "Error loading history for medication ${medication.id}: ${e.message}")
+                    historiesMap[medication.id ?: ""] = MedicationHistory() // Empty history on error
+                }
+            }
+
+            _medicationHistories.postValue(historiesMap)
+        }
+    }
+
+    fun getMedicationHistory(medicationId: String): MedicationHistory {
+        return medicationHistories.value?.get(medicationId) ?: MedicationHistory()
+    }
 
     fun getComplianceRate():Double {
         val meds = medications.value.orEmpty()
@@ -44,9 +93,23 @@ class MedicationHistoryViewModel : ViewModel() {
         return totalComplianceRate / meds.size
     }
 
+    fun getComplianceRateTwo(): Double {
+        val meds = medications.value.orEmpty()
+        if (meds.isEmpty()) return 0.0
+
+        val histories = medicationHistories.value ?: return 0.0
+
+        val totalComplianceRate = meds.sumOf { medication ->
+            histories[medication.id]?.getComplianceRate() ?: 0.0
+        }
+
+        return totalComplianceRate / meds.size
+    }
+
     fun testReceivingMedicationHistory(medication: Medication) {
         viewModelScope.launch {
-            val history = medication.medicationHistory
+            val history = medication.id?.let { getMedicationHistory(it) }
+            if(history == null) return@launch
             Log.d(tag, "History: $history")
             history.getLastEventOfType(MedicationEvent.EventType.TAKEN)?.let { lastTaken ->
                 Log.d(tag, "Last taken: ${lastTaken.date}")
@@ -54,8 +117,8 @@ class MedicationHistoryViewModel : ViewModel() {
             val compliance = history.getComplianceRate()
             Log.d(tag, "Compliance rate: $compliance%")
             if (history.wasTakenToday()) {
-                Log.d(tag, "Medication already taken today")
-            }
+                    Log.d(tag, "Medication already taken today")
+                }
             val recentEvents = history.getEventsFromLastDays(7)
             Log.d(tag, "Events in last 7 days: ${recentEvents.size}")
         }

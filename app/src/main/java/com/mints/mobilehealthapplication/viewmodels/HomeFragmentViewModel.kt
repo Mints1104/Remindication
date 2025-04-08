@@ -20,7 +20,6 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
      private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
-    // Add context parameter
 
     private val _todaysMedications = MutableLiveData<List<Medication>>()
     val todaysMedications: LiveData<List<Medication>> get() = _todaysMedications
@@ -35,25 +34,9 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
     val lastOriginalDates: List<LocalDateTime>? get() = _lastOriginalDates
 
-    /*
-    1. Store the medication we are marking as taken and its original and new date
-    2. Upon completion, then we want to temporarily assign the new date to the medication
-    3. If they click "Undo" then we revert back
-    4. If they do not click "Undo" then we save that medication with the new date to firestore
-    which we already have a function for
-
-
-     */
     init {
         MidnightWorker.initialize(notificationHelper.getContext())
     }
-
-
-
-
-
-
-
 
      private fun clearUndoState(medication: Medication) {
          val medicationSchedule = medication.schedule
@@ -65,12 +48,9 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
     }
 
 
-
-
     fun undoLastTaken(medication: Medication) {
         _lastOriginalMedication?.let { originalMed ->
             _lastOriginalDates?.let { originalDates ->
-                // Create reverted copy
                 val revertedMed = originalMed.copy(
                     schedule = (originalMed.schedule as MedicationSchedule.Daily).copy(
                         nextDueDates = originalDates
@@ -99,19 +79,15 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         FireStoreRepository.getMedicationsSnapshot(uid) { meds, error ->
             if (error != null) {
                 Log.e("HomeFragmentVM", "Failed to get medications: ${error.message}")
-                onComplete() // Even on error, signal completion
+                onComplete()
                 return@getMedicationsSnapshot
             }
 
             Log.d("HomeFragmentViewModel", "Fetched ${meds.size} medications from snapshot")
-            _medications.postValue(meds) // Update LiveData with the new list
+            _medications.postValue(meds)
             onComplete()
         }
     }
-
-
-
-
 
 
 
@@ -122,17 +98,9 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                 onComplete()
             } catch (e: Exception) {
                 Log.e("HomeFragmentVM", "Delete failed: ${e.message}")
-                // Consider showing error to user
             }
         }
     }
-
-
-
-
-
-
-
 
 
     fun getCurrentDay() {
@@ -161,7 +129,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
                     medication.markAsTaken(dateTime = currentDateTime)
                     Log.d("HomeViewModel", "Marking as taken at: $currentDateTime")
-                  val lastEvent =  medication.medicationHistory.getLastEvent()
+                    val lastEvent =  medication.medicationHistory.getLastEvent()
                     if (lastEvent != null) {
                         Log.d("HomeViewModel", "Last event date: ${lastEvent.date}")
                     }
@@ -171,6 +139,13 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                         medicationId = medId,
                         event = MedicationEvent.Taken(
                             instant = currentDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                        )
+                    )
+
+                    val success2 = FireStoreRepository.addMedicationEvent(userId = userId,
+                        medicationId = medId,
+                        event = MedicationEvent.Taken(
+                            instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
                         )
                     )
 
@@ -196,7 +171,7 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                     Log.e("HomeViewModel", "Exception marking medication as taken", e)
                 }
             }
-            onComplete() // Call this after the async work, success or fail
+            onComplete()
         }
     }
 
@@ -236,29 +211,31 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                         else -> LocalDateTime.now()
                     } ?: LocalDateTime.now()
 
-                    //Mark medication as skipped locally with the correct due date
                     medication.markAsSkipped(dateTime = eventDateTime)
 
 
 
-                    val success = FireStoreRepository.updateMedicationHistory(
+                    val success2 = FireStoreRepository.updateMedicationHistory(
                         userId = userId,
                         medicationId = medId,
-                        event = MedicationEvent.Taken(
+                        event = MedicationEvent.Skipped(
+                            instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                        )
+                    )
+                    val success = FireStoreRepository.addMedicationEvent(userId = userId,
+                        medicationId = medId,
+                        event = MedicationEvent.Skipped(
                             instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
                         )
                     )
 
                     if(success) {
-                        //Update local list
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
                         NotificationHelper(notificationHelper.getContext()).cancelBackupNotification(medication.name)
-                        // Convert eventDateTime to epoch millis
                         val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
                             .toInstant().toEpochMilli()
-                        // Cancel the regular notification for that scheduled dose
                         NotificationHelper(notificationHelper.getContext())
                             .cancelRegularNotification(medication.name, dueTimeMillis)
                     } else {
@@ -279,8 +256,5 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
         fun onMedicationClicked(medication: Medication) {
             _navigateToDetails.value = medication
         }
-
-
-
 
     }

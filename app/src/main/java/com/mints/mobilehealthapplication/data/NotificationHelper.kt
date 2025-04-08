@@ -1,6 +1,5 @@
 package com.mints.mobilehealthapplication.data
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -186,7 +185,6 @@ class NotificationHelper(private val context: Context) {
 
 
 
-    @SuppressLint("ScheduleExactAlarm")
     fun scheduleNotification(medicationName: String, timeInMillis:Long, isBackup:Boolean = false) {
         val uriPath = if(isBackup) "backup" else medicationName
         val uniqueUri = if(isBackup) {

@@ -12,7 +12,6 @@ import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.utils.ScheduleHelper
 import com.mints.mobilehealthapplication.utils.toLocalDateTime
-import com.mints.mobilehealthapplication.workers.MidnightWorker.Companion
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -127,6 +126,11 @@ class RescheduleWorker(
                     medicationId = medication.id!!,
                     events = missedEvents
                 )
+                val updateSuccess2 = FireStoreRepository.addMultipleMedicationEvents(
+                    userId = userId,
+                    medicationId = medication.id!!,
+                    events = missedEvents
+                )
                 if (updateSuccess) {
                     Log.d(tag, "Medication history updated with missed events for ${medication.name}")
                 } else {
@@ -233,6 +237,12 @@ class RescheduleWorker(
                     medicationId = medication.id!!,
                     events = missedEvents
                 )
+                val updateSuccess2 = FireStoreRepository.addMultipleMedicationEvents(
+                    userId = userId,
+                    medicationId = medication.id!!,
+                    events = missedEvents
+                )
+
                 if (updateSuccess) {
                     Log.d(tag, "Medication history updated with missed events for ${medication.name}")
                 } else {

@@ -12,7 +12,7 @@ class BootReceiver : BroadcastReceiver() {
         Log.d("BootReceiver", "BootReceiver onReceive triggered")
 
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
-            Log.d("BootDebug", "Boot completed. Scheduling reschedule worker.")
+            Log.d("BootReceiver", "Boot completed. Scheduling reschedule worker.")
 
             val workRequest = OneTimeWorkRequestBuilder<RescheduleWorker>().build()
             WorkManager.getInstance(context).enqueue(workRequest)

@@ -109,6 +109,13 @@ class PrescriptionsFragment : Fragment() {
         }
     }
 
+    private fun handleDisplayingNotes(medication: Medication) {
+        val addMedicationNotesBottomSheet =
+            MedicationNotesBottomSheet.newInstance(medication.name, medication.notes)
+        addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
+    }
+
+
     /**
      * Sets up the RecyclerView to display a list of medications.
      * Observes LiveData from the ViewModel to update the medication list dynamically.
@@ -142,15 +149,7 @@ class PrescriptionsFragment : Fragment() {
                 else -> Log.d(tag,"N/A")
             }
 
-
-            if (medication.notes.isNotEmpty()) {
-                val addMedicationNotesBottomSheet =MedicationNotesBottomSheet.newInstance(medication.name, medication.notes)
-
-                addMedicationNotesBottomSheet.show(parentFragmentManager, "MedicationNotesBottomSheet")
-
-            } else {
-                displayMessage("No notes available for ${medication.name}")
-            }
+            handleDisplayingNotes(medication)
         }
 
         binding.medicationsRecyclerView.adapter = adapter
