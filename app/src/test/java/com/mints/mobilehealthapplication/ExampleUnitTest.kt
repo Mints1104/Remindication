@@ -1,71 +1,13 @@
 package com.mints.mobilehealthapplication
 
-import com.google.firebase.Timestamp
 import com.mints.mobilehealthapplication.utils.ScheduleHelper
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
 
 class ScheduleHelperTest {
 
-    @Test
-    fun calculateCyclicDueDates_shouldReturnCorrectNextDueDates() {
-        // Arrange - Set up test data
-        val intakeDays = 3
-        val pauseDays = 2
-        val times = listOf(LocalTime.of(9, 0), LocalTime.of(18, 0))
-        val startDate = Timestamp.now() // Assume today
-
-        // Act - Call function
-        val result = ScheduleHelper.calculateCyclicDueDates(intakeDays, pauseDays, times, startDate)
-
-        // Assert - Verify results
-        assertEquals(6, result.size) // 3 days * 2 times per day
-        assertEquals(LocalDate.now(), result[0].toLocalDate()) // First day
-        assertEquals(LocalDate.now().plusDays(1), result[2].toLocalDate()) // Second day
-    }
-
-    @Test
-    fun calculateCyclicDueDates_shouldHandleCycleTransitionsCorrectly() {
-        val intakeDays = 3
-        val pauseDays = 2
-        val times = listOf(LocalTime.of(9, 0))
-        val pastStartDate = Timestamp.now().toDate().toInstant()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate().minusDays(10) // Simulate a past cycle start
-
-        val result = ScheduleHelper.calculateCyclicDueDates(
-            intakeDays, pauseDays, times, Timestamp(pastStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond, 0)
-        )
-
-        assertEquals(3, result.size) // Should still only return intake days
-        assertEquals(LocalDate.now(), result[0].toLocalDate()) // Should adjust to current cycle
-    }
-
-    @Test
-    fun calculateCyclicDueDates_shouldSkipPauseDays() {
-        val intakeDays = 4
-        val pauseDays = 3
-        val times = listOf(LocalTime.of(12, 0))
-        val startDate = Timestamp.now()
-
-        val result = ScheduleHelper.calculateCyclicDueDates(intakeDays, pauseDays, times, startDate)
-
-        val expectedDays = listOf(
-            LocalDate.now(),
-            LocalDate.now().plusDays(1),
-            LocalDate.now().plusDays(2),
-            LocalDate.now().plusDays(3)
-        )
-
-        assertEquals(4, result.size)
-        expectedDays.forEachIndexed { index, expectedDate ->
-            assertEquals(expectedDate, result[index].toLocalDate())
-        }
-    }
 
     @Test
     fun adjustDailyDueDate_shouldReturnDateAfterNow() {

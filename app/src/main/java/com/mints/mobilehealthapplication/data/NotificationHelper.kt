@@ -12,9 +12,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.ui.MainActivity
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class NotificationHelper(private val context: Context) {
     companion object {
@@ -55,19 +52,13 @@ class NotificationHelper(private val context: Context) {
 
     fun showNotification(medicationName: String,scheduleTime:Long) {
         Log.d("NotifDebug", "Building notification for $medicationName")
-
-        //Intent to open the app when the notification is tapped
-
         val mainIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-
         val mainPendingIntent = PendingIntent.getActivity(
             context, 0, mainIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-
-        //Create snooze intent
         val snoozeIntent = Intent(context,NotificationReceiver::class.java).apply {
             action = SNOOZE_ACTION
             putExtra("medication_name",medicationName)
@@ -79,8 +70,6 @@ class NotificationHelper(private val context: Context) {
             snoozeIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-
-
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.baseline_prescriptions_24px)
             .setContentTitle("Medication Reminder")
@@ -197,20 +186,15 @@ class NotificationHelper(private val context: Context) {
             data = uniqueUri
             putExtra("medication_name", medicationName)
             putExtra("schedule_time", timeInMillis)
-            putExtra("thread", Thread.currentThread().name)
-            putExtra("context_hash", context.hashCode())
             putExtra("notification_is_backup", isBackup)
         }
-
         val requestCode = uniqueUri.hashCode()
-
         val existingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
         )
-
         if(existingIntent !=null) {
             alarmManager.cancel(existingIntent)
         }
@@ -220,18 +204,12 @@ class NotificationHelper(private val context: Context) {
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-
         try {
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 timeInMillis,
                 pendingIntent
             )
-            val instant = Instant.ofEpochMilli(timeInMillis)
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
-            val formattedDate = formatter.format(instant)
-
-            Log.d("NotifDebug", "Alarm set successfully at: $formattedDate for $medicationName")
         } catch (e: Exception) {
             Log.e("NotifDebug", "Failed to set alarm", e)
         }

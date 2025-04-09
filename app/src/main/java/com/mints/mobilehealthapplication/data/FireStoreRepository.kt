@@ -57,7 +57,6 @@ object FireStoreRepository {
                     createdAt = document.getTimestamp("createdAt") ?: Timestamp.now(),
                     active = document.getBoolean("active") ?: true,
                     lastModified = document.getTimestamp("lastModified") ?: Timestamp.now(),
-                    refillReminder = parseRefillInfo(document.get("refillReminder") as? Map<String, Any>),
                     medicationHistory = parseMedicationHistory(document.get("medicationHistory") as? Map<String, Any>)
                    // medicationHistory = MedicationHistory()
 
@@ -88,7 +87,6 @@ object FireStoreRepository {
                         createdAt = document.getTimestamp("createdAt") ?: Timestamp.now(),
                         active = document.getBoolean("active") ?: true,
                         lastModified = document.getTimestamp("lastModified") ?: Timestamp.now(),
-                        refillReminder = parseRefillInfo(document.get("refillReminder") as? Map<String, Any>),
                        // medicationHistory = MedicationHistory()
                         medicationHistory = parseMedicationHistory(document.get("medicationHistory") as? Map<String, Any>)
 
@@ -124,7 +122,6 @@ object FireStoreRepository {
                     createdAt = documentSnapshot.getTimestamp("createdAt") ?: Timestamp.now(),
                     active = documentSnapshot.getBoolean("active") ?: true,
                     lastModified = documentSnapshot.getTimestamp("lastModified") ?: Timestamp.now(),
-                    refillReminder = parseRefillInfo(documentSnapshot.get("refillReminder") as? Map<String, Any>)
                 )
             } else {
                 throw Exception("Medication not found!")
@@ -213,7 +210,7 @@ object FireStoreRepository {
             false
         }
     }
-
+/*
     suspend fun addMedicationEvent(
         userId: String,
         medicationId: String,
@@ -243,6 +240,8 @@ object FireStoreRepository {
             false
         }
     }
+
+ */
 
     suspend fun getMedicationEvents(
         userId: String,
@@ -446,13 +445,7 @@ object FireStoreRepository {
                 "createdAt" to FieldValue.serverTimestamp()
             )
 
-            medication.refillReminder?.let { refillInfo ->
-                medicationData["refillReminder"] = hashMapOf(
-                    "pillsRemaining" to refillInfo.pillsRemaining,
-                    "totalPills" to refillInfo.totalPills,
-                    "reminderThreshold" to refillInfo.reminderThreshold
-                )
-            }
+
 
             Log.d("FireStoreRepo", "Scheduled times: ${medication.schedule.formattedTimes}")
 
@@ -471,8 +464,8 @@ object FireStoreRepository {
     suspend fun deleteMedication(uid: String, medicationId: String) {
         val tag = "FireStoreRepository"
         try {
-            Log.i(tag, "🔥 Initiating deletion for medication ID: $medicationId (User: ${uid.take(4)}...)")
-            Log.d(tag, "🗄️ Database path: users/$uid/medications/$medicationId")
+            Log.i(tag, "Initiating deletion for medication ID: $medicationId (User: ${uid.take(4)}...)")
+            Log.d(tag, "Database path: users/$uid/medications/$medicationId")
 
             val startTime = System.currentTimeMillis()
             db.collection("users").document(uid)
@@ -482,11 +475,10 @@ object FireStoreRepository {
                 .await()
 
             val duration = System.currentTimeMillis() - startTime
-            Log.i(tag, "✅ Successfully deleted medication ID: $medicationId in ${duration}ms")
+            Log.i(tag, "Successfully deleted medication ID: $medicationId in ${duration}ms")
         } catch (e: Exception) {
-            Log.e(tag, "❌ FAILED to delete medication ID: $medicationId", e)
-            Log.w(tag, "⚠️ Error details: ${e.message?.take(200)}...")
-            Log.d(tag, "🔄 Possible mitigation: Verify network connection and document permissions")
+            Log.e(tag, "FAILED to delete medication ID: $medicationId", e)
+            Log.w(tag, "Error details: ${e.message?.take(200)}...")
             throw e
         }
     }
@@ -706,15 +698,7 @@ object FireStoreRepository {
     fun getUser(): FirebaseUser? = FirebaseAuth.getInstance().currentUser
 
 
-    private fun parseRefillInfo(refillMap: Map<String, Any>?): RefillInfo? {
-        if (refillMap == null) return null
 
-        return RefillInfo(
-            pillsRemaining = (refillMap["pillsRemaining"] as? Long)?.toInt() ?: 0,
-            totalPills = (refillMap["totalPills"] as? Long)?.toInt() ?: 0,
-            reminderThreshold = (refillMap["reminderThreshold"] as? Long)?.toInt() ?: 7
-        )
-    }
 
     fun retrieveUserInfo(userId: String, onSuccess: (DocumentSnapshot) -> Unit, onFailure: (Exception) -> Unit) {
         db.collection("users").document(userId)

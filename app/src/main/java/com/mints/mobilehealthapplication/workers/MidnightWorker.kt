@@ -128,11 +128,7 @@ class MidnightWorker(
                     medicationId = medication.id!!,
                     events = missedEvents
                 )
-                val updateSuccess2 = FireStoreRepository.addMultipleMedicationEvents(
-                    userId = userId,
-                    medicationId = medication.id!!,
-                    events = missedEvents
-                )
+
                 if (updateSuccess) {
                     Log.d(TAG, "Medication history updated with missed events for ${medication.name}")
                 } else {
@@ -240,11 +236,7 @@ class MidnightWorker(
                     medicationId = medication.id!!,
                     events = missedEvents
                 )
-                val updateSuccess2 = FireStoreRepository.addMultipleMedicationEvents(
-                    userId = userId,
-                    medicationId = medication.id!!,
-                    events = missedEvents
-                )
+
                 if (updateSuccess) {
                     Log.d(TAG, "Medication history updated with missed events for ${medication.name}")
                 } else {
@@ -306,12 +298,7 @@ class MidnightWorker(
                         instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
                     )
                 )
-                val success2 = FireStoreRepository.addMedicationEvent(userId = userId,
-                    medicationId = it,
-                    event = MedicationEvent.Taken(
-                        instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
-                    )
-                )
+
             }
         }
 

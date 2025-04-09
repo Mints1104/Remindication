@@ -2,13 +2,12 @@ package com.mints.mobilehealthapplication.data
 
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.Instant
 
 data class Medication(
     var id: String? = null,
@@ -19,7 +18,6 @@ data class Medication(
     val createdAt: Timestamp = Timestamp.now(),
     val active: Boolean = true,
     val lastModified: Timestamp = Timestamp.now(),
-    val refillReminder: RefillInfo? = null,
     val medicationHistory: MedicationHistory = MedicationHistory()
 ) {
     fun markAsTaken(dateTime: LocalDateTime = LocalDateTime.now()) {
@@ -263,7 +261,7 @@ sealed class MedicationSchedule {
             }
             is WeeklySchedule -> days.joinToString { it.shortName }
             is Cyclic -> "Cyclic ($intakeDays days on, $pauseDays days off)"
-            is OnDemand -> "As Needed"
+            is OnDemand -> "On Demand"
             is Interval -> "Every ${interval.value} ${interval.unit.name.lowercase()}"
         }
     val frequencyType: String
@@ -271,7 +269,7 @@ sealed class MedicationSchedule {
 
             is WeeklySchedule -> "Weekly"
             is Cyclic -> "Cyclic"
-            is OnDemand -> "On demand"
+            is OnDemand -> "On Demand"
             is Interval -> "Interval"
             is Daily -> when (frequency) {
                 DailyFrequency.ONCE -> "Once Daily"

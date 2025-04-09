@@ -126,11 +126,7 @@ class RescheduleWorker(
                     medicationId = medication.id!!,
                     events = missedEvents
                 )
-                val updateSuccess2 = FireStoreRepository.addMultipleMedicationEvents(
-                    userId = userId,
-                    medicationId = medication.id!!,
-                    events = missedEvents
-                )
+
                 if (updateSuccess) {
                     Log.d(tag, "Medication history updated with missed events for ${medication.name}")
                 } else {
@@ -237,11 +233,7 @@ class RescheduleWorker(
                     medicationId = medication.id!!,
                     events = missedEvents
                 )
-                val updateSuccess2 = FireStoreRepository.addMultipleMedicationEvents(
-                    userId = userId,
-                    medicationId = medication.id!!,
-                    events = missedEvents
-                )
+
 
                 if (updateSuccess) {
                     Log.d(tag, "Medication history updated with missed events for ${medication.name}")

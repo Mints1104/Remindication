@@ -329,9 +329,8 @@ import java.time.LocalDateTime
                     } else {
                         displayMessage("Device not connected to internet")
                         Log.d(tag, "Cannot mark as skipped as device not connected to internet")
-                        onActionCompleted() // Unlock swipes since nothing happened
+                        onActionCompleted()
                     }
-                    // Ditch the adapter.notifyItemChanged(position) here
                 },
                 onSwipeRight = { position, onActionCompleted ->
                     val medication = adapter.getMedicationAt(position)
@@ -343,14 +342,12 @@ import java.time.LocalDateTime
                         Log.d(tag, "Cannot mark as taken as device not connected to internet")
                         onActionCompleted() // Unlock swipes since nothing happened
                     }
-                    // Ditch the adapter.notifyItemChanged(position) here too
                 }
             )
             ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
         }
 
         private fun showUndoSnackbar(medication: Medication, position: Int, onActionCompleted: () -> Unit) {
-            // Get the current list and remove the medication
             val oldList = adapter.getMedicationList().toMutableList()
             val removedIndex = oldList.indexOf(medication)
             if (removedIndex == -1) {
@@ -359,7 +356,7 @@ import java.time.LocalDateTime
                 return
             }
             oldList.removeAt(removedIndex)
-            adapter.updateMedicationList(oldList) // This uses DiffUtil to remove it
+            adapter.updateMedicationList(oldList)
 
             Log.d("SwipeDebug", "After remove: $oldList, size: ${oldList.size}")
 
@@ -367,7 +364,7 @@ import java.time.LocalDateTime
                 .setAction("UNDO") {
                     val currentList = adapter.getMedicationList().toMutableList()
                     currentList.add(removedIndex, medication)
-                    adapter.updateMedicationList(currentList) // DiffUtil adds it back
+                    adapter.updateMedicationList(currentList)
                     Log.d("SwipeDebug", "After undo: $currentList, size: ${currentList.size}")
                     onActionCompleted()
                 }

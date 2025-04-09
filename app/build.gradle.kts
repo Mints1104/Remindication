@@ -20,6 +20,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         viewBinding = true
@@ -59,6 +65,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.preference)
     implementation(libs.junit.junit)
+    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,8 +91,8 @@ dependencies {
     testImplementation (libs.jetbrains.kotlinx.coroutines.test)
     testImplementation (libs.androidx.core.testing)
     testImplementation (libs.robolectric)
-
-
-
+    testImplementation (libs.mockk)
+    testImplementation (libs.kotlinx.coroutines.test.v173)
+    testImplementation (libs.androidx.work.testing)
 
 }

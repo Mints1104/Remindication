@@ -9,8 +9,6 @@ import androidx.preference.PreferenceManager
 import com.mints.mobilehealthapplication.data.NotificationHelper.Companion.NOTIFICATION_ACTION
 import com.mints.mobilehealthapplication.data.NotificationHelper.Companion.SNOOZE_ACTION
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Date
 
 class NotificationReceiver : BroadcastReceiver() {
@@ -55,7 +53,6 @@ class NotificationReceiver : BroadcastReceiver() {
                 val scheduleTime = intent.getLongExtra("schedule_time",0)
                 Log.d("NotifDebug","Extracted medName: $medicationName")
                 Log.d("NotifDebug","Extracted schedule time: ${Instant.ofEpochMilli(scheduleTime)}")
-
                 if (medicationName.isNullOrEmpty()) {
                     Log.e("NotifDebug","Medication name is null or empty")
                     return
@@ -69,23 +66,12 @@ class NotificationReceiver : BroadcastReceiver() {
                     val isABackupNotification =  intent.getBooleanExtra("notification_is_backup", false)
 
                     Log.d("NotifDebug","Is backups enabled: $backupEnabled")
-                    //Only schedule a backup notification if the notification received was not a backup notification
                     Log.d("NotifDebug","Is a backup notification: $isABackupNotification")
                     if(backupEnabled && !isABackupNotification) {
                         val backupDelayMinutes = prefs.getString("backup_reminder_delay","30")?.toLong()?:30L
                         val backupDelayMillis = backupDelayMinutes * 60 * 1000L
                         val backupTime = System.currentTimeMillis() + backupDelayMillis
-
-                        //Schedule a backup notification for this medication
                         notificationHelper.scheduleNotification(medicationName,backupTime,true)
-                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(
-                            ZoneId.systemDefault())
-                        formatter.format(Instant.ofEpochMilli(backupTime))
-                        val formattedDate = formatter.format(Instant.ofEpochMilli(backupTime))
-
-                        Log.d("NotifDebug", "Backup notification scheduled for $medicationName for $formattedDate")
-
-
                     }
 
                 }catch(e:Exception) {

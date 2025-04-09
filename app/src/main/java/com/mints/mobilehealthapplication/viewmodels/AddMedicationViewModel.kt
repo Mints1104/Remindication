@@ -20,7 +20,9 @@ import java.time.LocalTime
     import java.time.temporal.TemporalAdjusters
     import java.util.Date
 
-    class AddMedicationViewModel : ViewModel() {
+    class AddMedicationViewModel(
+    ) : ViewModel(
+    ) {
 
         // LiveData Properties
         private val _medicationName = MutableLiveData("").apply {
@@ -65,8 +67,8 @@ import java.time.LocalTime
         private val _minHoursBetween = MutableLiveData<Int?>(null)
         val minHoursBetween: LiveData<Int?> = _minHoursBetween
 
-        private val _withFood = MutableLiveData(false)
-        val withFood: LiveData<Boolean> = _withFood
+       // private val _withFood = MutableLiveData(false)
+        //val withFood: LiveData<Boolean> = _withFood
 
 
         private val _isEditing = MutableLiveData(false)
@@ -129,9 +131,7 @@ import java.time.LocalTime
             _minHoursBetween.value = hours
         }
 
-        fun setWithFoodStatus(checked: Boolean) {
-            _withFood.value = checked
-        }
+
 
         // Validation methods
 
@@ -237,7 +237,6 @@ import java.time.LocalTime
             _pauseDays.value = null
             _maxDoses.value = null
             _minHoursBetween.value = null
-            _withFood.value = false
             _validationState.value = ValidationState.Initial
             _currentStage.value = FormStage.BASIC_INFO
             _isEditing.value = false
@@ -352,7 +351,6 @@ import java.time.LocalTime
                         frequency = DailyFrequency.fromInt(_selectedTimes.value?.size ?: 1),
                         times = _selectedTimes.value ?: emptyList(),
                         nextDueDates = calculateDueDates(_selectedTimes.value ?: emptyList()), // Already defined for daily
-                        withFood = _withFood.value ?: false
                     )
                 "Weekly" -> MedicationSchedule.WeeklySchedule(
                     days = _selectedDays.value?.toList() ?: emptyList(),
@@ -361,7 +359,6 @@ import java.time.LocalTime
                         _selectedDays.value?.toList() ?: emptyList(),
                         _selectedTimes.value ?: emptyList()
                     ),
-                    withFood = _withFood.value ?: false
                 )
                 "Cyclic" -> {
                     // For cyclic schedules, get the intake and pause days.

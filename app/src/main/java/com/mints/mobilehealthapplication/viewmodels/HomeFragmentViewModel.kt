@@ -16,7 +16,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) : ViewModel() {
+class HomeFragmentViewModel(private val notificationHelper: NotificationHelper,
+    private val initialiseWorker: Boolean = true) : ViewModel() {
 
      private val _medications = MutableLiveData<List<Medication>>()
     val medications: LiveData<List<Medication>> get() = _medications
@@ -35,7 +36,9 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
     val lastOriginalDates: List<LocalDateTime>? get() = _lastOriginalDates
 
     init {
-        MidnightWorker.initialize(notificationHelper.getContext())
+        if (initialiseWorker) {
+            MidnightWorker.initialize(notificationHelper.getContext())
+        }
     }
 
      private fun clearUndoState(medication: Medication) {
@@ -142,22 +145,17 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
                         )
                     )
 
-                    val success2 = FireStoreRepository.addMedicationEvent(userId = userId,
-                        medicationId = medId,
-                        event = MedicationEvent.Taken(
-                            instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
-                        )
-                    )
+
 
                     if (success) {
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
-                        NotificationHelper(notificationHelper.getContext()).cancelBackupNotification(medication.name)
+                        notificationHelper.cancelBackupNotification(medication.name)
                         val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
                             .toInstant().toEpochMilli()
-                        NotificationHelper(notificationHelper.getContext())
-                            .cancelRegularNotification(medication.name, dueTimeMillis)
+                        notificationHelper.cancelRegularNotification(medication.name, dueTimeMillis)
+
                         val streakUpdated = FireStoreRepository.updateAdherenceStreak(userId)
                         if (!streakUpdated) {
                             Log.e("HomeViewModel", "Failed to update adherence streak.")
@@ -215,29 +213,23 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper) 
 
 
 
-                    val success2 = FireStoreRepository.updateMedicationHistory(
+                    val success = FireStoreRepository.updateMedicationHistory(
                         userId = userId,
                         medicationId = medId,
                         event = MedicationEvent.Skipped(
                             instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
                         )
                     )
-                    val success = FireStoreRepository.addMedicationEvent(userId = userId,
-                        medicationId = medId,
-                        event = MedicationEvent.Skipped(
-                            instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant()
-                        )
-                    )
+
 
                     if(success) {
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
-                        NotificationHelper(notificationHelper.getContext()).cancelBackupNotification(medication.name)
+                        notificationHelper.cancelBackupNotification(medication.name)
                         val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
                             .toInstant().toEpochMilli()
-                        NotificationHelper(notificationHelper.getContext())
-                            .cancelRegularNotification(medication.name, dueTimeMillis)
+                        notificationHelper.cancelRegularNotification(medication.name, dueTimeMillis)
                     } else {
                         Log.e("HomeViewModel","Error marking ${medication.name} as skipped")
                     }
