@@ -47,7 +47,6 @@ class HomeFragmentViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
-        // Mock context and notification helper
         mockContext = mockk(relaxed = true)
         mockNotificationHelper = mockk {
             every { getContext() } returns mockContext
@@ -55,10 +54,8 @@ class HomeFragmentViewModelTest {
             every { cancelRegularNotification(any(), any()) } returns Unit
         }
 
-        // Mock FireStoreRepository as it's a singleton
         mockkObject(FireStoreRepository)
 
-        // Initialize ViewModel with initialiseWorker = false
         viewModel = HomeFragmentViewModel(mockNotificationHelper, initialiseWorker = false)
     }
 
@@ -77,10 +74,8 @@ class HomeFragmentViewModelTest {
         val nextDueDate = LocalDateTime.now()
         val times = listOf(LocalTime.of(8, 0))
 
-        // Create a real MedicationHistory instance
         val medicationHistory = MedicationHistory()
 
-        // Create a real Medication instance with a spy on markAsTaken
         val medication = Medication(
             id = medicationId,
             name = medicationName,
@@ -95,7 +90,6 @@ class HomeFragmentViewModelTest {
             lastModified = Timestamp(Date())
         )
 
-        // Mock repository responses
         coEvery {
             FireStoreRepository.updateMedicationHistory(
                 userId = userId,
@@ -108,16 +102,13 @@ class HomeFragmentViewModelTest {
             FireStoreRepository.updateAdherenceStreak(userId)
         } returns true
 
-        // Set initial medications list
         viewModel.getMedicationList().value = listOf(medication)
 
-        // When
         var completionCalled = false
         viewModel.markMedicationAsTaken(userId, medication) {
             completionCalled = true
         }
 
-        // Execute pending coroutines
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then

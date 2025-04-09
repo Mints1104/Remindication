@@ -570,6 +570,7 @@ import java.time.LocalDateTime
 
                 binding.nextMedicationName.text = getString(R.string.name_of_next_med, closestMedication.name)
                 if (closestDueDate != null) {
+                    binding.nextMedicationTime.isVisible = true
                     binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toLocalTime().toString())
                 }
             } else {

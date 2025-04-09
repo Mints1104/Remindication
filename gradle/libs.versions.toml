@@ -2,9 +2,11 @@
 agp = "8.7.2"
 converterGson = "2.9.0"
 coreTesting = "2.2.0"
+espressoCoreVersion = "3.5.1"
 firebaseBom = "33.7.0"
 firebaseFirestore = "25.1.1"
 fragmentKtx = "1.8.5"
+fragmentTesting = "1.8.6"
 googleServices = "4.4.2"
 kotlin = "1.9.24"
 coreKtx = "1.15.0"
@@ -25,25 +27,34 @@ mockitoKotlinVersion = "4.0.0"
 mockk = "1.13.5"
 mpandroidchart = "v3.1.0"
 navigationFragmentKtx = "2.8.5"
+navigationTesting = "2.8.9"
 playServicesAuth = "21.3.0"
 retrofit = "2.9.0"
 preference = "1.2.1"
 robolectric = "4.7.3"
+rules = "1.6.1"
 shimmer = "0.5.0"
 workRuntimeKtx = "2.10.0"
 junitJunit = "4.12"
 workTesting = "2.10.0"
 coreKtxVersion = "1.6.1"
+junitKtx = "1.2.1"
+espressoContrib = "3.6.1"
+espressoIntents = "3.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragmentTesting" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-localbroadcastmanager = { module = "androidx.localbroadcastmanager:localbroadcastmanager", version.ref = "localbroadcastmanager" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin" }
+androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navigationTesting" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
+androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "workTesting" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
@@ -72,6 +83,9 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+androidx-espresso-contrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espressoContrib" }
+androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoIntents" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

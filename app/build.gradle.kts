@@ -17,7 +17,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.mints.mobilehealthapplication.CustomTestRunner"
     }
 
     testOptions {
@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.preference)
     implementation(libs.junit.junit)
     implementation(libs.core.ktx)
+    implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.espresso.intents)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -94,5 +96,12 @@ dependencies {
     testImplementation (libs.mockk)
     testImplementation (libs.kotlinx.coroutines.test.v173)
     testImplementation (libs.androidx.work.testing)
+    testImplementation (libs.androidx.espresso.core)
+    testImplementation(libs.androidx.navigation.testing)
+    testImplementation(libs.androidx.rules)
+    testImplementation(libs.androidx.fragment.testing)
+
+
+
 
 }
