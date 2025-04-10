@@ -1,7 +1,6 @@
 package com.mints.mobilehealthapplication.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,25 +8,24 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.google.android.material.card.MaterialCardView
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.MedicationResult
-import com.mints.mobilehealthapplication.data.RetrofitClient
 import com.mints.mobilehealthapplication.databinding.FragmentTestBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.HttpException
+import com.mints.mobilehealthapplication.viewmodels.MedicationInfoViewModel
 
 class MedicationInfoFragment : Fragment() {
     private var _binding: FragmentTestBinding? = null
     private val binding get() = _binding!!
 
-    private var medicationName: String? = null
+    private val viewModel: MedicationInfoViewModel by viewModels()
+
     private val mainActivity: MainActivity by lazy {
         requireActivity() as MainActivity
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -38,12 +36,14 @@ class MedicationInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUpUI()
-        medicationName = arguments?.getString("MEDICATION_NAME")
+        setupObservers()
+
+        val medicationName = arguments?.getString("MEDICATION_NAME")
         if (medicationName.isNullOrEmpty()) {
             showError("No medication name provided")
         } else {
-            mainActivity.updateToolBarTitle("Medication Info for ${medicationName!!}")
-            fetchMedicationInfo(medicationName!!)
+            mainActivity.updateToolBarTitle("Medication Info for $medicationName")
+            viewModel.fetchMedicationInfo(medicationName)
         }
     }
 
@@ -51,45 +51,26 @@ class MedicationInfoFragment : Fragment() {
         mainActivity.showBottomNav()
     }
 
-    private fun fetchMedicationInfo(drugName: String) {
-        // Show loading state
-        binding.loadingIndicator.visibility = View.VISIBLE
-        binding.infoContainer.visibility = View.GONE
-        binding.errorMessage.visibility = View.GONE
-        binding.medicationHeaderCard.visibility = View.GONE
-
-        lifecycleScope.launch {
-            try {
-                Log.d("TestFragment", "Starting fetch for: $drugName")
-                val searchQuery = "openfda.brand_name:$drugName"
-
-                val response = withContext(Dispatchers.IO) {
-                    RetrofitClient.fdaApi.getMedicationInfo(searchQuery)
+    private fun setupObservers() {
+        viewModel.uiState.observe(viewLifecycleOwner, Observer { state ->
+            when (state) {
+                is MedicationInfoViewModel.UiState.Loading -> {
+                    binding.loadingIndicator.visibility = View.VISIBLE
+                    binding.infoContainer.visibility = View.GONE
+                    binding.errorMessage.visibility = View.GONE
+                    binding.medicationHeaderCard.visibility = View.GONE
                 }
-
-                if (response.results.isNotEmpty()) {
-                    val result = response.results[0]
+                is MedicationInfoViewModel.UiState.Success -> {
                     binding.loadingIndicator.visibility = View.GONE
                     binding.infoContainer.visibility = View.VISIBLE
                     binding.medicationHeaderCard.visibility = View.VISIBLE
-
-                    displayMedicationInfo(result)
-                } else {
-                    showError("No information found for $drugName")
+                    displayMedicationInfo(state.medicationResult)
                 }
-            } catch (e: HttpException) {
-                Log.e("TestFragment", "HTTP error: ${e.code()}", e)
-                val errorMessage = if (e.code() == 404) {
-                    "No information found for $drugName"
-                } else {
-                    "Unable to retrieve information. Please try again later."
+                is MedicationInfoViewModel.UiState.Error -> {
+                    showError(state.message)
                 }
-                showError(errorMessage)
-            } catch (e: Exception) {
-                Log.e("TestFragment", "Error fetching medication info", e)
-                showError("Error fetching data: ${e.message}")
             }
-        }
+        })
     }
 
     private fun showError(message: String) {
@@ -169,7 +150,7 @@ class MedicationInfoFragment : Fragment() {
         // Configure the section
         sectionIcon.setImageResource(iconResId)
         sectionTitle.text = title
-        sectionContent.text = formatMedicationInfo(content)
+        sectionContent.text = viewModel.formatMedicationInfo(content)
 
         // Set initial expanded state
         contentContainer.visibility = if (expandedByDefault) View.VISIBLE else View.GONE
@@ -196,38 +177,6 @@ class MedicationInfoFragment : Fragment() {
         binding.infoContainer.addView(sectionCard)
     }
 
-    private fun formatMedicationInfo(text: String): String {
-        // Break text into paragraphs first
-        val paragraphs = text.split("\n\n", "\r\n\r\n")
-        val formattedText = StringBuilder()
-
-        for (paragraph in paragraphs) {
-            // Skip empty paragraphs
-            if (paragraph.trim().isEmpty()) continue
-
-            // Process each paragraph into bullet points if needed
-            val cleanParagraph = paragraph.replace("\n", " ").trim()
-
-            // For paragraphs that appear to be lists (with multiple sentences)
-            if (cleanParagraph.contains(". ") && cleanParagraph.length > 100) {
-                val sentences = cleanParagraph.split(". ")
-                for (sentence in sentences) {
-                    if (sentence.trim().isEmpty()) continue
-
-                    val bulletPoint = sentence.trim() + if (sentence.endsWith(".")) "" else "."
-                    formattedText.append("• $bulletPoint\n")
-                }
-                formattedText.append("\n")
-            } else {
-                // Keep short paragraphs intact
-                formattedText.append(cleanParagraph)
-                formattedText.append("\n\n")
-            }
-        }
-
-        return formattedText.toString().trim()
-    }
-
     override fun onResume() {
         super.onResume()
         setUpUI()
@@ -237,6 +186,4 @@ class MedicationInfoFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-
 }
