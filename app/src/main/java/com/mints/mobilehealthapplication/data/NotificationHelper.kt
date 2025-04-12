@@ -44,6 +44,7 @@ class NotificationHelper(private val context: Context) {
             enableLights(true)
             lightColor = Color.RED
             enableVibration(true)
+            setBypassDnd(true)
         }
         notificationManager.createNotificationChannel(channel)
     }
@@ -75,6 +76,7 @@ class NotificationHelper(private val context: Context) {
             .setContentTitle("Medication Reminder")
             .setContentText("Time to take $medicationName")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
             .setContentIntent(mainPendingIntent)
             .addAction(R.drawable.baseline_ic_snooze,"Snooze",snoozePendingIntent)

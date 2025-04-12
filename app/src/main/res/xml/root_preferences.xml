@@ -4,6 +4,13 @@
     <PreferenceCategory
         app:title="Notification Settings">
 
+
+
+        <Preference
+            app:key="notification_settings_link"  app:title="Notification Settings"
+            app:summary="Open system notification settings for this app"
+            app:persistent="false"/>
+
         <!-- Snooze Duration for reminders -->
         <ListPreference
             app:key="snooze_duration"

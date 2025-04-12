@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity() {
         setUpAlarmManager()
         internetChecker = InternetConnectionChecker(applicationContext)
         internetChecker.registerNetworkCallback()
-
         val initialConnectionStatus = internetChecker.checkInternetConnection()
         if(initialConnectionStatus) {
             Log.d("MainActivity","Initial internet check is true")
@@ -72,6 +71,8 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+
 
     fun checkNetworkState(): Boolean {
         return internetChecker.isConnected
