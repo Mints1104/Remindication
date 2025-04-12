@@ -241,6 +241,9 @@
     <string name="medication_milestone">100 Doses Taken</string>
     <string name="default_medication_milestone_progress">50/100</string>
     <string name="add_your_first_medication">Add your first medication!</string>
+    <string name="daily_adherence_rate">Daily Adherence Rate (%)</string>
+    <string name="medication_taken_by_weekday">Medication Taken by Weekday</string>
+    <string name="time_of_day_distribution">Time-of-Day Distribution</string>
 
 
 </resources>

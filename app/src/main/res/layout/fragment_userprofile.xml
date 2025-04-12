@@ -302,7 +302,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/first_medication_title"
                                 android:layout_marginTop="8dp"
-                                android:textColor="?attr/colorOnSurface"
+                                android:textColor="?attr/colorOnTertiaryContainer"
                                 android:textSize="14sp" />
                         </LinearLayout>
                     </LinearLayout>
