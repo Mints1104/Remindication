@@ -13,7 +13,7 @@ data class Medication(
     var id: String? = null,
     val name: String = "",
     val dosage: String = "",
-    val schedule: MedicationSchedule,
+    var schedule: MedicationSchedule,
     val notes: String = "",
     val createdAt: Timestamp = Timestamp.now(),
     val active: Boolean = true,

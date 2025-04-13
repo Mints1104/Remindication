@@ -16,9 +16,6 @@
       <SelectionState runConfigName="AddMedicationTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="testLoginAndNavigateToHome()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="BasicTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>

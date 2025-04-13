@@ -49,8 +49,8 @@ object MotivationManager {
                     ContentOption.Image(imageId)
                 }
                 "quote" -> {
-                    val quoteText = sharedPref.getString("content_text", "Have a great day!")
-                    ContentOption.Quote(quoteText ?: "Have a great day!")
+                    val quoteText = sharedPref.getString("content_text", "")
+                    ContentOption.Quote(quoteText ?: "")
                 }
                 else -> pickAndStoreNewContent(sharedPref, todayDate)
             }

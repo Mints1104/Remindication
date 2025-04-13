@@ -66,4 +66,7 @@ class ScheduleHelperTest {
         assertEquals(expectedDates, result)
     }
 
+    // Test when a valid currentCycleStartDate is provided.
+
+
 }
