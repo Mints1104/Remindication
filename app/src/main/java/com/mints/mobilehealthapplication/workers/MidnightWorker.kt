@@ -206,8 +206,7 @@ class MidnightWorker(
         userId: String
     ) {
         Log.d(TAG, "Original daily due dates for ${medication.name}: ${schedule.nextDueDates}")
-
-        // Identify missed due dates.
+        val medicationId = medication.id ?: ""
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()
@@ -230,10 +229,11 @@ class MidnightWorker(
                 }
             }
 
-            if (missedEvents.isNotEmpty() && medication.id != null) {
+
+            if (missedEvents.isNotEmpty() && medicationId.isNotEmpty()) {
                 val updateSuccess = FireStoreRepository.updateMultipleMedicationHistories(
                     userId = userId,
-                    medicationId = medication.id!!,
+                    medicationId = medicationId,
                     events = missedEvents
                 )
 

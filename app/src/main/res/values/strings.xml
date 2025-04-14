@@ -166,12 +166,12 @@
     <string name="no_medications_left">No more medication left for today. Great job!\nTap below to reveal your daily image or quote.</string>
     <string name="step_1_of_2">Step 1 of 2</string>
     <string name="adherence_summary">Adherence Summary</string>
-    <string name="compliance_rate">Compliance Rate: 0%</string>
+    <string name="compliance_rate">Adherence Rate: 0%</string>
     <string name="total_taken">Taken: 0</string>
     <string name="total_missed">Missed: 0</string>
     <string name="total_skipped">Skipped: 0</string>
     <string name="medication_history">Medication History</string>
-    <string name="compliance_rate_value">Compliance Rate: %.2f%%</string>
+    <string name="compliance_rate_value">Adherence Rate: %.2f%%</string>
     <string name="overall_adherence">Overall Adherence</string>
     <string name="step_2_of_2">Step 2 of 2</string>
     <string name="medication_icon">Medication icon</string>

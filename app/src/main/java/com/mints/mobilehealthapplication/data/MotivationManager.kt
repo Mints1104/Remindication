@@ -32,7 +32,15 @@ object MotivationManager {
         R.drawable.cat3,
         R.drawable.beach1,
         R.drawable.beach2,
-        R.drawable.beach3
+        R.drawable.beach3,
+        R.drawable.dog1,
+        R.drawable.dog2,
+        R.drawable.dog3,
+        R.drawable.bunny1,
+        R.drawable.puppy1,
+        R.drawable.sunset1,
+        R.drawable.sunset2,
+        R.drawable.sunset3
 
     )
 
