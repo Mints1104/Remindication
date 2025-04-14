@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -70,29 +69,27 @@ class RegistrationViewModel : ViewModel() {
      * Validates if the user meets the minimum age requirement (18 years).
      * Uses device's locale for date parsing.
      */
-    fun isAgeValid(dobString: String): Boolean {
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        val dob = try {
-            dateFormat.parse(dobString)
-        } catch (e: ParseException) {
-            e.printStackTrace()
-            return false
-        } ?: return false
-
-        val dobCalendar = Calendar.getInstance().apply { time = dob }
-        val currentCalendar = Calendar.getInstance()
-
-        // Calculate age considering month and day
-        val age = currentCalendar.get(Calendar.YEAR) - dobCalendar.get(Calendar.YEAR) -
-                if (currentCalendar.get(Calendar.MONTH) < dobCalendar.get(Calendar.MONTH) ||
-                    (currentCalendar.get(Calendar.MONTH) == dobCalendar.get(Calendar.MONTH) &&
-                            currentCalendar.get(Calendar.DAY_OF_MONTH) < dobCalendar.get(Calendar.DAY_OF_MONTH))) {
-                    1
-                } else {
-                    0
+    fun isAgeValid(dateString: String): Boolean {
+        return try {
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val dob = dateFormat.parse(dateString)
+            val dobCalendar = Calendar.getInstance().apply {
+                if (dob != null) {
+                    time = dob
                 }
+            }
+            val today = Calendar.getInstance()
 
-        return age >= 18
+            val age = today.get(Calendar.YEAR) - dobCalendar.get(Calendar.YEAR)
+
+            if (today.get(Calendar.DAY_OF_YEAR) < dobCalendar.get(Calendar.DAY_OF_YEAR)) {
+                age - 1 >= 18
+            } else {
+                age >= 18
+            }
+        } catch (e: Exception) {
+            false // Return false for any parsing errors
+        }
     }
 
     /**

@@ -11,6 +11,7 @@ import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.UserProfile
+import java.time.ZoneId
 import java.time.temporal.WeekFields
 import java.util.Locale
 
@@ -66,30 +67,23 @@ class ProfileViewModel : ViewModel() {
                 return@getMedicationsSnapshot
             }
 
-            // Group all events by week
             val eventsByWeek = mutableMapOf<Int, MutableList<MedicationEvent>>()
 
             medications.forEach { medication ->
                 medication.medicationHistory.events.forEach { event ->
-                    // Use event.date (not timestamp)
-                    val localDate = event.date.toLocalDate()
+                    // Convert Instant to LocalDate using the system default zone.
+                    val localDate = event.date.atZone(ZoneId.systemDefault()).toLocalDate()
                     val weekFields = WeekFields.of(Locale.getDefault())
                     val weekNumber = localDate.get(weekFields.weekOfYear())
                     val year = localDate.year
                     val weekKey = year * 100 + weekNumber
-
-                    if (!eventsByWeek.containsKey(weekKey)) {
-                        eventsByWeek[weekKey] = mutableListOf()
-                    }
-                    eventsByWeek[weekKey]?.add(event)
+                    eventsByWeek.getOrPut(weekKey) { mutableListOf() }.add(event)
                 }
             }
 
-            // A week is perfect if ALL events were taken.
             val perfectWeeksCount = eventsByWeek.count { (_, events) ->
                 events.all { it is MedicationEvent.Taken }
             }
-
 
             _perfectWeeks.value = perfectWeeksCount
             Log.d("PerfectWeeks", "User has $perfectWeeksCount perfect weeks")
@@ -98,17 +92,13 @@ class ProfileViewModel : ViewModel() {
 
     fun startListeningToAdherenceStreak() {
         val userId = auth.currentUser?.uid ?: return
-
-        // Cancel any existing listener
         streakListener?.remove()
-
         val userDocRef = firestore.collection("users").document(userId)
         streakListener = userDocRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 Log.e("AdherenceListener", "Listen failed", error)
                 return@addSnapshotListener
             }
-
             if (snapshot != null && snapshot.exists()) {
                 val streak = snapshot.getLong("adherenceStreak")?.toInt() ?: 0
                 _adherenceStreak.value = streak
@@ -119,23 +109,19 @@ class ProfileViewModel : ViewModel() {
 
     fun checkMedicationHistory() {
         val userId = auth.currentUser?.uid ?: return
-
         FireStoreRepository.getMedicationsSnapshot(userId) { medications, error ->
             if (error != null) {
                 Log.e("ProfileViewModel", "Error loading medications", error)
                 return@getMedicationsSnapshot
             }
-
-            // Check if any medication has ever been taken before
             val hasTakenAny = medications.any { medication ->
                 medication.medicationHistory.events.any { it is MedicationEvent.Taken }
             }
-           val  totalDosesTaken = medications.sumOf { medication ->
-               medication.medicationHistory.getEventCount(MedicationEvent.EventType.TAKEN)
-           }
+            val totalDosesTaken = medications.sumOf { medication ->
+                medication.medicationHistory.getEventCount(MedicationEvent.EventType.TAKEN)
+            }
             _totalDosesTaken.value = totalDosesTaken
             _hasEverTakenMedication.value = hasTakenAny
-
             Log.d("MedicationHistory", "User has taken medication before: $hasTakenAny")
             Log.d("MedicationHistory", "Total doses taken: $totalDosesTaken")
         }

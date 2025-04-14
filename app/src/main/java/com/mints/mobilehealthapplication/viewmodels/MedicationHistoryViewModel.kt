@@ -34,6 +34,7 @@ class MedicationHistoryViewModel : ViewModel() {
         FireStoreRepository.getMedicationsSnapshot(uid) { meds, error ->
             if (error != null) {
                 Log.e(tag, "Failed to get medications: ${error.message}")
+                _medications.postValue(emptyList())
                 onComplete()
                 return@getMedicationsSnapshot
             }

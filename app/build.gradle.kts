@@ -2,7 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
-    id("androidx.navigation.safeargs.kotlin") // Safe Args plugin HERE
+    id("androidx.navigation.safeargs.kotlin")
+    jacoco
+
 
 }
 
@@ -36,10 +38,10 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "NHS_API_KEY", "\"${project.properties["NHS_API_KEY"] ?: ""}\"")
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
         }
         release {
-            buildConfigField("String", "NHS_API_KEY", "\"${project.properties["NHS_API_KEY"] ?: ""}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -104,4 +106,38 @@ dependencies {
 
 
 
+}
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*"
+    )
+
+    val debugTree = fileTree("${buildDir}/intermediates/javac/debug/classes") {
+        exclude(fileFilter)
+    }
+
+    val kotlinDebugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    classDirectories.setFrom(files(debugTree, kotlinDebugTree))
+    sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
+    executionData.setFrom(fileTree(buildDir) {
+        include(
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+        )
+    })
 }
