@@ -148,10 +148,14 @@ class MedicationTrendsFragment : Fragment() {
         val eventsByDate = events.groupBy { event ->
             event.date.toLocalDate()
         }
+        //Only use events that are marked as "Taken"
+        val filteredEvents = eventsByDate.mapValues { entry ->
+            entry.value.filter { it.type == MedicationEvent.EventType.TAKEN }
+        }
 
         // Create entries for each day of the current week
         val entries = daysInWeek.mapIndexed { index, date ->
-            val dayEvents = eventsByDate[date] ?: emptyList()
+            val dayEvents = filteredEvents[date] ?: emptyList()
             BarEntry(index.toFloat(), dayEvents.size.toFloat())
         }
 
@@ -200,6 +204,10 @@ class MedicationTrendsFragment : Fragment() {
         val eventsByHour: Map<Int, List<MedicationEvent>> = events.groupBy { event ->
             event.date.hour
         }
+        //Only use taken events, not missed or skipped
+        val filteredEventsByHour = eventsByHour.mapValues { entry ->
+            entry.value.filter { it.type == MedicationEvent.EventType.TAKEN }
+        }
 
         val timeBlocks: Map<String, List<Int>> = mapOf(
             "Morning (6-11)" to (6..11).toList(),
@@ -209,7 +217,7 @@ class MedicationTrendsFragment : Fragment() {
         )
 
         val entries: List<BarEntry> = timeBlocks.entries.mapIndexed { index, entry ->
-            val count: Int = entry.value.sumOf { hour -> eventsByHour[hour]?.size ?: 0 }
+            val count: Int = entry.value.sumOf { hour -> filteredEventsByHour[hour]?.size ?: 0 }
             BarEntry(index.toFloat(), count.toFloat())
         }
 
