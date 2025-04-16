@@ -131,12 +131,6 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper,
                     } ?: LocalDateTime.now()
 
                     medication.markAsTaken(dateTime = currentDateTime)
-                    Log.d("HomeViewModel", "Marking as taken at: $currentDateTime")
-                    val lastEvent =  medication.medicationHistory.getLastEvent()
-                    if (lastEvent != null) {
-                        Log.d("HomeViewModel", "Last event date: ${lastEvent.date}")
-                    }
-
                     val success = FireStoreRepository.updateMedicationHistory(
                         userId = userId,
                         medicationId = medId,
@@ -210,9 +204,6 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper,
                     } ?: LocalDateTime.now()
 
                     medication.markAsSkipped(dateTime = eventDateTime)
-
-
-
                     val success = FireStoreRepository.updateMedicationHistory(
                         userId = userId,
                         medicationId = medId,

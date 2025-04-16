@@ -26,7 +26,6 @@ class MedicationDetailFragment : Fragment() {
     private val args: MedicationDetailFragmentArgs by navArgs()
     private val viewModel: MedicationHistoryViewModel by activityViewModels()
 
-    // Adapter for medication history events
     private lateinit var eventAdapter: MedicationEventAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -35,10 +34,8 @@ class MedicationDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Retrieve the medication ID from Safe Args
         val medicationId = args.medicationId
 
-        // Set up the RecyclerView for events
         eventAdapter = MedicationEventAdapter(emptyList())
         binding.eventsRecyclerView.apply {
             adapter = eventAdapter
@@ -55,7 +52,6 @@ class MedicationDetailFragment : Fragment() {
         Log.d("MedicationTime", "Current time: ${LocalDateTime.now()}")
 
 
-        // Observe medications from the shared ViewModel
         viewModel.medications.observe(viewLifecycleOwner) { medicationList ->
             val med = medicationList.find { it.id == medicationId }
             med?.let {
@@ -70,7 +66,6 @@ class MedicationDetailFragment : Fragment() {
                 binding.missedCountText.text = "Missed: ${it.medicationHistory.getEventCount(MedicationEvent.EventType.MISSED)}"
                 binding.skippedCountText.text = "Skipped: ${it.medicationHistory.getEventCount(MedicationEvent.EventType.SKIPPED)}"
 
-                // Update the events adapter with all history events
                 eventAdapter.updateData(it.medicationHistory.events.reversed())
             }
         }

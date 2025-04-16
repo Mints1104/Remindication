@@ -107,34 +107,7 @@ class MedicationHistoryFragment : Fragment() {
         }
     }
 
-    /*
 
- private fun fetchUserMedication() {
-     uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-     if (uid.isEmpty()) {
-         Snackbar.make(binding.root, "User not authenticated", Snackbar.LENGTH_SHORT).show()
-     } else {
-         //  viewModel.getMedications(uid)
-         viewModel.getMedicationsTwo(uid)
-
-         medicationList = viewModel.getMedicationList()
-         medicationList.observe(viewLifecycleOwner) { meds ->
-             Log.d(tag,"Test receiving med List: ${medicationList.value}")
-             meds.forEach { med ->
-                 Log.d(tag,"Test: ${viewModel.testReceivingMedicationHistory(med)}")
-             }
-
-         }
-
-
-
-
-
-
-     }
- }
-
-  */
 
     override fun onResume() {
         super.onResume()

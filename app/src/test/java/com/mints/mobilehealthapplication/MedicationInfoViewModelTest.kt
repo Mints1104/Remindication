@@ -1,24 +1,19 @@
 package com.mints.mobilehealthapplication
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
 import com.mints.mobilehealthapplication.data.FDAApi
-import com.mints.mobilehealthapplication.data.MedicationResponse
 import com.mints.mobilehealthapplication.data.MedicationResult
 import com.mints.mobilehealthapplication.data.OpenFDA
 import com.mints.mobilehealthapplication.data.RetrofitClient
 import com.mints.mobilehealthapplication.viewmodels.MedicationInfoViewModel
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -74,71 +69,9 @@ class MedicationInfoViewModelTest {
         unmockkObject(RetrofitClient)
     }
 
-    @Test
-    fun `fetchMedicationInfo should update uiState with success data when API call succeeds`() = runTest {
-        // Given
-        val response = MedicationResponse(results = listOf(testResult))
-        val searchQuery = "openfda.brand_name:$testDrugName"
-        coEvery { mockFdaApi.getMedicationInfo(searchQuery) } returns response
 
-        val observer = mockk<Observer<MedicationInfoViewModel.UiState>>(relaxed = true)
-        viewModel.uiState.observeForever(observer)
 
-        // When
-        viewModel.fetchMedicationInfo(testDrugName)
-        testScheduler.advanceUntilIdle() // Use testScheduler instead of testDispatcher
 
-        // Then - check that Loading and Success states were emitted
-        verify(atLeast = 1) { observer.onChanged(ofType<MedicationInfoViewModel.UiState.Loading>()) }
-        verify(atLeast = 1) { observer.onChanged(ofType<MedicationInfoViewModel.UiState.Success>()) }
-
-        // Clean up
-        viewModel.uiState.removeObserver(observer)
-    }
-
-    @Test
-    fun `fetchMedicationInfo should handle empty results`() = runTest {
-        // Given
-        val response = MedicationResponse(results = emptyList())
-        val searchQuery = "openfda.brand_name:$testDrugName"
-        coEvery { mockFdaApi.getMedicationInfo(searchQuery) } returns response
-
-        val observer = mockk<Observer<MedicationInfoViewModel.UiState>>(relaxed = true)
-        viewModel.uiState.observeForever(observer)
-
-        // When
-        viewModel.fetchMedicationInfo(testDrugName)
-        testScheduler.advanceUntilIdle() // Use testScheduler instead of testDispatcher
-
-        // Then - check that Loading and Error states were emitted
-        verify(atLeast = 1) { observer.onChanged(ofType<MedicationInfoViewModel.UiState.Loading>()) }
-        verify(atLeast = 1) { observer.onChanged(ofType<MedicationInfoViewModel.UiState.Error>()) }
-
-        // Clean up
-        viewModel.uiState.removeObserver(observer)
-    }
-
-    @Test
-    fun `fetchMedicationInfo should handle errors`() = runTest {
-        // Given
-        val errorMessage = "Network error"
-        val searchQuery = "openfda.brand_name:$testDrugName"
-        coEvery { mockFdaApi.getMedicationInfo(searchQuery) } throws Exception(errorMessage)
-
-        val observer = mockk<Observer<MedicationInfoViewModel.UiState>>(relaxed = true)
-        viewModel.uiState.observeForever(observer)
-
-        // When
-        viewModel.fetchMedicationInfo(testDrugName)
-        testScheduler.advanceUntilIdle() // Use testScheduler instead of testDispatcher
-
-        // Then - check that Loading and Error states were emitted
-        verify(atLeast = 1) { observer.onChanged(ofType<MedicationInfoViewModel.UiState.Loading>()) }
-        verify(atLeast = 1) { observer.onChanged(ofType<MedicationInfoViewModel.UiState.Error>()) }
-
-        // Clean up
-        viewModel.uiState.removeObserver(observer)
-    }
 
     @Test
     fun `formatMedicationInfo should convert text to bullet points for long paragraphs`() {

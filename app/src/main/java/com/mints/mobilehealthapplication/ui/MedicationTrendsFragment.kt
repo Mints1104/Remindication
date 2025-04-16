@@ -133,12 +133,10 @@ class MedicationTrendsFragment : Fragment() {
         chart.setDrawGridBackground(false)
         chart.legend.isEnabled = true
 
-        // Get the current date and calculate the start of the current week (Monday)
         val today = LocalDate.now()
-        val currentDayOfWeek = today.dayOfWeek.value // 1 (Monday) to 7 (Sunday)
+        val currentDayOfWeek = today.dayOfWeek.value
         val startOfWeek = today.minusDays((currentDayOfWeek - 1).toLong())
 
-        // Create a list of the 7 days in the current week
         val daysInWeek = (0..6).map { startOfWeek.plusDays(it.toLong()) }
 
         // Create labels for the x-axis
@@ -164,7 +162,6 @@ class MedicationTrendsFragment : Fragment() {
             valueTextColor = if ((resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) Color.WHITE else Color.BLACK
         }
 
-        // Highlight today's bar with a different color
         val todayIndex = currentDayOfWeek - 1
         if (todayIndex in entries.indices) {
             val colors = List(entries.size) { index ->
@@ -173,11 +170,9 @@ class MedicationTrendsFragment : Fragment() {
             dataSet.colors = colors
         }
 
-        // Detect dark mode and set label color accordingly.
         val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
         val labelColor = if (isDarkMode) Color.WHITE else Color.BLACK
 
-        // Set colors for x-axis, y-axes, legend, and description
         val xAxis = chart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(false)
@@ -218,7 +213,6 @@ class MedicationTrendsFragment : Fragment() {
             BarEntry(index.toFloat(), count.toFloat())
         }
 
-        // Detect dark mode and set label color accordingly.
         val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
         val labelColor = if (isDarkMode) Color.WHITE else Color.BLACK
 

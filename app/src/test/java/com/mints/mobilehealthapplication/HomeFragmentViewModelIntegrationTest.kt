@@ -176,12 +176,9 @@ class HomeFragmentViewModelIntegrationTest {
 
     @Test
     fun `test deletion of medication`() = runTest {
-        // Given
         val userId = "test-user-id"
         val medication = createTestMedication("med-1", "Aspirin")
         val medications = listOf(medication)
-
-        // Mock repository responses
         every {
             FireStoreRepository.getMedicationsSnapshot(eq(userId), captureLambda())
         } answers {
@@ -193,21 +190,16 @@ class HomeFragmentViewModelIntegrationTest {
             FireStoreRepository.deleteMedication(userId, medication.id!!)
         } returns Unit
 
-        // When - Fetch medications first
         viewModel.getMedications(userId)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then - Verify medications were loaded
         assertEquals(medications, viewModel.getMedicationList().value)
 
-        // When - Delete a medication
         var deletionCompletionCalled = false
         viewModel.deleteMedication(userId, medication.id!!) {
             deletionCompletionCalled = true
         }
         testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then - Verify deletion completed
         assertEquals(true, deletionCompletionCalled)
     }
 

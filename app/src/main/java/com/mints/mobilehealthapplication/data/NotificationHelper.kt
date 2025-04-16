@@ -191,19 +191,13 @@ class NotificationHelper(private val context: Context) {
             putExtra("notification_is_backup", isBackup)
         }
         val requestCode = uniqueUri.hashCode()
-        val existingIntent = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
+        val existingIntent = PendingIntent.getBroadcast(context, requestCode, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
         )
         if(existingIntent !=null) {
             alarmManager.cancel(existingIntent)
         }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
+        val pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         try {

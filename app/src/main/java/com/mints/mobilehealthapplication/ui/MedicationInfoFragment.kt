@@ -83,10 +83,8 @@ class MedicationInfoFragment : Fragment() {
     }
 
     private fun displayMedicationInfo(result: MedicationResult) {
-        // Clear any existing content
         binding.infoContainer.removeAllViews()
 
-        // Display medication name and generic name in the header
         val brandName = result.openfda?.brand_name?.firstOrNull() ?: "Unknown"
         val genericName = result.openfda?.generic_name?.firstOrNull() ?: "Unknown"
 

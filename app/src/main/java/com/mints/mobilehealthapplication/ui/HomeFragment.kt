@@ -34,6 +34,7 @@ import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
+    import java.time.format.DateTimeFormatter
 
 
     /**
@@ -328,7 +329,6 @@ import java.time.LocalDateTime
                         showUndoSnackbar(medication,position,true, onActionCompleted)
                     } else {
                         displayMessage("Device not connected to internet")
-                        Log.d(tag, "Cannot mark as skipped as device not connected to internet")
                         onActionCompleted()
                     }
                 },
@@ -339,54 +339,12 @@ import java.time.LocalDateTime
                         showUndoSnackbar(medication, position,false, onActionCompleted)
                     } else {
                         displayMessage("Device not connected to internet")
-                        Log.d(tag, "Cannot mark as taken as device not connected to internet")
-                        onActionCompleted() // Unlock swipes since nothing happened
+                        onActionCompleted()
                     }
                 }
             )
             ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
         }
-
-        private fun showUndoSnackbar(medication: Medication, position: Int, onActionCompleted: () -> Unit) {
-            val oldList = adapter.getMedicationList().toMutableList()
-            val removedIndex = oldList.indexOf(medication)
-            if (removedIndex == -1) {
-                Log.e("SwipeDebug", "Medication ${medication.name} not found in list!")
-                onActionCompleted()
-                return
-            }
-            oldList.removeAt(removedIndex)
-            adapter.updateMedicationList(oldList)
-
-            Log.d("SwipeDebug", "After remove: $oldList, size: ${oldList.size}")
-
-            Snackbar.make(binding.root, "${medication.name} deleted", Snackbar.LENGTH_LONG)
-                .setAction("UNDO") {
-                    val currentList = adapter.getMedicationList().toMutableList()
-                    currentList.add(removedIndex, medication)
-                    adapter.updateMedicationList(currentList)
-                    Log.d("SwipeDebug", "After undo: $currentList, size: ${currentList.size}")
-                    onActionCompleted()
-                }
-                .addCallback(object : Snackbar.Callback() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        if (event != DISMISS_EVENT_ACTION) {
-                            medication.id?.let { id ->
-                                viewModel.deleteMedication(uid, id) {
-                                    Log.d("SwipeDebug", "Deleted ${medication.name} from backend")
-                                    onActionCompleted()
-                                }
-                            } ?: onActionCompleted()
-                        } else {
-                            onActionCompleted()
-                        }
-                    }
-                })
-                .show()
-        }
-
-
-
 
         private fun showUndoSnackbar(
             medication: Medication,
@@ -394,7 +352,6 @@ import java.time.LocalDateTime
             isSkipped: Boolean,
             onActionCompleted: () -> Unit
         ) {
-            // Get the current list and update the medication’s state
             val oldList = adapter.getMedicationList().toMutableList()
             val targetIndex = oldList.indexOf(medication)
             if (targetIndex == -1) {
@@ -403,13 +360,12 @@ import java.time.LocalDateTime
                 return
             }
 
-            // Update the medication locally
             val updatedMedication = medication.copy()
             if (isSkipped) updatedMedication.markAsSkipped(dateTime = LocalDateTime.now())
             else updatedMedication.markAsTaken(dateTime = LocalDateTime.now())
             oldList[targetIndex] = updatedMedication
-            adapter.updateMedicationList(oldList) // DiffUtil updates the UI
-          //  updateNextMedicationCard(oldList) // Sync card with adapter
+            adapter.updateMedicationList(oldList)
+            updateNextMedicationCard(oldList)
 
             Log.d("SwipeDebug", "After mark: $oldList, size: ${oldList.size}")
 
@@ -417,16 +373,15 @@ import java.time.LocalDateTime
             Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
                 .setAction("UNDO") {
                     val currentList = adapter.getMedicationList().toMutableList()
-                    currentList[targetIndex] = medication // Revert to original state locally
-                    adapter.updateMedicationList(currentList) // DiffUtil reverts it
-                    updateNextMedicationCard(currentList) // Sync card with adapter
+                    currentList[targetIndex] = medication
+                    adapter.updateMedicationList(currentList)
+                    updateNextMedicationCard(currentList)
                     Log.d("SwipeDebug", "After undo: $currentList, size: ${currentList.size}")
                     onActionCompleted()
                 }
                 .addCallback(object : Snackbar.Callback() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         if (event != DISMISS_EVENT_ACTION) {
-                            // Commit the mark action
                             medication.id?.let {
                                 if (isSkipped) {
                                     viewModel.markMedicationAsSkipped(uid, updatedMedication) {
@@ -441,7 +396,7 @@ import java.time.LocalDateTime
                                 }
                             } ?: onActionCompleted()
                         } else {
-                            // Undo was pressed—revert backend state
+
                             medication.id?.let {
                                 viewModel.undoLastTaken(medication)
                                 val finalList = adapter.getMedicationList().toMutableList()
@@ -456,7 +411,7 @@ import java.time.LocalDateTime
                                     finalList[index] = medication
                                 }
                                 adapter.updateMedicationList(finalList)
-                                updateNextMedicationCard(finalList) // Sync card with adapter
+                                updateNextMedicationCard(finalList)
                                 Log.d("SwipeDebug", "Undone ${medication.name} in backend, list: $finalList, size: ${finalList.size}")
                             }
                             onActionCompleted()
@@ -465,11 +420,12 @@ import java.time.LocalDateTime
                 })
                 .show()
 
-            // Force animation reset since DiffUtil alone isn’t enough for updates
             adapter.notifyItemChanged(position)
         }
 
         private fun updateNextMedicationCard(medications: List<Medication>) {
+            if (_binding == null) return
+
             if (medications.isEmpty()) {
                 binding.nextMedicationName.text = getString(R.string.no_medications_left)
                 binding.nextMedicationTime.visibility = View.GONE
@@ -478,17 +434,25 @@ import java.time.LocalDateTime
                 val now = LocalDateTime.now()
                 val closestMedication = medications.minByOrNull { med ->
                     val nextDueDates = med.schedule.getNextDueDates()
-                    val closestDate = nextDueDates.filter { it.isAfter(now) || (it.isBefore(now) && !med.medicationHistory.hasEventToday()) }
-                        .minOrNull() ?: LocalDateTime.MAX
+                    val closestDate = nextDueDates.filter { it.isAfter(now) }
+                        .minOrNull() ?: nextDueDates.minOrNull() ?: LocalDateTime.MAX
                     closestDate
                 }
+
                 if (closestMedication != null) {
                     val nextDueDates = closestMedication.schedule.getNextDueDates()
-                    val closestDueDate = nextDueDates.filter { it.isAfter(now) || (it.isBefore(now) && !closestMedication.medicationHistory.hasEventToday()) }
-                        .minOrNull()
+                    val closestDueDate = nextDueDates.filter { it.isAfter(now) }
+                        .minOrNull() ?: nextDueDates.minOrNull()
+
                     binding.nextMedicationName.text = getString(R.string.name_of_next_med, closestMedication.name)
                     if (closestDueDate != null) {
-                        binding.nextMedicationTime.text = getString(R.string.time_of_medication, closestDueDate.toString())
+                        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+                        val formattedTime = closestDueDate.format(formatter)
+
+                        binding.nextMedicationTime.text = getString(
+                            R.string.time_of_medication,
+                            formattedTime
+                        )
                         binding.nextMedicationTime.visibility = View.VISIBLE
                     } else {
                         binding.nextMedicationTime.visibility = View.GONE
