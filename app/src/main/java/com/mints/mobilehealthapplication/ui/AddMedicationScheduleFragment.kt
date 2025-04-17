@@ -94,6 +94,9 @@ class AddMedicationScheduleFragment : Fragment() {
         resetContainerVisibility()
         setContainerVisibility()
         handleIsEditing()
+        setupTextWatchers()
+
+        populateFieldsFromViewModel()
         setUpTimePicker()
         setUpDaySelection()
     }
@@ -103,32 +106,33 @@ class AddMedicationScheduleFragment : Fragment() {
             val test = viewModel.getFrequency()
             Log.d(tag, "Get Frequency: $test")
             setUpUpdateButton()
-            if (viewModel.getFrequencyType() == "Weekly") {
-                val frequencyString = viewModel.getFrequency() ?: ""
-                val selectedDays = frequencyString.split(",")
-                    .map { it.trim() }
-                    .mapNotNull { abbreviation ->
-                        when (abbreviation) {
-                            "Mon" -> R.id.mondayChip
-                            "Tue" -> R.id.tuesdayChip
-                            "Wed" -> R.id.wednesdayChip
-                            "Thu" -> R.id.thursdayChip
-                            "Fri" -> R.id.fridayChip
-                            "Sat" -> R.id.saturdayChip
-                            "Sun" -> R.id.sundayChip
-                            else -> null
-                        }
-                    }
-                selectedDays.forEach { chipId ->
-                    binding.daysChipGroup.findViewById<Chip>(chipId)?.isChecked = true
-                }
-            }
         } else {
             setUpSaveButton()
         }
     }
 
 
+    private fun setupTextWatchers() {
+        binding.intakeDaysInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                s?.toString()?.toIntOrNull()?.let { days ->
+                    viewModel.updateIntakeDays(days)
+                }
+            }
+        })
+
+        binding.pauseDaysInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                s?.toString()?.toIntOrNull()?.let { days ->
+                    viewModel.updatePauseDays(days)
+                }
+            }
+        })
+    }
 
 
 
@@ -174,6 +178,8 @@ class AddMedicationScheduleFragment : Fragment() {
                     if (validateDailySchedule()) {
                         Log.d(tag, "Attempting to update medication daily")
                         updateMedication(userId)
+                    } else {
+                        Log.d(tag, "Failed to update medication daily")
                     }
                 }
                 "Weekly" -> {
@@ -188,12 +194,16 @@ class AddMedicationScheduleFragment : Fragment() {
                     if (validateCyclicSchedule()) {
                         Log.d(tag, "Attempting to update medication cyclic")
                         updateMedication(userId)
+                    } else {
+                        Log.d(tag, "Failed to update medication cyclic")
                     }
                 }
                 "On Demand" -> {
                     if (validateOnDemand()) {
                         Log.d(tag, "Attempting to update medication on demand")
                         updateMedication(userId)
+                    } else {
+                        Log.d(tag, "Failed to update medication on demand")
                     }
                 }
                 else -> displayMessage("Invalid schedule type")
@@ -271,6 +281,35 @@ class AddMedicationScheduleFragment : Fragment() {
         picker.addOnPositiveButtonClickListener {
             val time = LocalTime.of(picker.hour, picker.minute)
             editText.setText(time.format(timeFormatter))
+
+            when (editText.id) {
+                R.id.dailyTimeInput -> viewModel.setSelectedTimes(listOf(time))
+                R.id.weeklyTimeInput -> {
+                    val currentTimes = viewModel.getSelectedTimes() ?: emptyList()
+                    if (currentTimes.isEmpty()) {
+                        viewModel.setSelectedTimes(listOf(time))
+                    } else {
+                        viewModel.setSelectedTimes(listOf(time))
+                    }
+                }
+                R.id.cyclicTimeInput -> viewModel.setSelectedTimes(listOf(time))
+                R.id.firstTimeInput -> {
+                    val secondTime = viewModel.getSelectedTimes()?.getOrNull(1)
+                    if (secondTime != null) {
+                        viewModel.setSelectedTimes(listOf(time, secondTime))
+                    } else {
+                        viewModel.setSelectedTimes(listOf(time))
+                    }
+                }
+                R.id.secondTimeInput -> {
+                    val firstTime = viewModel.getSelectedTimes()?.firstOrNull()
+                    if (firstTime != null) {
+                        viewModel.setSelectedTimes(listOf(firstTime, time))
+                    } else {
+                        viewModel.setSelectedTimes(listOf(LocalTime.now(), time))
+                    }
+                }
+            }
         }
         picker.show(parentFragmentManager, "TIME_PICKER_${editText.id}")
     }
@@ -358,12 +397,18 @@ class AddMedicationScheduleFragment : Fragment() {
 
 
     private fun validateWeeklySchedule(): Boolean {
-        val times = parseTimes(binding.weeklyTimeInput.text.toString())
-        return if (times.isNotEmpty() && viewModel.selectedDays.value?.isNotEmpty() == true) {
+        val timeText = binding.weeklyTimeInput.text.toString()
+        val times = parseTimes(timeText)
+        val selectedDays = viewModel.selectedDays.value
+
+        Log.d(tag, "Weekly validation - Time text: '$timeText', Parsed times: ${times.size}, Selected days: ${selectedDays?.size}")
+
+        return if (times.isNotEmpty() && selectedDays?.isNotEmpty() == true) {
             viewModel.setSelectedTimes(times)
             viewModel.validateSchedule()
         } else {
             displayMessage("Please select days and time")
+            Log.d(tag, "Weekly validation failed - times empty: ${times.isEmpty()}, days empty: ${selectedDays?.isEmpty()}")
             false
         }
     }
@@ -398,17 +443,91 @@ class AddMedicationScheduleFragment : Fragment() {
         }
     }
 
+    private fun populateFieldsFromViewModel() {
+        val frequencyType = viewModel.getFrequencyType()
+        Log.d(tag, "Populating fields for frequency type: $frequencyType")
 
-    private fun parseTimes(input: String): List<LocalTime> {
-        return input.split(",")
-            .map { it.trim() }
-            .mapNotNull {
-                try {
-                    LocalTime.parse(it, timeFormatter)
-                } catch (e: Exception) {
-                    null
+        val times = viewModel.getSelectedTimes()
+
+        when (frequencyType) {
+            "Once Daily" -> {
+                times?.firstOrNull()?.let { time ->
+                    binding.dailyTimeInput.setText(time.format(timeFormatter))
                 }
             }
+            "Twice Daily" -> {
+                if (times != null && times.size >= 2) {
+                    binding.firstTimeInput.setText(times[0].format(timeFormatter))
+                    binding.secondTimeInput.setText(times[1].format(timeFormatter))
+                }
+            }
+            "Weekly" -> {
+                times?.firstOrNull()?.let { time ->
+                    binding.weeklyTimeInput.setText(time.format(timeFormatter))
+                }
+
+                val selectedDays = viewModel.getSelectedDays()
+                if (!selectedDays.isNullOrEmpty()) {
+                    selectedDays.forEach { day ->
+                        val chipId = when (day) {
+                            DayOfWeek.MONDAY -> R.id.mondayChip
+                            DayOfWeek.TUESDAY -> R.id.tuesdayChip
+                            DayOfWeek.WEDNESDAY -> R.id.wednesdayChip
+                            DayOfWeek.THURSDAY -> R.id.thursdayChip
+                            DayOfWeek.FRIDAY -> R.id.fridayChip
+                            DayOfWeek.SATURDAY -> R.id.saturdayChip
+                            DayOfWeek.SUNDAY -> R.id.sundayChip
+                        }
+                        binding.daysChipGroup.findViewById<Chip>(chipId)?.isChecked = true
+                    }
+                }
+            }
+            "Cyclic" -> {
+                times?.firstOrNull()?.let { time ->
+                    binding.cyclicTimeInput.setText(time.format(timeFormatter))
+                }
+                viewModel.intakeDays.value?.let { days ->
+                    binding.intakeDaysInput.setText(days.toString())
+                    Log.d(tag, "Setting intake days: $days")
+                }
+                viewModel.pauseDays.value?.let { days ->
+                    binding.pauseDaysInput.setText(days.toString())
+                    Log.d(tag, "Setting pause days: $days")
+                }
+            }
+            "On Demand" -> {
+                viewModel.maxDoses.value?.let { doses ->
+                    binding.maxDosesInput.setText(doses.toString())
+                }
+                viewModel.minHoursBetween.value?.let { hours ->
+                    binding.minHoursBetweenInput.setText(hours.toString())
+                }
+            }
+        }
+    }
+
+
+    private fun parseTimes(input: String): List<LocalTime> {
+        if (input.isBlank()) return emptyList()
+
+        return if (input.contains(",")) {
+            // Parse comma-separated times
+            input.split(",")
+                .map { it.trim() }
+                .mapNotNull {
+                    try {
+                        LocalTime.parse(it, timeFormatter)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+        } else {
+            try {
+                listOf(LocalTime.parse(input.trim(), timeFormatter))
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
     }
 
 

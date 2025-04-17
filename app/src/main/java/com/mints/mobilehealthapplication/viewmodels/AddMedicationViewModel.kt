@@ -24,7 +24,6 @@ import java.time.LocalTime
     ) : ViewModel(
     ) {
 
-        // LiveData Properties
         private val _medicationName = MutableLiveData("").apply {
             observeForever { newValue ->
                 Log.d("AddMedicationViewModel", "medicationName value changed to: $newValue")
@@ -67,8 +66,6 @@ import java.time.LocalTime
         private val _minHoursBetween = MutableLiveData<Int?>(null)
         val minHoursBetween: LiveData<Int?> = _minHoursBetween
 
-       // private val _withFood = MutableLiveData(false)
-        //val withFood: LiveData<Boolean> = _withFood
 
 
         private val _isEditing = MutableLiveData(false)
@@ -101,7 +98,6 @@ import java.time.LocalTime
 
 
 
-        // Data methods
         fun setSelectedDays(days: Set<DayOfWeek>) {
             _selectedDays.value = days
         }
@@ -133,7 +129,6 @@ import java.time.LocalTime
 
 
 
-        // Validation methods
 
         fun setIsEditing(status:Boolean) {
             _isEditing.value = status
@@ -154,16 +149,24 @@ import java.time.LocalTime
         }
 
         fun validateSchedule(): Boolean {
+            Log.d("AddMedicationViewModel", "frequency.value: ${_frequency.value}")
+            Log.d("AddMedicationViewModel", "frequencyType.value: ${_frequencyType.value}")
+
             val isValid = when (_frequency.value) {
                 "Once Daily", "Twice Daily" -> validateDailySchedule()
                 "Weekly" -> validateWeeklySchedule()
                 "Cyclic" -> validateCyclicSchedule()
                 "On Demand" -> validateOnDemand()
-                else -> false
+                else -> {
+                    Log.d("AddMedicationViewModel", "No matching frequency, validation fails")
+                    false
+                }
             }
 
             if (isValid) {
                 _validationState.value = ValidationState.Valid
+            } else {
+                Log.d("AddMedicationViewModel", "Schedule validation failed")
             }
             return isValid
         }
@@ -179,10 +182,12 @@ import java.time.LocalTime
             return when {
                 _selectedDays.value.isNullOrEmpty() -> {
                     setValidationError("Please select at least one day")
+                    Log.d("AddMedicationViewModel", "Selected days are empty")
                     false
                 }
                 _selectedTimes.value.isNullOrEmpty() -> {
                     setValidationError("Please select at least one time")
+                    Log.d("AddMedicationViewModel", "Selected times are empty")
                     false
                 }
                 else -> true
@@ -193,14 +198,17 @@ import java.time.LocalTime
             return when {
                 _intakeDays.value == null -> {
                     setValidationError("Please enter intake days")
+                    Log.d("AddMedicationViewModel", "Intake days are null")
                     false
                 }
                 _pauseDays.value == null -> {
                     setValidationError("Please enter pause days")
+                    Log.d("AddMedicationViewModel", "Pause days are null")
                     false
                 }
                 _selectedTimes.value.isNullOrEmpty() -> {
                     setValidationError("Please select at least one time")
+                    Log.d("AddMedicationViewModel", "Selected times are empty")
                     false
                 }
                 !ScheduleValidator.isValidCyclicSchedule(
@@ -209,6 +217,7 @@ import java.time.LocalTime
                     _selectedTimes.value!!
                 ) -> {
                     setValidationError("Invalid cyclic schedule parameters")
+                    Log.d("AddMedicationViewModel", "Invalid cyclic schedule parameters")
                     false
                 }
                 else -> true
@@ -254,6 +263,26 @@ import java.time.LocalTime
                 updateFrequency(med.schedule.formattedFrequency)
                 updateFrequencyType(med.schedule.frequencyType)
                 updateMedicationId(med.id!!)
+
+            when (val schedule = med.schedule) {
+                is MedicationSchedule.Daily -> {
+                    _selectedTimes.value = schedule.times
+                }
+                is MedicationSchedule.WeeklySchedule -> {
+                    _selectedTimes.value = schedule.times
+                    _selectedDays.value = schedule.days.toSet()
+                }
+                is MedicationSchedule.Cyclic -> {
+                    _selectedTimes.value = schedule.times
+                    _intakeDays.value = schedule.intakeDays
+                    _pauseDays.value = schedule.pauseDays
+                }
+                is MedicationSchedule.OnDemand -> {
+                    _maxDoses.value = schedule.maxDailyDoses
+                    _minHoursBetween.value = schedule.minTimeBetweenDoses
+                }
+                else -> {}
+            }
         }
 
         private fun createMedication(): Medication {
@@ -415,13 +444,14 @@ import java.time.LocalTime
             _validationState.value = ValidationState.Invalid(message)
         }
 
-        // Update methods
-        fun updateFrequency(frequency: String) {
-            _frequency.value = frequency
+        fun updateFrequencyType(frequencyType: String) {
+            _frequencyType.value = frequencyType
+            _frequency.value = frequencyType
         }
 
-        fun updateFrequencyType(frequencyType:String) {
-            _frequencyType.value = frequencyType
+        fun updateFrequency(frequency: String) {
+            _frequency.value = frequency
+            _frequencyType.value = frequency
         }
 
         fun getFrequencyType(): String? = _frequencyType.value

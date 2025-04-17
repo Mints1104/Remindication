@@ -211,8 +211,9 @@ class MainActivity : AppCompatActivity() {
             R.id.loginFragment, R.id.resetPasswordFragment -> {
                 hideAllUI()
             }
-            R.id.addMedicationBasicInfoFragment, R.id.addMedicationFrequencyFragment -> {
-                showAllUI()
+            R.id.addMedicationBasicInfoFragment, R.id.addMedicationFrequencyFragment, R.id.addMedicationScheduleFragment -> {
+                hideFAB()
+                hideBottomNav()
                 updateToolbar(
                     showBackArrow = true,
                     menuResId =   null,
