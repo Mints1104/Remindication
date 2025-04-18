@@ -29,6 +29,11 @@ class RegistrationViewModel : ViewModel() {
     private val _registrationState = MutableStateFlow<RegistrationState>(RegistrationState.Initial)
     val registrationState = _registrationState.asStateFlow()
 
+
+    fun resetRegistrationData() {
+        _registrationData.value = RegistrationData()
+        _registrationState.value = RegistrationState.Initial
+    }
     /**
      * Data class containing all registration-related information.
      * Uses nullable types for optional medication fields.

@@ -89,6 +89,7 @@ class HealthInfoFragment : Fragment() {
                 when (state) {
                     is RegistrationViewModel.RegistrationState.Success -> {
                         if (findNavController().currentDestination?.id == R.id.healthInfoFragment) {
+                            viewModel.resetRegistrationData()
                             findNavController().navigate(R.id.action_healthInfoFragment_to_homeFragment)
                         }
                     }
@@ -114,52 +115,49 @@ class HealthInfoFragment : Fragment() {
             isFocusableInTouchMode = false
             isClickable = true
         }
+
         // Set default date to 18 years ago
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.YEAR, -18)
         val minDate = calendar.timeInMillis
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.UK)
-        val datePickerBuilder = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("Select Date of Birth")
-            .setTheme(R.style.ThemeOverlay_App_DatePicker)
-            .setSelection(minDate)
-            .setCalendarConstraints(
-                CalendarConstraints.Builder()
-                    .setValidator(DateValidatorPointBackward.before(minDate))
-                    .build()
-            )
-        datePicker = datePickerBuilder.build()
-
-        datePicker?.addOnPositiveButtonClickListener { selectedDate ->
-            val selectedCalendar = Calendar.getInstance()
-            selectedCalendar.timeInMillis = selectedDate
-
-            val dobString = dateFormat.format(selectedCalendar.time)
-
-            if (!viewModel.isAgeValid(dobString)) {
-                Toast.makeText(requireContext(), "You must be at least 18 years old", Toast.LENGTH_SHORT).show()
-                return@addOnPositiveButtonClickListener
-            }
-
-            dobEditText.setText(dobString)
-            viewModel.updateRegistrationData {
-                this.dateOfBirth = dobString
-            }
-        }
-
-        datePicker?.addOnDismissListener {
-            datePicker = null
-        }
 
         dobEditText.setOnClickListener {
-            datePicker?.let {
-                if (!it.isAdded) {
-                    it.show(parentFragmentManager, "DATE_PICKER")
+            // Create a new date picker instance every time
+            val datePickerBuilder = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Date of Birth")
+                .setTheme(R.style.ThemeOverlay_App_DatePicker)
+                .setSelection(minDate)
+                .setCalendarConstraints(
+                    CalendarConstraints.Builder()
+                        .setValidator(DateValidatorPointBackward.before(minDate))
+                        .build()
+                )
+
+            datePicker = datePickerBuilder.build()
+
+            datePicker?.addOnPositiveButtonClickListener { selectedDate ->
+                val selectedCalendar = Calendar.getInstance()
+                selectedCalendar.timeInMillis = selectedDate
+
+                val dobString = dateFormat.format(selectedCalendar.time)
+
+                if (!viewModel.isAgeValid(dobString)) {
+                    Toast.makeText(requireContext(), "You must be at least 18 years old", Toast.LENGTH_SHORT).show()
+                    return@addOnPositiveButtonClickListener
                 }
-            } ?: run {
-                datePicker = datePickerBuilder.build()
-                datePicker?.show(parentFragmentManager, "DATE_PICKER")
+
+                dobEditText.setText(dobString)
+                viewModel.updateRegistrationData {
+                    this.dateOfBirth = dobString
+                }
             }
+
+            datePicker?.addOnDismissListener {
+                datePicker = null
+            }
+
+            datePicker?.show(parentFragmentManager, "DATE_PICKER")
         }
     }
 

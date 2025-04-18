@@ -29,8 +29,9 @@ class UserInfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegistrationBinding.inflate(inflater, container, false)
-
         viewModel = ViewModelProvider(requireActivity())[RegistrationViewModel::class.java]
+        viewModel.resetRegistrationData()
+
         mainActivity.showAppBar()
         setUpUI()
         handleContinueRegistration()

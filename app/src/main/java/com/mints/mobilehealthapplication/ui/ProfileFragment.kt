@@ -34,7 +34,6 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Load user details
         viewModel.loadUserProfile()
        mainActivity.hideBottomNav()
 
@@ -107,7 +106,7 @@ class ProfileFragment : Fragment() {
     private fun setupDebugMode() {
         // Only show debug toggle in debug builds
         if (BuildConfig.DEBUG) {
-            binding.debugModeSwitch.visibility = View.VISIBLE
+           // binding.debugModeSwitch.visibility = View.VISIBLE
             binding.debugModeSwitch.setOnCheckedChangeListener { _, isChecked ->
                 binding.debugUserIdContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
             }
