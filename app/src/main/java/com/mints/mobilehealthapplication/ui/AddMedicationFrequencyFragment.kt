@@ -45,6 +45,7 @@ class AddMedicationFrequencyFragment : Fragment() {
         setupContinueButton()
         observeValidationState()
         deviceConnected = isDeviceConnected()
+        /*
         observeNetworkState()
 
         if(!deviceConnected) {
@@ -53,6 +54,8 @@ class AddMedicationFrequencyFragment : Fragment() {
         } else {
             Log.d(tag, "Device is connected to the internet")
         }
+
+         */
         return view
     }
 

@@ -60,7 +60,9 @@ class AddMedicationScheduleFragment : Fragment() {
 
         Log.d(tag,"Get frequencyType: ${viewModel.getFrequencyType()}")
         deviceConnected = isDeviceConnected()
+        /*
         observeNetworkState()
+
 
         if(!deviceConnected) {
             displayMessage("Internet connection lost")
@@ -68,6 +70,8 @@ class AddMedicationScheduleFragment : Fragment() {
         } else {
             Log.d(tag, "Device is connected to the internet")
         }
+
+         */
 
     }
 
@@ -595,6 +599,7 @@ class AddMedicationScheduleFragment : Fragment() {
         }
 
         viewModel.saveMedication(userId)
+        navigateToNextFragment()
 
 
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
@@ -603,7 +608,6 @@ class AddMedicationScheduleFragment : Fragment() {
                 displayMessage("Successfully saved medication")
 
 
-                navigateToNextFragment()
             } else {
                 Log.d(tag,"Failed to save medication")
                 displayMessage("Failed to save medication")
@@ -677,11 +681,12 @@ class AddMedicationScheduleFragment : Fragment() {
 
 
         viewModel.updateMedication(userId)
+        navigateToNextFragment()
+
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             if (success) {
                 Log.d(tag,"Successfully updated medication")
                 displayMessage("Successfully updated medication")
-                navigateToNextFragment()
             } else {
                 Log.d(tag,"Failed to updated medication")
                 displayMessage("Failed to  update medication")

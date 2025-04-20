@@ -108,7 +108,6 @@ class HealthInfoFragment : Fragment() {
 
 
     private fun setupDatePicker(dobEditText: EditText) {
-        // Prevent manual text input
         dobEditText.apply {
             inputType = InputType.TYPE_NULL
             isFocusable = false
@@ -116,14 +115,12 @@ class HealthInfoFragment : Fragment() {
             isClickable = true
         }
 
-        // Set default date to 18 years ago
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.YEAR, -18)
         val minDate = calendar.timeInMillis
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.UK)
 
         dobEditText.setOnClickListener {
-            // Create a new date picker instance every time
             val datePickerBuilder = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Select Date of Birth")
                 .setTheme(R.style.ThemeOverlay_App_DatePicker)

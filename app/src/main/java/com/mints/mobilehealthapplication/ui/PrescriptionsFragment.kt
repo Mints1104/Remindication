@@ -184,17 +184,19 @@ class PrescriptionsFragment : Fragment() {
             ),
             onSwipeLeft = { position, onActionCompleted ->
                 val medication = adapter.getMedicationAt(position)
-                if (deviceConnected) {
-                    displayMessage("Delete medication: ${medication.name}")
-                    showUndoSnackbar(medication, position, onActionCompleted)
-                } else {
-                    displayMessage("Device not connected to internet")
-                    onActionCompleted()
-                }
+//                if (deviceConnected) {
+//                    displayMessage("Delete medication: ${medication.name}")
+//                    showUndoSnackbar(medication, position, onActionCompleted)
+//                } else {
+//                    displayMessage("Device not connected to internet")
+//                    onActionCompleted()
+//                }
+                                    showUndoSnackbar(medication, position, onActionCompleted)
+
             },
             onSwipeRight = { position, onActionCompleted ->
                 val medication = adapter.getMedicationAt(position)
-                if (deviceConnected) {
+              //  if (deviceConnected) {
                     val medicationId = medication.id
                     val action = PrescriptionsFragmentDirections
                         .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
@@ -203,10 +205,10 @@ class PrescriptionsFragment : Fragment() {
                         navController.navigate(action)
                     }
                     onActionCompleted()
-                } else {
-                    displayMessage("Device not connected to internet")
-                    onActionCompleted()
-                }
+               // } else {
+               //     displayMessage("Device not connected to internet")
+               //     onActionCompleted()
+               // }
             }
         )
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
@@ -248,7 +250,10 @@ class PrescriptionsFragment : Fragment() {
                     } else {
                         onActionCompleted()
                     }
+                    onActionCompleted()
+
                 }
+
             })
             .show()
     }

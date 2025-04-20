@@ -324,6 +324,7 @@ import java.time.LocalDateTime
                 ),
                 onSwipeLeft = { position, onActionCompleted ->
                     val medication = adapter.getMedicationAt(position)
+                    /*
                     if (deviceConnected) {
                         displayMessage("Mark ${medication.name} as skipped")
                         showUndoSnackbar(medication,position,true, onActionCompleted)
@@ -331,16 +332,15 @@ import java.time.LocalDateTime
                         displayMessage("Device not connected to internet")
                         onActionCompleted()
                     }
+
+                     */
+                    showUndoSnackbar(medication,position,true, onActionCompleted)
+
                 },
                 onSwipeRight = { position, onActionCompleted ->
                     val medication = adapter.getMedicationAt(position)
-                    if (deviceConnected) {
-                        displayMessage("Mark ${medication.name} as taken")
-                        showUndoSnackbar(medication, position,false, onActionCompleted)
-                    } else {
-                        displayMessage("Device not connected to internet")
-                        onActionCompleted()
-                    }
+                    showUndoSnackbar(medication, position,false, onActionCompleted)
+
                 }
             )
             ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
@@ -416,7 +416,10 @@ import java.time.LocalDateTime
                             }
                             onActionCompleted()
                         }
+                        onActionCompleted()
+
                     }
+
                 })
                 .show()
 
@@ -609,6 +612,12 @@ import java.time.LocalDateTime
         private fun setupFAB() {
             val fab = requireActivity().findViewById<ExtendedFloatingActionButton>(R.id.add_medication_fab)
             fab.setOnClickListener {
+                    val navController = findNavController()
+                    if(navController.currentDestination?.id == R.id.homeFragment) {
+                        findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
+                    }
+
+                /*
                 if(deviceConnected) {
                     val navController = findNavController()
                     if(navController.currentDestination?.id == R.id.homeFragment) {
@@ -617,6 +626,7 @@ import java.time.LocalDateTime
             } else {
                 displayMessage("Device not connected to internet")
                 }
+                 */
                 }
         }
 

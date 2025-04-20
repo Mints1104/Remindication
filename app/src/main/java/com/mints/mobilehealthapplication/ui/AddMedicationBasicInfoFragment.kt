@@ -52,6 +52,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
         observeValidationState()
         Log.d(tag,"UserId: $uid")
         deviceConnected = isDeviceConnected()
+        /*
         observeNetworkState()
 
         if(!deviceConnected) {
@@ -60,6 +61,8 @@ class AddMedicationBasicInfoFragment : Fragment() {
         } else {
             Log.d(tag, "Device is connected to the internet")
         }
+
+         */
 
         return view
     }
