@@ -244,6 +244,10 @@
     <string name="daily_adherence_rate">Daily Adherence Rate (%)</string>
     <string name="medication_taken_by_weekday">Medication Taken by Weekday</string>
     <string name="time_of_day_distribution">Time-of-Day Distribution</string>
+    <string name="next_medication_title">Next medication</string>
+    <string name="tap_to_reveal">Tap to reveal</string>
+    <string name="history">History</string>
+    <string name="medications_tab">Medications</string>
 
 
 </resources>

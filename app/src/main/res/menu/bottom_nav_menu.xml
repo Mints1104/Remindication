@@ -12,12 +12,12 @@
         android:id="@+id/medicationHistoryFragment"
         android:enabled="true"
         android:icon="@drawable/baseline_bar_chart_24"
-        android:title="@string/statistics_tab"/>
+        android:title="@string/history"/>
     <item
         android:id="@+id/prescriptionsFragment"
         android:enabled="true"
         android:icon="@drawable/baseline_prescriptions_24px"
-        android:title="@string/prescriptions_tab"/>
+        android:title="@string/medications_tab"/>
 
 
 </menu>

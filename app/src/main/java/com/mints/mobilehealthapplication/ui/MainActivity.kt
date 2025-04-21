@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                 updateToolbar(
                     showBackArrow = false,
                     menuResId = R.menu.top_app_bar,
-                    title = "Prescriptions"
+                    title = "Medications"
                 )
                 invalidateOptionsMenu()
             }

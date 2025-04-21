@@ -7,9 +7,8 @@
     android:layout_height="match_parent"
     android:padding="20dp"
     android:background="?attr/colorSurface"
-    tools:ignore="VisualLintBounds">
+    >
 
-    <!-- Main content container -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,10 +17,7 @@
         app:layout_constraintBottom_toTopOf="@id/registration_footer"
         app:layout_constraintVertical_bias="0.2">
 
-        <!-- App Title -->
 
-
-        <!-- Email Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/email_layout"
             android:layout_width="match_parent"
@@ -41,7 +37,6 @@
 
 
 
-        <!-- Password Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/password_layout"
             android:layout_width="match_parent"
@@ -61,7 +56,6 @@
                 android:paddingEnd="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Confirm Password Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/confirm_password_layout"
             android:layout_width="match_parent"
@@ -80,7 +74,6 @@
                 android:paddingEnd="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Phone Number Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/phone_layout"
             android:layout_width="match_parent"
@@ -99,7 +92,6 @@
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Continue Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/continue_button"
             android:layout_width="match_parent"
@@ -108,7 +100,6 @@
             android:contentDescription="@string/continueSignUp"
             android:layout_marginTop="32dp"/>
 
-        <!-- Already Have an Account? Link -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/already_have_account_text"
             android:layout_width="wrap_content"
@@ -125,7 +116,6 @@
             android:layout_marginTop="16dp"/>
     </LinearLayout>
 
-    <!-- Footer with Progress Bar -->
     <LinearLayout
         android:id="@+id/registration_footer"
         android:layout_width="match_parent"
