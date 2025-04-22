@@ -49,11 +49,23 @@ class MedicationHistoryViewModel : ViewModel() {
         return medicationHistories.value?.get(medicationId) ?: MedicationHistory()
     }
 
-    fun getComplianceRate():Double {
-        val meds = medications.value.orEmpty()
-        if(meds.isEmpty()) return 0.0
-        val totalComplianceRate = meds.sumOf { it.medicationHistory.getComplianceRate() }
-        return totalComplianceRate / meds.size
+    fun getComplianceRate(): Double {
+        val medications = _medications.value ?: return 0.0
+
+        if (medications.isEmpty()) return 0.0
+
+        var totalEvents = 0
+        var totalTaken = 0
+
+        medications.forEach { med ->
+            val events = med.medicationHistory.getAllEvents()
+            totalEvents += events.size
+            totalTaken += events.count { it.type == MedicationEvent.EventType.TAKEN }
+        }
+
+        if (totalEvents == 0) return 0.0
+
+        return (totalTaken.toDouble() / totalEvents) * 100
     }
 
 

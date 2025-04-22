@@ -613,7 +613,6 @@ class AddMedicationScheduleFragment : Fragment() {
             }
         }
 
-        // Call the appropriate ViewModel method based on whether this is a save or update
         if (isUpdate) {
             viewModel.updateMedication(userId)
         } else {
@@ -622,7 +621,6 @@ class AddMedicationScheduleFragment : Fragment() {
 
         navigateToNextFragment()
 
-        // Observe the result
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             val action = if (isUpdate) "updated" else "saved"
             if (success) {

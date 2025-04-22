@@ -129,11 +129,10 @@ data class MedicationHistory(
         return events.filter { it.date.isAfter(startDate) }
     }
 
-    // Get compliance rate (percentage of taken vs. total events)
     fun getComplianceRate(): Double {
         if (events.isEmpty()) return 0.0
         val takenCount = events.count { it.type == MedicationEvent.EventType.TAKEN }
-        return (takenCount.toDouble() / events.size) * 100
+        return (takenCount.toDouble() / getAllEvents().size) * 100
     }
 
 
