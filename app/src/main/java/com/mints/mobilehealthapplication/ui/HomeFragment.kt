@@ -324,23 +324,11 @@ import java.time.LocalDateTime
                 ),
                 onSwipeLeft = { position, onActionCompleted ->
                     val medication = adapter.getMedicationAt(position)
-                    /*
-                    if (deviceConnected) {
-                        displayMessage("Mark ${medication.name} as skipped")
-                        showUndoSnackbar(medication,position,true, onActionCompleted)
-                    } else {
-                        displayMessage("Device not connected to internet")
-                        onActionCompleted()
-                    }
-
-                     */
                     showUndoSnackbar(medication,position,true, onActionCompleted)
-
                 },
                 onSwipeRight = { position, onActionCompleted ->
                     val medication = adapter.getMedicationAt(position)
                     showUndoSnackbar(medication, position,false, onActionCompleted)
-
                 }
             )
             ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)

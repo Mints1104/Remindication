@@ -16,13 +16,12 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
 
-    <!-- Medications RecyclerView -->
 
     <TextView
         android:id="@+id/noMedicationsAdded"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add your first medication from the home tab!"
+        android:text="@string/add_your_first_medication_from_the_home_tab"
         android:paddingStart="20sp"
         android:paddingEnd="20sp"
         android:paddingBottom="20sp"

@@ -224,13 +224,13 @@ class AddMedicationScheduleFragment : Fragment() {
                 "Once Daily", "Twice Daily" -> {
                     if (validateDailySchedule()) {
                         Log.d(tag, "Attempting to save medication daily")
-                        saveMedication()
+                        saveMedication(userId)
                     }
                 }
                 "Weekly" -> {
                     if (validateWeeklySchedule()) {
                         Log.d(tag, "Attempting to save medication weekly")
-                        saveMedication()
+                        saveMedication(userId)
                     } else {
                         Log.d(tag, "Failed  to save medication weekly")
                     }
@@ -239,13 +239,13 @@ class AddMedicationScheduleFragment : Fragment() {
                 "Cyclic" -> {
                     if (validateCyclicSchedule()) {
                         Log.d(tag, "Attempting to save medication cyclic")
-                        saveMedication()
+                        saveMedication(userId)
                     }
                 }
                 "On Demand" -> {
                     if (validateOnDemand()) {
                         Log.d(tag, "Attempting to save medication on demand")
-                        saveMedication()
+                        saveMedication(userId)
                     }
                 }
                 else -> displayMessage("Invalid schedule type")
@@ -534,163 +534,120 @@ class AddMedicationScheduleFragment : Fragment() {
         }
     }
 
+    private fun saveMedication(userId: String) {
+        processMedication(userId, false)
+    }
 
-    private fun saveMedication() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            displayMessage("User not authenticated")
-            return
-        }
+    private fun updateMedication(userId: String) {
+        processMedication(userId, true)
+    }
+
+
+
+    private fun processMedication(userId: String, isUpdate: Boolean) {
         val currentTime = LocalTime.now()
         val medicationName = viewModel.getName()
 
-        if(viewModel.getFrequencyType() == "Twice Daily") {
-            val selectedLocalTimes : List<LocalTime> = viewModel.getSelectedTimes() ?: listOf(currentTime, currentTime)
-            var scheduledDateTimes = selectedLocalTimes.map { time ->
-                LocalDateTime.of(LocalDate.now(), time)
+        // Schedule notifications based on frequency type
+        when (viewModel.getFrequencyType()) {
+            "Twice Daily" -> {
+                val selectedLocalTimes = viewModel.getSelectedTimes() ?: listOf(currentTime, currentTime)
+                var scheduledDateTimes = selectedLocalTimes.map { time ->
+                    LocalDateTime.of(LocalDate.now(), time)
+                }
+                if (scheduledDateTimes[0].isBefore(LocalDateTime.now())) {
+                    scheduledDateTimes = scheduledDateTimes.map { it.plusDays(1) }
+                }
+                val triggerTimeInMillis = scheduledDateTimes.map { scheduledDateTime ->
+                    scheduledDateTime
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
+                }
+                scheduleNotifications(medicationName!!, triggerTimeInMillis)
             }
-            if(scheduledDateTimes[0].isBefore(LocalDateTime.now())) {
-                scheduledDateTimes = scheduledDateTimes.map { it.plusDays(1) }
+            "Weekly" -> {
+                val selectedDays = viewModel.getSelectedDays() ?: emptySet()
+                val selectedTime = viewModel.getSelectedTimes()?.firstOrNull() ?: currentTime
+
+                if (selectedDays.isNotEmpty()) {
+                    val today = LocalDate.now().dayOfWeek
+                    val scheduledDateTimes = selectedDays.map { day ->
+                        // Calculate days to add to get to the next occurrence of this day
+                        val daysToAdd = (day.value - today.value + 7) % 7
+                        val date = if (daysToAdd == 0 && selectedTime.isBefore(currentTime)) {
+                            LocalDate.now().plusDays(7) // Schedule for next week
+                        } else if (daysToAdd == 0) {
+                            LocalDate.now() // Today, but time is still in future
+                        } else {
+                            LocalDate.now().plusDays(daysToAdd.toLong())
+                        }
+
+                        LocalDateTime.of(date, selectedTime)
+                    }
+
+                    val triggerTimeInMillis = scheduledDateTimes.map { dateTime ->
+                        dateTime
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant()
+                            .toEpochMilli()
+                    }
+
+                    Log.d(tag, "Weekly schedule - selected days: $selectedDays, times: $triggerTimeInMillis")
+                    scheduleNotifications(medicationName!!, triggerTimeInMillis)
+                }
             }
-            val triggerTimeInMillis = scheduledDateTimes.map { scheduledDateTime ->
-                scheduledDateTime
+            "Once Daily", "Cyclic" -> {
+                val selectedLocalTime = viewModel.getSelectedTimes()?.firstOrNull() ?: currentTime
+                var scheduledDateTime = LocalDateTime.of(LocalDate.now(), selectedLocalTime)
+                if (scheduledDateTime.isBefore(LocalDateTime.now())) {
+                    scheduledDateTime = scheduledDateTime.plusDays(1)
+                }
+
+                val triggerTimeInMillis = scheduledDateTime
                     .atZone(ZoneId.systemDefault())
                     .toInstant()
                     .toEpochMilli()
+
+                scheduleNotifications(medicationName!!, listOf(triggerTimeInMillis))
             }
-           triggerTimeInMillis.forEach { time ->
-                val instant = Instant.ofEpochMilli(time)
-                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
-                val formattedDate = formatter.format(instant)
-                Log.d(tag,"Initial notification should be  at: $formattedDate for $medicationName")
-                val notificationHelper = (requireActivity().application as MedicationApp).notificationHelper
-                notificationHelper.scheduleNotification(medicationName = medicationName!!,
-                    timeInMillis = time)
-            }
-           }
-
-
-
-        if(viewModel.getFrequencyType() != "On Demand") {
-            val selectedLocalTime: LocalTime = viewModel.getSelectedTimes()?.get(0) ?: currentTime
-            var scheduledDateTime = LocalDateTime.of(LocalDate.now(), selectedLocalTime)
-            if (scheduledDateTime.isBefore(LocalDateTime.now())) {
-                scheduledDateTime = scheduledDateTime.plusDays(1)
-
-
-            }
-            Log.d(tag,"Scheduled date time: $scheduledDateTime")
-
-            val triggerTimeInMillis = scheduledDateTime
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-
-            val instant = Instant.ofEpochMilli(triggerTimeInMillis)
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
-            val formattedDate = formatter.format(instant)
-
-            Log.d(tag,"Initial notification should be  at: $formattedDate for $medicationName")
-            val notificationHelper = (requireActivity().application as MedicationApp).notificationHelper
-            notificationHelper.scheduleNotification(medicationName = medicationName!!,
-                timeInMillis = triggerTimeInMillis)
-
-
-
         }
 
-        viewModel.saveMedication(userId)
+        // Call the appropriate ViewModel method based on whether this is a save or update
+        if (isUpdate) {
+            viewModel.updateMedication(userId)
+        } else {
+            viewModel.saveMedication(userId)
+        }
+
         navigateToNextFragment()
 
-
+        // Observe the result
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
+            val action = if (isUpdate) "updated" else "saved"
             if (success) {
-                Log.d(tag,"Successfully saved medication")
-                displayMessage("Successfully saved medication")
-
-
+                Log.d(tag, "Successfully $action medication")
+                displayMessage("Successfully $action medication")
             } else {
-                Log.d(tag,"Failed to save medication")
-                displayMessage("Failed to save medication")
+                Log.d(tag, "Failed to $action medication")
+                displayMessage("Failed to $action medication")
             }
         }
     }
 
+    private fun scheduleNotifications(medicationName: String, timeInMillisList: List<Long>) {
+        val notificationHelper = (requireActivity().application as MedicationApp).notificationHelper
 
-    private fun updateMedication(userId: String) {
-
-        val currentTime = LocalTime.now()
-        val medicationName = viewModel.getName()
-
-        if(viewModel.getFrequencyType() == "Twice Daily") {
-            val selectedLocalTimes : List<LocalTime> = viewModel.getSelectedTimes() ?: listOf(currentTime, currentTime)
-            var scheduledDateTimes = selectedLocalTimes.map { time ->
-                LocalDateTime.of(LocalDate.now(), time)
-            }
-            if(scheduledDateTimes[0].isBefore(LocalDateTime.now())) {
-                scheduledDateTimes = scheduledDateTimes.map { it.plusDays(1) }
-            }
-            val triggerTimeInMillis = scheduledDateTimes.map { scheduledDateTime ->
-                scheduledDateTime
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
-            }
-            triggerTimeInMillis.forEach { time ->
-                val instant = Instant.ofEpochMilli(time)
-                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
-                val formattedDate = formatter.format(instant)
-                Log.d(tag,"Initial notification should be  at: $formattedDate for $medicationName")
-                val notificationHelper = (requireActivity().application as MedicationApp).notificationHelper
-                notificationHelper.scheduleNotification(medicationName = medicationName!!,
-                    timeInMillis = time)
-            }
-        }
-
-
-
-        if(viewModel.getFrequencyType() != "On Demand") {
-            val selectedLocalTime: LocalTime = viewModel.getSelectedTimes()?.get(0) ?: currentTime
-            var scheduledDateTime = LocalDateTime.of(LocalDate.now(), selectedLocalTime)
-            if (scheduledDateTime.isBefore(LocalDateTime.now())) {
-                scheduledDateTime = scheduledDateTime.plusDays(1)
-
-
-            }
-            Log.d(tag,"Scheduled date time: $scheduledDateTime")
-
-            val triggerTimeInMillis = scheduledDateTime
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-
-            val instant = Instant.ofEpochMilli(triggerTimeInMillis)
+        timeInMillisList.forEach { time ->
+            val instant = Instant.ofEpochMilli(time)
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
             val formattedDate = formatter.format(instant)
+            Log.d(tag, "Scheduling notification at: $formattedDate for $medicationName")
 
-            Log.d(tag,"Initial notification should be  at: $formattedDate for $medicationName")
-            val notificationHelper = (requireActivity().application as MedicationApp).notificationHelper
-            notificationHelper.scheduleNotification(medicationName = medicationName!!,
-                timeInMillis = triggerTimeInMillis)
-
-
-
-        }
-
-
-
-
-
-        viewModel.updateMedication(userId)
-        navigateToNextFragment()
-
-        viewModel.saveResult.observe(viewLifecycleOwner) { success ->
-            if (success) {
-                Log.d(tag,"Successfully updated medication")
-                displayMessage("Successfully updated medication")
-            } else {
-                Log.d(tag,"Failed to updated medication")
-                displayMessage("Failed to  update medication")
-            }
+            notificationHelper.scheduleNotification(
+                medicationName = medicationName,
+                timeInMillis = time
+            )
         }
     }
 

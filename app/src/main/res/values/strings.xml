@@ -248,6 +248,10 @@
     <string name="tap_to_reveal">Tap to reveal</string>
     <string name="history">History</string>
     <string name="medications_tab">Medications</string>
+    <string name="add_your_first_medication_from_the_home_tab">Add your first medication from the home tab!</string>
+    <string name="visualise_adherence">Visualise Adherence</string>
+    <string name="second_intake">Second intake</string>
+    <string name="first_intake">First intake</string>
 
 
 </resources>

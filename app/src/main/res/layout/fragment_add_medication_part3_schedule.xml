@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:layout_gravity="center"
     android:background="?attr/colorSurface">
 
     <!-- Scrollable Content -->
@@ -27,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -61,7 +62,7 @@
                     android:id="@+id/first_time_intake"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="First intake"
+                    android:text="@string/first_intake"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     />
@@ -85,7 +86,7 @@
                     android:id="@+id/second_time_intake"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Second intake"
+                    android:text="@string/second_intake"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     />
@@ -307,15 +308,14 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/saveButton"
-            android:layout_width="match_parent"
-            android:contentDescription="@string/save"
+            android:layout_width="380dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/save"
-            android:layout_marginTop="24dp"
             android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"
-            />
+            android:contentDescription="@string/save"
+            android:text="@string/save" />
 
         <TextView
             android:id="@+id/stepText"
