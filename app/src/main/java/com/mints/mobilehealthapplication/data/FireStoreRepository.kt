@@ -10,6 +10,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.firestoreSettings
+import com.google.firebase.firestore.ktx.persistentCacheSettings
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
@@ -21,7 +23,21 @@ import java.time.ZoneId
 
 
 object FireStoreRepository {
-    private val db by lazy { FirebaseFirestore.getInstance() }
+    private val db by lazy {
+        val settings = firestoreSettings {
+            setLocalCacheSettings(
+                persistentCacheSettings {
+                    setSizeBytes(100L * 1024 * 1024)   // 100 MB
+                }
+            )
+        }
+
+        val firestore =  FirebaseFirestore.getInstance().apply {
+            firestoreSettings = settings
+        }
+
+        firestore
+    }
     private val mappers = FireStoreMappers()
 
     suspend fun saveUserData(uid: String, data: RegistrationViewModel.RegistrationData): Boolean {

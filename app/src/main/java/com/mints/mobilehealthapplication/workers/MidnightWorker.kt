@@ -17,7 +17,6 @@ import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.ui.HomeFragment.Companion.REFRESH_ACTION
 import com.mints.mobilehealthapplication.utils.ScheduleHelper
-import com.mints.mobilehealthapplication.utils.toLocalDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -31,6 +30,9 @@ class MidnightWorker(
     private val notificationHelper: NotificationHelper
 ) : CoroutineWorker(context, workerParams) {
 
+    private fun Timestamp.toLocalDateTime(): LocalDateTime {
+        return this.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+    }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -284,21 +286,20 @@ class MidnightWorker(
     ) {
         Log.d(TAG, "Original weekly due dates for ${medication.name}: ${schedule.nextDueDates}")
 
-        // Handle missed weekly due dates.
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
-            val missedDateTime = missedDueDates.minByOrNull { it }!!
-            Log.d(TAG, "${medication.name} missed at $missedDateTime, marking as missed")
-            medication.markAsMissed(missedDateTime)
-            medication.id?.let {
-                FireStoreRepository.updateMedicationHistory(
-                    userId = userId,
-                    medicationId = it,
-                    event = MedicationEvent.Missed(
-                        instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
+            for (missedDateTime in missedDueDates) {
+                Log.d(TAG, "${medication.name} missed at $missedDateTime, marking as missed")
+                medication.markAsMissed(missedDateTime)
+                medication.id?.let {
+                    FireStoreRepository.updateMedicationHistory(
+                        userId = userId,
+                        medicationId = it,
+                        event = MedicationEvent.Missed(
+                            instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                        )
                     )
-                )
-
+                }
             }
         }
 

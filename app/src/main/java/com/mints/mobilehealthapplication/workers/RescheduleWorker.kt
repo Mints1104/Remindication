@@ -11,7 +11,6 @@ import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
 import com.mints.mobilehealthapplication.utils.ScheduleHelper
-import com.mints.mobilehealthapplication.utils.toLocalDateTime
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -24,6 +23,9 @@ class RescheduleWorker(
 ) : CoroutineWorker(context, workerParams) {
 
     private val tag = "RescheduleWorker"
+    private fun Timestamp.toLocalDateTime(): LocalDateTime {
+        return this.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+    }
 
     override suspend fun doWork(): Result {
         return try {
@@ -279,20 +281,21 @@ class RescheduleWorker(
         // Handle missed weekly due dates.
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
-            val missedDateTime = missedDueDates.minByOrNull { it }!!
-            Log.d(tag, "${medication.name} missed at $missedDateTime, marking as missed")
-            medication.markAsMissed(missedDateTime)
-            medication.id?.let {
-                FireStoreRepository.updateMedicationHistory(
-                    userId = userId,
-                    medicationId = it,
-                    event = MedicationEvent.Missed(
-                        instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
+            for (missedDateTime in missedDueDates) {
+                Log.d(TAG, "${medication.name} missed at $missedDateTime, marking as missed")
+                medication.markAsMissed(missedDateTime)
+                medication.id?.let {
+                    FireStoreRepository.updateMedicationHistory(
+                        userId = userId,
+                        medicationId = it,
+                        event = MedicationEvent.Missed(
+                            instant = missedDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                        )
                     )
-                )
+                }
             }
-        }
 
+        }
         val updatedDates = schedule.nextDueDates.map { dueDate ->
             if (dueDate.isBefore(now)) ScheduleHelper.adjustWeeklyDueDate(dueDate, now) else dueDate
         }.sorted()

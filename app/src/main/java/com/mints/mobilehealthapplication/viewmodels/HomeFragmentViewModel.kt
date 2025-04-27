@@ -10,6 +10,7 @@ import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
 import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.data.NotificationHelper
+import com.mints.mobilehealthapplication.data.getNextDueDates
 import com.mints.mobilehealthapplication.workers.MidnightWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -97,6 +98,18 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper,
     fun deleteMedication(uid: String, medicationId: String, onComplete: () -> Unit) {
         viewModelScope.launch {
             try {
+                val medicationToDelete = _medications.value?.find { it.id == medicationId }
+
+                medicationToDelete?.let { medication ->
+                    notificationHelper.cancelBackupNotification(medication.name)
+
+                    medication.schedule.getNextDueDates().forEach { dateTime ->
+                        val dueTimeMillis = dateTime.atZone(ZoneId.systemDefault())
+                            .toInstant().toEpochMilli()
+                        notificationHelper.cancelRegularNotification(medication.name, dueTimeMillis)
+                    }
+                }
+
                 FireStoreRepository.deleteMedication(uid, medicationId)
                 onComplete()
             } catch (e: Exception) {
