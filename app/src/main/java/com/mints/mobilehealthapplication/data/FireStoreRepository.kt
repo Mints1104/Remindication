@@ -87,7 +87,6 @@ object FireStoreRepository {
 
         medicationsRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                // If there's an error, pass it along via the callback.
                 onResult(emptyList(), error)
                 return@addSnapshotListener
             }
@@ -110,7 +109,6 @@ object FireStoreRepository {
                 }
                 onResult(meds, null)
             } else {
-                // If snapshot is null, return an empty list.
                 onResult(emptyList(), null)
             }
         }
@@ -149,13 +147,11 @@ object FireStoreRepository {
 
     suspend fun updateAdherenceStreak(userId: String, checkDate: LocalDate = LocalDate.now()): Boolean {
         return try {
-            // Retrieve medications list.
             val medications = getMedications(userId)
             val currentDate = LocalDate.now()
             val adherentToday = medications.any { it.medicationHistory.wasTakenOnSpecificDay(checkDate) }
             Log.d("Adherence", "User adherent today: $adherentToday")
 
-            // Fetch the user's current adherence data.
             val userDocRef = db.collection("users").document(userId)
             val document = userDocRef.get().await()
 

@@ -222,6 +222,10 @@ class MidnightWorker(
                 missedDates.forEach { date ->
                     val eventDateTime = date.atTime(missedDateTime.toLocalTime())
                     Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
+                    if (medication.medicationHistory.hadEventOnSpecificDay(date)) {
+                        Log.d(TAG, "Event already exists for $date, skipping")
+                        return
+                    }
                     medication.markAsMissed(eventDateTime)
                     missedEvents.add(
                         MedicationEvent.Missed(

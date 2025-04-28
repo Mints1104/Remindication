@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,6 +10,10 @@ plugins {
 
 
 }
+val localProperties = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
+val apiKey: String = localProperties.getProperty("apiKey") ?: "default_key"
 
 android {
     namespace = "com.mints.mobilehealthapplication"
@@ -40,6 +47,7 @@ android {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
         }
         release {
             isMinifyEnabled = false
@@ -47,6 +55,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
         }
     }
 
