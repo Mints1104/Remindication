@@ -555,7 +555,7 @@ import java.time.LocalDateTime
             if (!alreadyUncovered) {
                 when (val content = MotivationManager.pickOrRetrieveContentForToday(requireContext())) {
                     is MotivationManager.ContentOption.Image -> {
-                        binding.specialImageView.setImageResource(content.drawableId)
+                        MotivationManager.loadImage(requireContext(), content.drawableId, binding.specialImageView)
                         binding.specialImageView.isVisible = true
                         binding.specialQuoteTextView.isVisible = false
                         binding.specialImageView.setOnClickListener {

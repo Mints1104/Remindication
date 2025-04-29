@@ -282,6 +282,10 @@ class RescheduleWorker(
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             for (missedDateTime in missedDueDates) {
+                if(medication.medicationHistory.hadEventOnSpecificDay(missedDateTime.toLocalDate())) {
+                    Log.d(tag, "Event already exists for $missedDateTime, skipping")
+                    continue
+                }
                 Log.d(TAG, "${medication.name} missed at $missedDateTime, marking as missed")
                 medication.markAsMissed(missedDateTime)
                 medication.id?.let {

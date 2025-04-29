@@ -93,6 +93,20 @@
                 android:layout_marginTop="4dp"
                 android:textColor="?attr/colorOnPrimaryContainer"
                 android:textSize="16sp"
+
+
+                />
+
+            <TextView
+                android:id="@+id/medication_instructions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Swipe to mark medication as taken or skipped!"
+                android:layout_marginTop="8dp"
+                android:textColor="?attr/colorOnPrimaryContainer"
+                android:textSize="16sp"
+
+
                 />
 
         </LinearLayout>

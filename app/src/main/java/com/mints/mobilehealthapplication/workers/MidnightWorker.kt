@@ -210,7 +210,7 @@ class MidnightWorker(
         Log.d(TAG, "Original daily due dates for ${medication.name}: ${schedule.nextDueDates}")
         val medicationId = medication.id ?: ""
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
-        if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
+        if (missedDueDates.isNotEmpty()) {
             val missedEvents = mutableListOf<MedicationEvent>()
 
 
@@ -224,7 +224,7 @@ class MidnightWorker(
                     Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
                     if (medication.medicationHistory.hadEventOnSpecificDay(date)) {
                         Log.d(TAG, "Event already exists for $date, skipping")
-                        return
+                        return@forEach
                     }
                     medication.markAsMissed(eventDateTime)
                     missedEvents.add(
@@ -294,6 +294,10 @@ class MidnightWorker(
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             for (missedDateTime in missedDueDates) {
                 Log.d(TAG, "${medication.name} missed at $missedDateTime, marking as missed")
+                if(medication.medicationHistory.hadEventOnSpecificDay(missedDateTime.toLocalDate())) {
+                    Log.d(TAG, "Event already exists for $missedDateTime, skipping")
+                    continue
+                }
                 medication.markAsMissed(missedDateTime)
                 medication.id?.let {
                     FireStoreRepository.updateMedicationHistory(

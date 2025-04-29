@@ -111,6 +111,7 @@ dependencies {
     testImplementation(libs.androidx.navigation.testing)
     testImplementation(libs.androidx.rules)
     testImplementation(libs.androidx.fragment.testing)
+    implementation (libs.glide)
 
 
 

@@ -2,6 +2,8 @@ package com.mints.mobilehealthapplication.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.widget.ImageView
+import com.bumptech.glide.Glide
 import com.mints.mobilehealthapplication.R
 import java.time.LocalDate
 
@@ -93,6 +95,23 @@ object MotivationManager {
             ContentOption.Image(images.random())
         } else {
             ContentOption.Quote(quotes.random())
+        }
+    }
+
+     fun loadImage(context: Context, drawableId: Int, imageView: ImageView) {
+        try {
+            Glide.with(context)
+                .load(drawableId)
+                .centerCrop()
+                .error(R.drawable.ic_stop)
+                .into(imageView)
+
+        } catch (e: Exception) {
+            try {
+                imageView.setImageResource(R.drawable.ic_stop)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

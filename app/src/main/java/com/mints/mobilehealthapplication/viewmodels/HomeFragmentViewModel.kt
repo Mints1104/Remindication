@@ -151,17 +151,17 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper,
                             instant = currentDateTime.atZone(ZoneId.systemDefault()).toInstant()
                         )
                     )
-
+                    notificationHelper.cancelBackupNotification(medication.name)
+                    val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
+                        .toInstant().toEpochMilli()
+                    notificationHelper.cancelRegularNotification(medication.name, dueTimeMillis)
 
 
                     if (success) {
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
-                        notificationHelper.cancelBackupNotification(medication.name)
-                        val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
-                            .toInstant().toEpochMilli()
-                        notificationHelper.cancelRegularNotification(medication.name, dueTimeMillis)
+
 
                         val streakUpdated = FireStoreRepository.updateAdherenceStreak(userId)
                         if (!streakUpdated) {
@@ -225,15 +225,15 @@ class HomeFragmentViewModel(private val notificationHelper: NotificationHelper,
                         )
                     )
 
-
+                    notificationHelper.cancelBackupNotification(medication.name)
+                    val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
+                        .toInstant().toEpochMilli()
+                    notificationHelper.cancelRegularNotification(medication.name, dueTimeMillis)
                     if(success) {
                         _medications.value = _medications.value?.map {
                             if (it.id == medication.id) medication else it
                         }
-                        notificationHelper.cancelBackupNotification(medication.name)
-                        val dueTimeMillis = eventDateTime.atZone(ZoneId.systemDefault())
-                            .toInstant().toEpochMilli()
-                        notificationHelper.cancelRegularNotification(medication.name, dueTimeMillis)
+
                     } else {
                         Log.e("HomeViewModel","Error marking ${medication.name} as skipped")
                     }
