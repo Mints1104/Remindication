@@ -101,7 +101,7 @@
                 android:id="@+id/medication_instructions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Swipe to mark medication as taken or skipped!"
+                android:text="@string/swipe_to_mark_medication_as_taken_or_skipped"
                 android:layout_marginTop="8dp"
                 android:textColor="?attr/colorOnPrimaryContainer"
                 android:textSize="16sp"

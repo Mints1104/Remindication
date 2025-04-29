@@ -419,8 +419,8 @@ import java.time.LocalDateTime
 
             if (medications.isEmpty()) {
                 binding.nextMedicationName.text = getString(R.string.no_medications_left)
-                binding.nextMedicationTime.visibility = View.GONE
-                binding.motivationCover.visibility = View.VISIBLE
+                binding.nextMedicationTime.isVisible = false
+                binding.motivationCover.isVisible = true
             } else {
                 val now = LocalDateTime.now()
                 val closestMedication = medications.minByOrNull { med ->
@@ -448,11 +448,12 @@ import java.time.LocalDateTime
                     } else {
                         binding.nextMedicationTime.visibility = View.GONE
                     }
-                    binding.motivationCover.visibility = View.GONE
+                    binding.motivationCover.isVisible = true
+                    binding.medicationInstructions.isVisible = true
                 } else {
                     binding.nextMedicationName.text = getString(R.string.no_medications_left)
-                    binding.nextMedicationTime.visibility = View.GONE
-                    binding.motivationCover.visibility = View.VISIBLE
+                    binding.nextMedicationTime.isVisible = false
+                    binding.motivationCover.isVisible = true
                 }
             }
         }
@@ -543,8 +544,9 @@ import java.time.LocalDateTime
         private fun handleAllMedicationsCompleted() {
             Log.d(tag, "No more scheduled medications to complete!")
             binding.nextMedicationName.text = getString(R.string.no_medications_left)
-            binding.nextMedicationTime.visibility = View.GONE
-            binding.motivationCover.visibility = View.VISIBLE
+            binding.medicationInstructions.isVisible = false
+            binding.nextMedicationTime.isVisible = false
+            binding.motivationCover.isVisible = true
 
 
         }
