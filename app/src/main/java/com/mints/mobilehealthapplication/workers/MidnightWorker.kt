@@ -269,12 +269,6 @@ class MidnightWorker(
                     Log.d(TAG, "Scheduling notification for ${medication.name} at $dueTimeMillis")
                     notificationHelper.scheduleNotification(medication.name, dueTimeMillis)
                 }
-//                val nextDueTimeMillis = updatedDates.minByOrNull { it }
-//                    ?.atZone(ZoneId.systemDefault())
-//                    ?.toInstant()
-//                    ?.toEpochMilli() ?: 0L
-//                Log.d(TAG, "Scheduling notification for ${medication.name} at $nextDueTimeMillis")
-//                notificationHelper.scheduleNotification(medication.name, nextDueTimeMillis)
                 Log.d(TAG, "Successfully advanced daily schedule for ${medication.name}")
             } else {
                 Log.e(TAG, "Failed to update daily schedule for ${medication.name}")

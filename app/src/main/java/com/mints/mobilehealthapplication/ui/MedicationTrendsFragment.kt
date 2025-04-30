@@ -1,4 +1,3 @@
-// File: java/com/mints/mobilehealthapplication/ui/MedicationTrendsFragment.kt
 package com.mints.mobilehealthapplication.ui
 
 import android.graphics.Color
@@ -60,8 +59,12 @@ class MedicationTrendsFragment : Fragment() {
                 medications.flatMap { it.medicationHistory.getAllEvents() }
             } else {
                 val medication = medications.find { it.id == medicationId }
-                Log.d(tag, "Medication Name: ${medication?.name}")
-                mainActivity.updateToolBarTitle("${medication!!.name} Trends")
+                if (medication == null) {
+                    Log.d(tag, "Medication not found")
+                    return@observe
+                }
+                Log.d(tag, "Medication Name: ${medication.name}")
+                mainActivity.updateToolBarTitle("${medication.name} Trends")
                 medication.medicationHistory.getAllEvents()
             }
 

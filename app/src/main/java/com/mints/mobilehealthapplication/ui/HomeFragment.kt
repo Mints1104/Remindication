@@ -420,7 +420,7 @@ import java.time.LocalDateTime
             if (medications.isEmpty()) {
                 binding.nextMedicationName.text = getString(R.string.no_medications_left)
                 binding.nextMedicationTime.isVisible = false
-                binding.motivationCover.isVisible = true
+                binding.motivationCover.visibility = View.GONE
             } else {
                 val now = LocalDateTime.now()
                 val closestMedication = medications.minByOrNull { med ->
@@ -448,7 +448,7 @@ import java.time.LocalDateTime
                     } else {
                         binding.nextMedicationTime.visibility = View.GONE
                     }
-                    binding.motivationCover.isVisible = true
+                    binding.motivationCover.isVisible = false
                     binding.medicationInstructions.isVisible = true
                 } else {
                     binding.nextMedicationName.text = getString(R.string.no_medications_left)

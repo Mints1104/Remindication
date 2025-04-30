@@ -114,7 +114,7 @@ class HomeFragmentViewModelIntegrationTest {
         return Medication(
             id = id,
             name = name,
-            dosage = "10mg",
+            dosage = "1",
             schedule = MedicationSchedule.Daily(
                 frequency = DailyFrequency.ONCE,
                 times = listOf(LocalTime.of(8, 0)),
