@@ -137,7 +137,6 @@ class RescheduleWorker(
             }
         }
 
-        // Initial calculation
         var newDueDates: List<LocalDateTime>
         var newCycleStartDate: Timestamp
 
@@ -151,7 +150,6 @@ class RescheduleWorker(
         newDueDates = initialCalculation.first
         newCycleStartDate = initialCalculation.second
 
-        // If all calculated dates are in the past, recalculate for next cycle
         if (newDueDates.all { it.isBefore(now) }) {
             Log.d(TAG, "All dates in the past, recalculating with new cycle start")
             val recalculation = ScheduleHelper.calculateCyclicDueDates(
@@ -165,7 +163,6 @@ class RescheduleWorker(
         }
 
         medication.id?.let { medId ->
-            // Update both the due dates and cycle start date
             val success = FireStoreRepository.updateCyclicMedication(
                 userId = userId,
                 medicationId = medId,
@@ -176,7 +173,6 @@ class RescheduleWorker(
             if (success) {
                 Log.d(TAG, "All new due dates: $newDueDates")
 
-                // Filter out due dates that are not after the current time
                 val upcomingDueDates = newDueDates.filter { it.isAfter(now) }
                 Log.d(TAG, "Upcoming due dates after filtering: $upcomingDueDates")
 
@@ -207,13 +203,11 @@ class RescheduleWorker(
     ) {
         Log.d(tag, "Original daily due dates for ${medication.name}: ${schedule.nextDueDates}")
 
-        // Identify missed due dates.
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             val missedEvents = mutableListOf<MedicationEvent>()
 
             missedDueDates.forEach { missedDateTime ->
-                // Use the shared ScheduleHelper function.
                 val missedDates = ScheduleHelper.getDatesBetween(
                     start = missedDateTime.toLocalDate(),
                     end = now.toLocalDate().minusDays(1)
@@ -245,7 +239,6 @@ class RescheduleWorker(
             }
         }
 
-        // Adjust due dates using ScheduleHelper.
         val updatedDates = schedule.nextDueDates.map { dueDate ->
             if (dueDate.isBefore(now)) ScheduleHelper.adjustDailyDueDate(dueDate, now) else dueDate
         }.distinct()
@@ -278,7 +271,6 @@ class RescheduleWorker(
     ) {
         Log.d(tag, "Original weekly due dates for ${medication.name}: ${schedule.nextDueDates}")
 
-        // Handle missed weekly due dates.
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty() && !medication.medicationHistory.hadEventYesterday()) {
             for (missedDateTime in missedDueDates) {

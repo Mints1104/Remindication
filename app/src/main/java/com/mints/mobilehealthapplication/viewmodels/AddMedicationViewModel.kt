@@ -1,5 +1,4 @@
     package com.mints.mobilehealthapplication.viewmodels
-
     import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,8 +19,7 @@ import java.time.LocalTime
     import java.time.temporal.TemporalAdjusters
     import java.util.Date
 
-    class AddMedicationViewModel(
-    ) : ViewModel(
+    class AddMedicationViewModel : ViewModel(
     ) {
 
         private val _medicationName = MutableLiveData("").apply {
@@ -234,7 +232,6 @@ import java.time.LocalTime
             } else true
         }
 
-        // State management
         fun resetAllData() {
             _medicationName.value = ""
             _dosage.value = ""
@@ -390,16 +387,12 @@ import java.time.LocalTime
                     ),
                 )
                 "Cyclic" -> {
-                    // For cyclic schedules, get the intake and pause days.
                     val intakeDays = _intakeDays.value
                         ?: throw IllegalStateException("Missing intake days")
                     val pauseDays = _pauseDays.value
                         ?: throw IllegalStateException("Missing pause days")
-                    // Use the selected times.
                     val cyclicTimes = _selectedTimes.value ?: emptyList()
-                    // For currentCycleStartDate, we can default to now.
                     val currentCycleStart = Timestamp(Date())
-                    // Calculate next due dates for the cyclic schedule.
                     val nextDueDates = calculateCyclicDueDates(intakeDays, cyclicTimes, currentCycleStart)
                     MedicationSchedule.Cyclic(
                         intakeDays = intakeDays,
@@ -424,13 +417,11 @@ import java.time.LocalTime
             times: List<LocalTime>,
             currentCycleStartDate: Timestamp?
         ): List<LocalDateTime> {
-            // If currentCycleStartDate is null, use today.
             val startDate: LocalDate = currentCycleStartDate?.toDate()?.toInstant()
                 ?.atZone(ZoneId.systemDefault())
                 ?.toLocalDate() ?: LocalDate.now()
 
             val dueDates = mutableListOf<LocalDateTime>()
-            // For each day in the intake period, add each time as a due date.
             for (day in 0 until intakeDays) {
                 val date = startDate.plusDays(day.toLong())
                 times.forEach { time ->

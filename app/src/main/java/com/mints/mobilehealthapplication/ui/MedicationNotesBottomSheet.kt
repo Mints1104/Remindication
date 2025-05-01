@@ -60,9 +60,7 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)

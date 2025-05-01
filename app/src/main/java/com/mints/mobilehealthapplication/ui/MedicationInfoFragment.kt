@@ -91,7 +91,6 @@ class MedicationInfoFragment : Fragment() {
         binding.medicationNameHeader.text = brandName
         binding.medicationGenericName.text = genericName
 
-        // Key medication information sections (expanded by default)
         addInfoSection(R.drawable.ic_directions, "How to Use",
             result.dosage_and_administration?.firstOrNull(), true)
 
@@ -101,7 +100,6 @@ class MedicationInfoFragment : Fragment() {
         addInfoSection(R.drawable.ic_uses, "Uses",
             result.indications_and_usage?.firstOrNull(), true)
 
-        // Secondary information (collapsed by default)
         addInfoSection(R.drawable.ic_ingredient, "Active Ingredients",
             result.active_ingredient?.firstOrNull(), false)
 
@@ -125,10 +123,8 @@ class MedicationInfoFragment : Fragment() {
     }
 
     private fun addInfoSection(iconResId: Int, title: String, content: String?, expandedByDefault: Boolean) {
-        // Skip if content is null or empty
         if (content.isNullOrBlank()) return
 
-        // Inflate the section card
         val inflater = LayoutInflater.from(requireContext())
         val sectionCard = inflater.inflate(
             R.layout.medication_info_card,
@@ -136,7 +132,6 @@ class MedicationInfoFragment : Fragment() {
             false
         ) as MaterialCardView
 
-        // Set up the card content
         val sectionIcon = sectionCard.findViewById<ImageView>(R.id.section_icon)
         val sectionTitle = sectionCard.findViewById<TextView>(R.id.section_title)
         val expandIcon = sectionCard.findViewById<ImageView>(R.id.expand_icon)
@@ -145,21 +140,17 @@ class MedicationInfoFragment : Fragment() {
         val divider = sectionCard.findViewById<View>(R.id.divider)
         val sectionHeader = sectionCard.findViewById<LinearLayout>(R.id.section_header)
 
-        // Configure the section
         sectionIcon.setImageResource(iconResId)
         sectionTitle.text = title
         sectionContent.text = viewModel.formatMedicationInfo(content)
 
-        // Set initial expanded state
         contentContainer.visibility = if (expandedByDefault) View.VISIBLE else View.GONE
         divider.visibility = if (expandedByDefault) View.VISIBLE else View.GONE
         expandIcon.rotation = if (expandedByDefault) 180f else 0f
 
-        // Set up click listener to expand/collapse
         sectionHeader.setOnClickListener {
             val isExpanded = contentContainer.visibility == View.VISIBLE
 
-            // Toggle visibility with animation
             if (isExpanded) {
                 contentContainer.visibility = View.GONE
                 divider.visibility = View.GONE
@@ -171,7 +162,6 @@ class MedicationInfoFragment : Fragment() {
             }
         }
 
-        // Add the card to the container
         binding.infoContainer.addView(sectionCard)
     }
 

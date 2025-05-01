@@ -79,7 +79,6 @@ class MidnightWorker(
     ) {
         Log.d(TAG, "Processing cyclic schedule for ${medication.name}")
 
-        // Handle missed doses
         val missedDueDates = schedule.nextDueDates.filter { it.isBefore(now) }
         if (missedDueDates.isNotEmpty()) {
             val missedEvents = mutableListOf<MedicationEvent>()
@@ -139,7 +138,6 @@ class MidnightWorker(
             }
         }
 
-        // Initial calculation
         var newDueDates: List<LocalDateTime>
         var newCycleStartDate: Timestamp
 
@@ -251,7 +249,6 @@ class MidnightWorker(
             }
         }
 
-        // Adjust due dates using ScheduleHelper.
         val updatedDates = schedule.nextDueDates.map { dueDate ->
             if (dueDate.isBefore(now)) ScheduleHelper.adjustDailyDueDate(dueDate, now) else dueDate
         }.distinct()

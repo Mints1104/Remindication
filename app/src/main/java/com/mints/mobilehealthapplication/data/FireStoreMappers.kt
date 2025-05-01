@@ -22,15 +22,12 @@ class FireStoreMappers {
         )
     }
 
-    // Converts a LocalDateTime to a Firebase Timestamp.
     fun LocalDateTime.toFirebaseTimestamp(): Timestamp =
         Timestamp(java.util.Date.from(this.atZone(ZoneId.systemDefault()).toInstant()))
 
-    // Converts a Firebase Timestamp to a LocalDateTime.
     fun Timestamp.toLocalDateTime(): LocalDateTime =
         LocalDateTime.ofInstant(this.toDate().toInstant(), ZoneId.systemDefault())
 
-    // Extension function for formatting LocalTime.
     fun LocalTime.formatTime(): String =
         this.format(DateTimeFormatter.ofPattern("HH:mm"))
 

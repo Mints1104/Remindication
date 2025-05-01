@@ -92,7 +92,6 @@ class MedicationHistoryViewModel : ViewModel() {
         _navigateToDetails.value = medication
     }
 
-    // Clear navigation event once handled
     fun onMedicationNavigated() {
         _navigateToDetails.value = null
     }

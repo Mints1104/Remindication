@@ -23,11 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-/**
- * Fragment responsible for capturing basic health information during user registration.
- * This fragment allows the user to input their first name, last name, and date of birth (DOB).
- * It also handles navigation to the next fragment after the user completes the form.
- */
+
 class HealthInfoFragment : Fragment() {
     private lateinit var viewModel: RegistrationViewModel
     private var datePicker: MaterialDatePicker<Long>? = null
@@ -79,9 +75,7 @@ class HealthInfoFragment : Fragment() {
     }
 
 
-    /**
-     * Completes the registration process and navigates to the next screen.
-     */
+
     private fun completeRegistration() {
         viewModel.registerUser()
         lifecycleScope.launch {
@@ -158,9 +152,7 @@ class HealthInfoFragment : Fragment() {
         }
     }
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
@@ -170,7 +162,6 @@ class HealthInfoFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        //Save current data before leaving the fragment
         val firstName = binding.firstNameEditText.text.toString()
         val lastName = binding.lastNameEditText.text.toString()
         val dob = binding.dobEditText.text.toString()

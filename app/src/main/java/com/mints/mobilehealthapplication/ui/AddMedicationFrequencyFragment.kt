@@ -13,10 +13,7 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationPart2Binding
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 
-/**
- * A Fragment to handle adding a medication entry.
- * Allows the user to input medication details such as name, dosage, frequency, reminder time, and notes.
- */
+
 class AddMedicationFrequencyFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationPart2Binding? = null
@@ -29,9 +26,7 @@ class AddMedicationFrequencyFragment : Fragment() {
         requireActivity() as MainActivity
     }
 
-    /**
-     * Inflates the layout and initializes UI elements for the fragment.
-     */
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,35 +39,11 @@ class AddMedicationFrequencyFragment : Fragment() {
         setUpRadioButtonListeners()
         setupContinueButton()
         observeValidationState()
-        deviceConnected = isDeviceConnected()
-        /*
-        observeNetworkState()
-
-        if(!deviceConnected) {
-            displayMessage("Internet connection lost")
-            findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
-        } else {
-            Log.d(tag, "Device is connected to the internet")
-        }
-
-         */
         return view
     }
 
-    private fun observeNetworkState() {
-        mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
-            if (!isConnected) {
-                displayMessage("Internet connection lost")
-                if (findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment) {
-                    findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
-                }
-            }
-        }
-    }
 
-    private fun isDeviceConnected(): Boolean {
-        return mainActivity.checkNetworkState()
-    }
+
 
     private fun setUpUI() {
         mainActivity.apply {

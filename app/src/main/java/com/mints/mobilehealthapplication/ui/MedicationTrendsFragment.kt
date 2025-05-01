@@ -142,21 +142,17 @@ class MedicationTrendsFragment : Fragment() {
 
         val daysInWeek = (0..6).map { startOfWeek.plusDays(it.toLong()) }
 
-        // Create labels for the x-axis
         val dayLabels = daysInWeek.map { date ->
             "${date.monthValue}/${date.dayOfMonth} ${date.dayOfWeek.toString().take(3)}"
         }
 
-        // Group events by their actual date
         val eventsByDate = events.groupBy { event ->
             event.date.toLocalDate()
         }
-        //Only use events that are marked as "Taken"
         val filteredEvents = eventsByDate.mapValues { entry ->
             entry.value.filter { it.type == MedicationEvent.EventType.TAKEN }
         }
 
-        // Create entries for each day of the current week
         val entries = daysInWeek.mapIndexed { index, date ->
             val dayEvents = filteredEvents[date] ?: emptyList()
             BarEntry(index.toFloat(), dayEvents.size.toFloat())
@@ -165,7 +161,6 @@ class MedicationTrendsFragment : Fragment() {
         val dataSet = BarDataSet(entries, "Events by Day").apply {
             color = Color.GREEN
             valueTextSize = 12f
-            // Set the values' text color for the bars
             valueTextColor = if ((resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES) Color.WHITE else Color.BLACK
         }
 
@@ -203,11 +198,9 @@ class MedicationTrendsFragment : Fragment() {
         chart.setDrawGridBackground(false)
         chart.legend.isEnabled = true
 
-        // Group events by hour
         val eventsByHour: Map<Int, List<MedicationEvent>> = events.groupBy { event ->
             event.date.hour
         }
-        //Only use taken events, not missed or skipped
         val filteredEventsByHour = eventsByHour.mapValues { entry ->
             entry.value.filter { it.type == MedicationEvent.EventType.TAKEN }
         }

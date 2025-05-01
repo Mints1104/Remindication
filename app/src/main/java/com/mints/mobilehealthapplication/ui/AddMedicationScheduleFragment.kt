@@ -37,7 +37,6 @@ class AddMedicationScheduleFragment : Fragment() {
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     private val tag = "ScheduleFragment"
     private var userId = ""
-    private var deviceConnected = false
     private val mainActivity: MainActivity by lazy {
         requireActivity() as MainActivity
     }
@@ -54,41 +53,13 @@ class AddMedicationScheduleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupViews()
         setupObservers()
-        Log.d(tag,"In MedicationScheduleFragment...")
         userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         Log.d(tag,"Get frequency: ${viewModel.getFrequency()}")
-
         Log.d(tag,"Get frequencyType: ${viewModel.getFrequencyType()}")
-        deviceConnected = isDeviceConnected()
-        /*
-        observeNetworkState()
 
-
-        if(!deviceConnected) {
-            displayMessage("Internet connection lost")
-            findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
-        } else {
-            Log.d(tag, "Device is connected to the internet")
-        }
-
-         */
 
     }
 
-    private fun observeNetworkState() {
-        mainActivity.internetChecker.connectionState.observe(viewLifecycleOwner) { isConnected ->
-            if (!isConnected) {
-                displayMessage("Internet connection lost")
-                if (findNavController().currentDestination?.id == R.id.addMedicationBasicInfoFragment) {
-                    findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
-                }
-            }
-        }
-    }
-
-    private fun isDeviceConnected(): Boolean {
-        return mainActivity.checkNetworkState()
-    }
 
     private fun setupViews() {
       mainActivity.apply {
@@ -548,7 +519,6 @@ class AddMedicationScheduleFragment : Fragment() {
         val currentTime = LocalTime.now()
         val medicationName = viewModel.getName()
 
-        // Schedule notifications based on frequency type
         when (viewModel.getFrequencyType()) {
             "Twice Daily" -> {
                 val selectedLocalTimes = viewModel.getSelectedTimes() ?: listOf(currentTime, currentTime)
@@ -573,12 +543,11 @@ class AddMedicationScheduleFragment : Fragment() {
                 if (selectedDays.isNotEmpty()) {
                     val today = LocalDate.now().dayOfWeek
                     val scheduledDateTimes = selectedDays.map { day ->
-                        // Calculate days to add to get to the next occurrence of this day
                         val daysToAdd = (day.value - today.value + 7) % 7
                         val date = if (daysToAdd == 0 && selectedTime.isBefore(currentTime)) {
-                            LocalDate.now().plusDays(7) // Schedule for next week
+                            LocalDate.now().plusDays(7)
                         } else if (daysToAdd == 0) {
-                            LocalDate.now() // Today, but time is still in future
+                            LocalDate.now()
                         } else {
                             LocalDate.now().plusDays(daysToAdd.toLong())
                         }
@@ -653,24 +622,22 @@ class AddMedicationScheduleFragment : Fragment() {
     private fun navigateToNextFragment() {
         if (isAdded && !isStateSaved) {
             if (viewModel.getIsEditing() == true) {
-                // Clear all fragments up to home, then navigate to prescriptions
                 findNavController().navigate(
                     R.id.action_addMedicationScheduleFragment_to_prescriptionsFragment,
                     null,
                     navOptions {
                         popUpTo(R.id.homeFragment) {
-                            inclusive = false  // Keep home fragment as base
+                            inclusive = false
                         }
                     }
                 )
             } else {
-                // Navigate to home and clear everything else
                 findNavController().navigate(
                     R.id.action_addMedicationScheduleFragment_to_homeFragment,
                     null,
                     navOptions {
                         popUpTo(R.id.homeFragment) {
-                            inclusive = true  // Clear everything including home
+                            inclusive = true
                         }
                     }
                 )
@@ -679,9 +646,7 @@ class AddMedicationScheduleFragment : Fragment() {
     }
 
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)

@@ -13,10 +13,7 @@ import com.google.firebase.ktx.Firebase
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.BottomsheetStreaksBinding
 
-/**
- * A BottomSheetFragment that displays a user's daily adherence streak.
- * Instead of tracking logins, it checks if the user has taken any medication today.
- */
+
 class StreakBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var db: FirebaseFirestore
@@ -34,18 +31,14 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
         db = Firebase.firestore
         auth = Firebase.auth
 
-        // Show loading text while we fetch/update adherence streak data
         binding.currentStreakText.text = getString(R.string.current_streak_loading)
 
-        // Set up close button for the bottom sheet
         binding.closeStreakDialogButton.setOnClickListener {
             dismiss()
         }
 
-        // If the user is logged in, update the adherence streak
         val userId = FirebaseAuth.getInstance().uid
         if (userId != null) {
-        //    updateAdherenceStreak(userId)
             listenToAdherenceChanges(userId)
 
         } else {
@@ -65,7 +58,6 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
                 return@addSnapshotListener
             }
 
-            // Only update UI if we have a valid binding
             if (snapshot != null && snapshot.exists() && _binding != null) {
                 val streak = snapshot.getLong("adherenceStreak")?.toInt() ?: 0
                 _binding?.currentStreakText?.text = "Current Adherence Streak: $streak"

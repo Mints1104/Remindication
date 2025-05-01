@@ -8,7 +8,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.ktx.persistentCacheSettings
@@ -222,111 +221,11 @@ object FireStoreRepository {
             false
         }
     }
-/*
-    suspend fun addMedicationEvent(
-        userId: String,
-        medicationId: String,
-        event: MedicationEvent
-    ): Boolean {
-        return try {
-            val eventPath = "users/$userId/medications/$medicationId/events"
-            Log.d("FireStoreRepo", "Adding medication event at path: [$eventPath] with event type: ${event::class.simpleName}")
 
-            val eventMap = with(mappers) { event.toMap() }
 
-            // Using the timestamp as the document ID or generate a unique ID
-            val eventId = db.collection(eventPath).document().id
 
-            db.collection(eventPath)
-                .document(eventId)
-                .set(eventMap)
-                .await()
 
-            Log.d("FireStoreRepo", "Successfully added medication event at path: [$eventPath/$eventId]")
-            true
-        } catch (e: FirebaseFirestoreException) {
-            Log.e("FireStoreRepo", "Firestore operation failed: ${e.code} - ${e.message}", e)
-            false
-        } catch (e: Exception) {
-            Log.e("FireStoreRepo", "Unexpected error adding medication event: ${e.message}", e)
-            false
-        }
-    }
 
- */
-
-    suspend fun getMedicationEvents(
-        userId: String,
-        medicationId: String,
-        limit: Long = 200,
-        startAfter: Timestamp? = null
-    ): List<MedicationEvent> {
-        val eventsPath = "users/$userId/medications/$medicationId/events"
-
-        try {
-            var query = db.collection(eventsPath)
-                .orderBy("date", Query.Direction.DESCENDING)
-                .limit(limit)
-
-            if (startAfter != null) {
-                query = query.startAfter(startAfter)
-            }
-
-            val snapshot = query.get().await()
-            return snapshot.documents.mapNotNull { doc ->
-                val eventMap = doc.data ?: return@mapNotNull null
-                parseMedicationEvent(eventMap)
-            }
-        } catch (e: Exception) {
-            Log.e("FireStoreRepo", "Error getting medication events: ${e.message}")
-            return emptyList()
-        }
-    }
-
-    private fun parseMedicationEvent(eventMap: Map<String, Any>): MedicationEvent? {
-        val instant = (eventMap["date"] as? Timestamp)?.toDate()?.toInstant() ?: Instant.now()
-        val notes = eventMap["notes"] as? String ?: ""
-        val type = eventMap["type"] as? String
-
-        return when (type) {
-            "taken" -> MedicationEvent.Taken(instant = instant)
-            "skipped" -> MedicationEvent.Skipped(instant = instant)
-            "missed" -> MedicationEvent.Missed(instant = instant)
-            else -> null
-        }
-    }
-
-    suspend fun addMultipleMedicationEvents(
-        userId: String,
-        medicationId: String,
-        events: List<MedicationEvent>
-    ): Boolean {
-        if (events.isEmpty()) return true
-
-        return try {
-            val eventsPath = "users/$userId/medications/$medicationId/events"
-            Log.d("FireStoreRepo", "Adding multiple medication events (${events.size}) at path: [$eventsPath]")
-
-            val batch = db.batch()
-
-            events.forEach { event ->
-                val eventMap = with(mappers) { event.toMap() }
-                val eventRef = db.collection(eventsPath).document()
-                batch.set(eventRef, eventMap)
-            }
-
-            batch.commit().await()
-
-            Log.d("FireStoreRepo", "Successfully added ${events.size} medication events to path: [$eventsPath]")
-            true
-        } catch (e: FirebaseFirestoreException) {
-            Log.e("FireStoreRepo", "Batch write failed for multiple medication events: ${e.code} - ${e.message}", e)
-            false
-        } catch (e: Exception) {
-            Log.e("FireStoreRepo", "Unexpected error adding multiple medication events: ${e.message}", e)
-            false
-        }
-    }
 
 
 

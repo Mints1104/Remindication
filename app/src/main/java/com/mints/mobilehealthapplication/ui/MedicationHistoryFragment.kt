@@ -96,8 +96,6 @@ class MedicationHistoryFragment : Fragment() {
             Snackbar.make(binding.root, "User not authenticated", Snackbar.LENGTH_SHORT).show()
         } else {
             viewModel.getMedications(uid)
-          //  viewModel.getMedicationsTwo(uid)
-
             medicationList = viewModel.getMedicationList()
 
 

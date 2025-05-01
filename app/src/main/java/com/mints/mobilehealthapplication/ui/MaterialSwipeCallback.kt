@@ -34,7 +34,6 @@ class MaterialSwipeCallback(
             .build()
     }
 
-    // Add this to block swipes while one’s active
     override fun isItemViewSwipeEnabled(): Boolean {
         return !isSwipeInProgress
     }
@@ -47,7 +46,7 @@ class MaterialSwipeCallback(
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         if (isSwipeInProgress) {
-            return // Extra safety, but isItemViewSwipeEnabled should catch it
+            return
         }
         isSwipeInProgress = true
         val position = viewHolder.adapterPosition

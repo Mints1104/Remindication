@@ -16,7 +16,6 @@ class MedicationAnalyticsViewModel: ViewModel() {
     private val _adherencePercentage = MutableLiveData<Float>()
     val adherencePercentage: LiveData<Float> get() = _adherencePercentage
 
-    // Add a LiveData for medication events
     private val _medicationEvents = MutableLiveData<List<MedicationEvent>>()
     val medicationEvents: LiveData<List<MedicationEvent>> get() = _medicationEvents
 

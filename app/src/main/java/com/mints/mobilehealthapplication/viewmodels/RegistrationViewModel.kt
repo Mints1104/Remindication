@@ -16,10 +16,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-/**
- * ViewModel responsible for managing the registration process including user data and medication information.
- * Handles user authentication, data validation, and storage in Firebase.
- */
+
 class RegistrationViewModel : ViewModel() {
     private val auth = Firebase.auth
 
@@ -34,10 +31,7 @@ class RegistrationViewModel : ViewModel() {
         _registrationData.value = RegistrationData()
         _registrationState.value = RegistrationState.Initial
     }
-    /**
-     * Data class containing all registration-related information.
-     * Uses nullable types for optional medication fields.
-     */
+
     data class RegistrationData(
         var email: String = "",
         var password: String = "",
@@ -47,10 +41,7 @@ class RegistrationViewModel : ViewModel() {
         var phoneNumber: String = "",
     )
 
-    /**
-     * Sealed class representing all possible states during the registration process.
-     * Provides type-safe state handling.
-     */
+
     sealed class RegistrationState {
         data object Initial : RegistrationState()
         data object Loading : RegistrationState()
@@ -58,10 +49,7 @@ class RegistrationViewModel : ViewModel() {
         data class Success(val userId: String) : RegistrationState()
     }
 
-    /**
-     * Enum class representing different types of registration errors.
-     * Used for more specific error handling in the UI.
-     */
+
     enum class ErrorType {
         EMAIL_EXISTS,
         WEAK_PASSWORD,
@@ -70,10 +58,7 @@ class RegistrationViewModel : ViewModel() {
         GENERAL
     }
 
-    /**
-     * Validates if the user meets the minimum age requirement (18 years).
-     * Uses device's locale for date parsing.
-     */
+
     fun isAgeValid(dateString: String): Boolean {
         return try {
             val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -93,19 +78,15 @@ class RegistrationViewModel : ViewModel() {
                 age >= 18
             }
         } catch (e: Exception) {
-            false // Return false for any parsing errors
+            false
         }
     }
 
-    /**
-     * Handles the complete registration process including user creation and data storage.
-     * Executes in a coroutine scope and handles various Firebase exceptions.
-     */
+
     fun registerUser() = viewModelScope.launch {
         _registrationState.value = RegistrationState.Loading
 
         try {
-            // Validate age before proceeding
             if (!isAgeValid(_registrationData.value.dateOfBirth)) {
                 _registrationState.value = RegistrationState.Error(
                     "You must be 18 or older to register",
@@ -114,7 +95,6 @@ class RegistrationViewModel : ViewModel() {
                 return@launch
             }
 
-            // Create Firebase user
             val authResult = auth.createUserWithEmailAndPassword(
                 _registrationData.value.email,
                 _registrationData.value.password
@@ -122,7 +102,6 @@ class RegistrationViewModel : ViewModel() {
 
             val user = authResult.user
             if (user != null) {
-                // Save user data
                 val userData = _registrationData.value
                 val isSaved = FireStoreRepository.saveUserData(user.uid, userData)
 
@@ -166,10 +145,7 @@ class RegistrationViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Updates registration data in a thread-safe way using the provided update function.
-     * @param update lambda function to modify registration data
-     */
+
     fun updateRegistrationData(update: RegistrationData.() -> Unit) {
         _registrationData.value = _registrationData.value.copy().apply(update)
     }

@@ -7,13 +7,7 @@ import kotlinx.coroutines.launch
 
 class ResetPasswordViewModel : ViewModel() {
 
-    /**
-     * Sends a password reset email using the FireStoreRepository.
-     * @param email The email address to send the reset email to.
-     * @param onResult A callback function that receives a Pair<Boolean, String>:
-     *                 - Boolean: Indicates success (true) or failure (false).
-     *                 - String: Contains a success message or error message.
-     */
+
     fun sendPasswordResetEmail(email: String, onResult: (Boolean, String) -> Unit) {
         viewModelScope.launch {
             try {

@@ -37,7 +37,6 @@ class ProfileFragment : Fragment() {
         viewModel.loadUserProfile()
        mainActivity.hideBottomNav()
 
-        // Initialize ProfileViewModel functions
         viewModel.startListeningToAdherenceStreak()
         viewModel.checkMedicationHistory()
         viewModel.calculatePerfectWeeks()
@@ -46,13 +45,11 @@ class ProfileFragment : Fragment() {
         setupDebugMode()
         setupObservers()
 
-        // Handle button clicks
         binding.btnChangePassword.setOnClickListener { changePassword() }
         binding.btnLogout.setOnClickListener { logoutUser() }
     }
 
     private fun setupObservers() {
-        // Observe profile data and update UI
         viewModel.userProfile.observe(viewLifecycleOwner) { user ->
             binding.profileFullName.text = "${user.firstName} ${user.lastName}"
             binding.profileEmail.text = user.email
@@ -61,25 +58,20 @@ class ProfileFragment : Fragment() {
             binding.profileUserId.text = user.uid
         }
 
-        // Observe adherence streak
         viewModel.adherenceStreak.observe(viewLifecycleOwner) { streak ->
             binding.streakCount.text = streak.toString()
 
-            // Update streak progress (7-day streak achievement)
             val progress = minOf(streak, 7)
             binding.streakProgress.progress = progress * 100 / 7
             binding.streakProgressText.text = "$progress/7"
         }
 
-        // Observe if user has taken medication before
         viewModel.hasEverTakenMedication.observe(viewLifecycleOwner) { hasTaken ->
-            // Update first medication badge (make it fully visible if achieved)
             binding.firstMedicationBadge.alpha = if (hasTaken) 1.0f else 0.5f
             binding.firstMedicationBadgeText.text = if (hasTaken) "✓" else "X"
 
         }
 
-        // Observe perfect weeks count
         viewModel.perfectWeeks.observe(viewLifecycleOwner) { perfectWeeks ->
             binding.perfectWeekCount.text = "$perfectWeeks"
         }
@@ -104,9 +96,7 @@ class ProfileFragment : Fragment() {
 
 
     private fun setupDebugMode() {
-        // Only show debug toggle in debug builds
         if (BuildConfig.DEBUG) {
-           // binding.debugModeSwitch.visibility = View.VISIBLE
             binding.debugModeSwitch.setOnCheckedChangeListener { _, isChecked ->
                 binding.debugUserIdContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
             }

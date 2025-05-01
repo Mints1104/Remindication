@@ -14,7 +14,6 @@ import retrofit2.HttpException
 
 class MedicationInfoViewModel : ViewModel() {
 
-    // Define UI states
     sealed class UiState {
         object Loading : UiState()
         data class Success(val medicationResult: MedicationResult) : UiState()
@@ -25,7 +24,6 @@ class MedicationInfoViewModel : ViewModel() {
     val uiState: LiveData<UiState> = _uiState
 
     fun fetchMedicationInfo(drugName: String) {
-        // Show loading state
         _uiState.value = UiState.Loading
 
         viewModelScope.launch {
@@ -59,18 +57,14 @@ class MedicationInfoViewModel : ViewModel() {
     }
 
     fun formatMedicationInfo(text: String): String {
-        // Break text into paragraphs first
         val paragraphs = text.split("\n\n", "\r\n\r\n")
         val formattedText = StringBuilder()
 
         for (paragraph in paragraphs) {
-            // Skip empty paragraphs
             if (paragraph.trim().isEmpty()) continue
 
-            // Process each paragraph into bullet points if needed
             val cleanParagraph = paragraph.replace("\n", " ").trim()
 
-            // For paragraphs that appear to be lists (with multiple sentences)
             if (cleanParagraph.contains(". ") && cleanParagraph.length > 100) {
                 val sentences = cleanParagraph.split(". ")
                 for (sentence in sentences) {
@@ -81,7 +75,6 @@ class MedicationInfoViewModel : ViewModel() {
                 }
                 formattedText.append("\n")
             } else {
-                // Keep short paragraphs intact
                 formattedText.append(cleanParagraph)
                 formattedText.append("\n\n")
             }

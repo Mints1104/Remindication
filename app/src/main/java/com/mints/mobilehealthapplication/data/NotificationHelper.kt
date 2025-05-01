@@ -138,17 +138,14 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun cancelRegularNotification(medicationName: String, timeInMillis: Long) {
-        // Construct the same unique URI used for regular notifications.
         val uniqueUri = Uri.parse("mints://notification/$medicationName/$timeInMillis")
         val requestCode = uniqueUri.hashCode()
 
-        // Create an intent with the same action and data.
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             action = NOTIFICATION_ACTION
             data = uniqueUri
         }
 
-        // Get the existing PendingIntent, if any.
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
@@ -156,7 +153,6 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
         )
 
-        // If there's an existing intent, cancel it using the AlarmManager.
         if (pendingIntent != null) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.cancel(pendingIntent)
@@ -165,7 +161,6 @@ class NotificationHelper(private val context: Context) {
             Log.d("NotifDebug", "No regular notification found to cancel for $medicationName")
         }
 
-        // Also cancel the notification from the NotificationManager.
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(requestCode)
     }

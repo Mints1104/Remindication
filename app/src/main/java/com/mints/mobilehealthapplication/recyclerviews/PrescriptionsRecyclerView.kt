@@ -98,9 +98,7 @@ class PrescriptionsRecyclerView(
         diffResult.dispatchUpdatesTo(this)
     }
 
-    /**
-     * This method can be called from another class to hide the medicationDay view for every medication.
-     */
+
     fun hideAllMedicationDays() {
         hideMedicationDays = true
         notifyDataSetChanged()

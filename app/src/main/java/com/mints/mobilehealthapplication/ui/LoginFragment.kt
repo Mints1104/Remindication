@@ -17,10 +17,7 @@ import com.mints.mobilehealthapplication.application.MedicationApp
 import com.mints.mobilehealthapplication.databinding.FragmentLoginscreenBinding
 import com.mints.mobilehealthapplication.viewmodels.LoginViewModel
 
-/**
- * LoginFragment handles the user login functionality, including user authentication
- * and navigation to related fragments like "Reset Password" or "Sign Up."
- */
+
 class LoginFragment : Fragment() {
 
     private val viewModel: LoginViewModel by viewModels()
@@ -28,9 +25,7 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var navController: NavController
 
-    /**
-     * Inflates the layout for this fragment and initializes the UI components.
-     */
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

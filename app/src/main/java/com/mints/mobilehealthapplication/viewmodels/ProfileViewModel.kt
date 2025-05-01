@@ -22,11 +22,9 @@ class ProfileViewModel : ViewModel() {
     private val _userProfile = MutableLiveData<UserProfile>()
     val userProfile: LiveData<UserProfile> get() = _userProfile
 
-    // Add streak tracking
     private val _adherenceStreak = MutableLiveData<Int>(0)
     val adherenceStreak: LiveData<Int> = _adherenceStreak
 
-    // Track if user has ever taken medication
     private val _hasEverTakenMedication = MutableLiveData<Boolean>(false)
     val hasEverTakenMedication: LiveData<Boolean> = _hasEverTakenMedication
 
@@ -71,7 +69,6 @@ class ProfileViewModel : ViewModel() {
 
             medications.forEach { medication ->
                 medication.medicationHistory.events.forEach { event ->
-                    // Convert Instant to LocalDate using the system default zone.
                     val localDate = event.date.atZone(ZoneId.systemDefault()).toLocalDate()
                     val weekFields = WeekFields.of(Locale.getDefault())
                     val weekNumber = localDate.get(weekFields.weekOfYear())
@@ -137,12 +134,12 @@ class ProfileViewModel : ViewModel() {
         FireStoreRepository.getMedicationsSnapshot(uid) { meds, error ->
             if (error != null) {
                 Log.e("HomeFragmentVM", "Failed to get medications: ${error.message}")
-                onComplete() // Even on error, signal completion
+                onComplete()
                 return@getMedicationsSnapshot
             }
 
             Log.d("HomeFragmentViewModel", "Fetched ${meds.size} medications from snapshot")
-            _medications.postValue(meds) // Update LiveData with the new list
+            _medications.postValue(meds)
             onComplete()
         }
     }
@@ -150,7 +147,6 @@ class ProfileViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        // Clean up listener when ViewModel is destroyed
         streakListener?.remove()
     }
 }

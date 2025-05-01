@@ -18,10 +18,7 @@ import com.mints.mobilehealthapplication.databinding.FragmentAddMedicationPart1B
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import kotlinx.coroutines.launch
 
-/**
- * A Fragment to handle adding a medication entry.
- * Allows the user to input medication details such as name, dosage, frequency, reminder time, and notes.
- */
+
 class AddMedicationBasicInfoFragment : Fragment() {
 
     private var _binding: FragmentAddMedicationPart1Binding? = null
@@ -34,9 +31,7 @@ class AddMedicationBasicInfoFragment : Fragment() {
         requireActivity() as MainActivity
     }
 
-    /**
-     * Inflates the layout and initializes UI elements for the fragment.
-     */
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -52,18 +47,6 @@ class AddMedicationBasicInfoFragment : Fragment() {
         observeValidationState()
         Log.d(tag,"UserId: $uid")
         deviceConnected = isDeviceConnected()
-        /*
-        observeNetworkState()
-
-        if(!deviceConnected) {
-            displayMessage("Internet connection lost")
-            findNavController().navigate(R.id.action_addMedicationBasicInfoFragment_to_homeFragment)
-        } else {
-            Log.d(tag, "Device is connected to the internet")
-        }
-
-         */
-
         return view
     }
 
@@ -186,20 +169,13 @@ class AddMedicationBasicInfoFragment : Fragment() {
     }
 
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
             .show()
 
     }
-
-
-    /**
-     * Called when the view is destroyed, cleans up resources.
-     */
     override fun onDestroyView() {
         viewModel.validationState.removeObservers(viewLifecycleOwner)
         super.onDestroyView()

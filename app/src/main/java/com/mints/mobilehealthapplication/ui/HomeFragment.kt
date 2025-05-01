@@ -584,7 +584,6 @@ import java.time.LocalDateTime
             return lastDate == null || lastDate != todayDate
         }
 
-        // Resets the uncover flag if it's a new day.
         private fun resetIfNewDay() {
             val sharedPref = requireContext().getSharedPreferences("motivation_prefs", Context.MODE_PRIVATE)
             if (isNewDay(sharedPref)) {
@@ -596,9 +595,7 @@ import java.time.LocalDateTime
         }
 
 
-        /**
-         * Sets up the Floating Action Button (FAB) to navigate to the AddMedicationBasicInfoFragment.
-         */
+
         private fun setupFAB() {
             val fab = requireActivity().findViewById<ExtendedFloatingActionButton>(R.id.add_medication_fab)
             fab.setOnClickListener {
@@ -606,26 +603,13 @@ import java.time.LocalDateTime
                     if(navController.currentDestination?.id == R.id.homeFragment) {
                         findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
                     }
-
-                /*
-                if(deviceConnected) {
-                    val navController = findNavController()
-                    if(navController.currentDestination?.id == R.id.homeFragment) {
-                        findNavController().navigate(R.id.action_homeFragment_to_addMedicationBasicInfoFragment)
-                    }
-            } else {
-                displayMessage("Device not connected to internet")
-                }
-                 */
                 }
         }
 
 
 
 
-        /**
-         * Displays a message in a Snackbar at the bottom of the screen.
-         */
+
         private fun displayMessage(msgTxt: String) {
             Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
                 .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
@@ -646,9 +630,7 @@ import java.time.LocalDateTime
         }
 
 
-        /**
-         * Cleans up ViewBinding to prevent memory leaks.
-         */
+
         override fun onDestroyView() {
             super.onDestroyView()
             val viewModel: AddMedicationViewModel by activityViewModels()

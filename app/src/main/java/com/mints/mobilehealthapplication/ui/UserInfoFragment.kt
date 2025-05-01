@@ -13,10 +13,7 @@ import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.databinding.FragmentRegistrationBinding
 import com.mints.mobilehealthapplication.viewmodels.RegistrationViewModel
 
-/**
- * Fragment responsible for handling the user information screen during the registration process.
- * Validates and collects user email, phone, and password inputs.
- */
+
 class UserInfoFragment : Fragment() {
     private lateinit var viewModel: RegistrationViewModel
     private var _binding: FragmentRegistrationBinding? = null
@@ -92,12 +89,6 @@ class UserInfoFragment : Fragment() {
             .show()
     }
 
-    /**
-     * Helper function to validate the email format using a regex pattern.
-     *
-     * @param email The email address to be validated
-     * @return true if the email format is valid, false otherwise
-     */
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }

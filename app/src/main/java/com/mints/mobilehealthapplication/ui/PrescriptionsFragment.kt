@@ -25,10 +25,7 @@ import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import com.mints.mobilehealthapplication.viewmodels.HomeFragmentViewModel
 
 
-/**
- * HomeFragment displays the list of medications and serves as the main screen of the application.
- * It uses a ViewModel to fetch and observe medication data and manages the UI using ViewBinding.
- */
+
 class PrescriptionsFragment : Fragment() {
 
     private var _binding: FragmentPrescriptionsBinding? = null
@@ -47,9 +44,7 @@ class PrescriptionsFragment : Fragment() {
     private val mainActivity: MainActivity by lazy {
         requireActivity() as MainActivity
     }
-    /**
-     * Inflates the fragment layout using ViewBinding.
-     */
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,9 +53,7 @@ class PrescriptionsFragment : Fragment() {
         return binding.root
     }
 
-    /**
-     * Initializes UI components, sets up RecyclerView, and fetches medication data after the view is created.
-     */
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         notificationHelper = NotificationHelper(requireContext())
@@ -116,10 +109,7 @@ class PrescriptionsFragment : Fragment() {
     }
 
 
-    /**
-     * Sets up the RecyclerView to display a list of medications.
-     * Observes LiveData from the ViewModel to update the medication list dynamically.
-     */
+
     private fun setUpRecyclerView() {
         Log.d("HomeFragment", "Setting up RecyclerView")
 
@@ -184,19 +174,11 @@ class PrescriptionsFragment : Fragment() {
             ),
             onSwipeLeft = { position, onActionCompleted ->
                 val medication = adapter.getMedicationAt(position)
-//                if (deviceConnected) {
-//                    displayMessage("Delete medication: ${medication.name}")
-//                    showUndoSnackbar(medication, position, onActionCompleted)
-//                } else {
-//                    displayMessage("Device not connected to internet")
-//                    onActionCompleted()
-//                }
-                                    showUndoSnackbar(medication, position, onActionCompleted)
+                showUndoSnackbar(medication, position, onActionCompleted)
 
             },
             onSwipeRight = { position, onActionCompleted ->
                 val medication = adapter.getMedicationAt(position)
-              //  if (deviceConnected) {
                     val medicationId = medication.id
                     val action = PrescriptionsFragmentDirections
                         .actionPrescriptionsFragmentToAddMedicationBasicInfoFragment(medicationId!!)
@@ -205,10 +187,6 @@ class PrescriptionsFragment : Fragment() {
                         navController.navigate(action)
                     }
                     onActionCompleted()
-               // } else {
-               //     displayMessage("Device not connected to internet")
-               //     onActionCompleted()
-               // }
             }
         )
         ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.medicationsRecyclerView)
@@ -217,7 +195,6 @@ class PrescriptionsFragment : Fragment() {
 
 
     private fun showUndoSnackbar(medication: Medication, position: Int, onActionCompleted: () -> Unit) {
-        // Get the current list and remove the medication
         val oldList = adapter.getMedicationList().toMutableList()
         val removedIndex = oldList.indexOf(medication)
         if (removedIndex == -1) {
@@ -226,7 +203,7 @@ class PrescriptionsFragment : Fragment() {
             return
         }
         oldList.removeAt(removedIndex)
-        adapter.updateMedicationList(oldList) // This uses DiffUtil to remove it
+        adapter.updateMedicationList(oldList)
 
         Log.d("SwipeDebug", "After remove: $oldList, size: ${oldList.size}")
 
@@ -234,7 +211,7 @@ class PrescriptionsFragment : Fragment() {
             .setAction("UNDO") {
                 val currentList = adapter.getMedicationList().toMutableList()
                 currentList.add(removedIndex, medication)
-                adapter.updateMedicationList(currentList) // DiffUtil adds it back
+                adapter.updateMedicationList(currentList)
                 Log.d("SwipeDebug", "After undo: $currentList, size: ${currentList.size}")
                 onActionCompleted()
             }
@@ -258,9 +235,6 @@ class PrescriptionsFragment : Fragment() {
             .show()
     }
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
@@ -273,11 +247,6 @@ class PrescriptionsFragment : Fragment() {
         setUpUI()
     }
 
-
-
-    /**
-     * Cleans up ViewBinding to prevent memory leaks.
-     */
     override fun onDestroyView() {
         super.onDestroyView()
         val viewModel: AddMedicationViewModel by activityViewModels()

@@ -36,7 +36,6 @@ class MedicationEventAdapter(private var events: List<MedicationEvent>) :
         Log.d("EventAdapter", "Stored Instant: ${event.instant}")
         Log.d("EventAdapter", "Local DateTime: $eventDateTime")
 
-        // Display the formatted date based on event type.
         when (event) {
             is MedicationEvent.Missed -> {
                 holder.binding.eventDateText.text = getFormattedDateForMissed(eventDateTime)

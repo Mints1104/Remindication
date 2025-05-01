@@ -21,7 +21,6 @@ data class Medication(
     val medicationHistory: MedicationHistory = MedicationHistory()
 ) {
     fun markAsTaken(dateTime: LocalDateTime = LocalDateTime.now()) {
-        // Convert the user-provided LocalDateTime into an Instant
         medicationHistory.addEvent(
             MedicationEvent.Taken(
                 instant = dateTime.atZone(ZoneId.systemDefault()).toInstant()
@@ -48,14 +47,10 @@ data class Medication(
 
 }
 
-
-
-
 sealed class MedicationEvent {
     abstract val instant: Instant
     abstract val type: EventType
 
-    // Convert the stored Instant to a LocalDateTime in the system default zone
     val date: LocalDateTime
         get() = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
 
@@ -87,10 +82,8 @@ sealed class MedicationEvent {
 data class MedicationHistory(
     val events: MutableList<MedicationEvent> = mutableListOf()
 ) {
-    // Add a new event to the history
     fun addEvent(event: MedicationEvent) {
         events.add(event)
-        // Sort events by date to ensure proper ordering
         events.sortByDescending { it.date }
     }
 
@@ -158,7 +151,6 @@ data class MedicationHistory(
         }
     }
 
-    // Get count of events by type
     fun getEventCount(type: MedicationEvent.EventType): Int {
         return events.count { it.type == type }
     }
@@ -221,8 +213,6 @@ sealed class MedicationSchedule {
         val interval: IntervalPeriod,
         val startTime: LocalTime,
         val endDate: Timestamp? = null,
-      //  val nextDueDates: ""
-
     ) : MedicationSchedule()
 
     data class WeeklySchedule(
@@ -251,7 +241,6 @@ sealed class MedicationSchedule {
 
 
 
-    // Formatting properties
     val formattedFrequency: String
         get() = when (this) {
             is Daily -> when (frequency) {
@@ -308,7 +297,6 @@ fun MedicationSchedule.getNextDueDates(): List<LocalDateTime> {
 
 
 
-// Extension functions
 private fun List<LocalTime>.formatTimes(): String = joinToString(", ") { it.formatTime() }
 
 private fun LocalTime.formatTime(): String =
