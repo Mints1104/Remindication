@@ -26,7 +26,7 @@ object FireStoreRepository {
         val settings = firestoreSettings {
             setLocalCacheSettings(
                 persistentCacheSettings {
-                    setSizeBytes(100L * 1024 * 1024)   // 100 MB
+                    setSizeBytes(100L * 1024 * 1024)
                 }
             )
         }
@@ -264,13 +264,11 @@ object FireStoreRepository {
         times: List<LocalTime>,
         currentCycleStartDate: Timestamp?
     ): List<LocalDateTime> {
-        // If currentCycleStartDate is null, use today.
         val startDate: LocalDate = currentCycleStartDate?.toDate()?.toInstant()
             ?.atZone(ZoneId.systemDefault())
             ?.toLocalDate() ?: LocalDate.now()
 
         val dueDates = mutableListOf<LocalDateTime>()
-        // For each day in the intake period, add each time as a due date.
         for (day in 0 until intakeDays) {
             val date = startDate.plusDays(day.toLong())
             times.forEach { time ->
@@ -512,19 +510,15 @@ object FireStoreRepository {
             }
 
             "cyclic" -> {
-                // Parse times
                 val times = (scheduleMap["times"] as? List<*>)?.mapNotNull {
                     (it as? String)?.let { timeStr -> LocalTime.parse(timeStr) }
                 } ?: emptyList()
 
-                // Parse intakeDays and pauseDays
                 val intakeDays = (scheduleMap["intakeDays"] as? Long)?.toInt() ?: 1
                 val pauseDays = (scheduleMap["pauseDays"] as? Long)?.toInt() ?: 0
 
-                // Parse currentCycleStartDate (optional)
                 val currentCycleStartDate = scheduleMap["currentCycleStartDate"] as? Timestamp
 
-                // If nextDueDates are provided, parse them; otherwise, calculate them.
                 val nextDueDates: List<LocalDateTime> = if (scheduleMap.containsKey("nextDueDates")) {
                     (scheduleMap["nextDueDates"] as? List<Timestamp>)?.map { timestamp ->
                         LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())

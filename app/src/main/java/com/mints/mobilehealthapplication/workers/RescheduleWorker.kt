@@ -77,12 +77,10 @@ class RescheduleWorker(
             val missedEvents = mutableListOf<MedicationEvent>()
             val cycleLength = schedule.intakeDays + schedule.pauseDays
 
-            // Use schedule's currentCycleStartDate to determine cycle position
             val cycleStartDate = schedule.currentCycleStartDate?.toLocalDateTime()?.toLocalDate()
                 ?: missedDueDates.minByOrNull { it }?.toLocalDate()
                 ?: now.toLocalDate()
 
-            // Track dates we've already processed to avoid duplicates
             val processedDates = mutableSetOf<LocalDate>()
 
             missedDueDates.forEach { missedDateTime ->
@@ -96,13 +94,10 @@ class RescheduleWorker(
                         continue
                     }
 
-                    // Calculate day position in the cycle
                     val daysSinceCycleStart = java.time.temporal.ChronoUnit.DAYS.between(cycleStartDate, currentDate)
                     val dayInCycle = (daysSinceCycleStart % cycleLength).toInt()
 
-                    // Only mark as missed if:
-                    // 1. It's an intake day (day falls within intake period)
-                    // 2. No event exists for this specific day
+
                     if (dayInCycle < schedule.intakeDays && !medication.medicationHistory.hadEventOnSpecificDay(currentDate)) {
                         val eventDateTime = currentDate.atTime(missedDateTime.toLocalTime())
                         Log.d(tag, "Marking ${medication.name} as missed at $eventDateTime")

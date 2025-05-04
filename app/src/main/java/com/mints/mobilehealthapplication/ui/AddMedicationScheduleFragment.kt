@@ -588,7 +588,7 @@ class AddMedicationScheduleFragment : Fragment() {
             viewModel.saveMedication(userId)
         }
 
-        navigateToNextFragment()
+        //navigateToNextFragment()
 
         viewModel.saveResult.observe(viewLifecycleOwner) { success ->
             val action = if (isUpdate) "updated" else "saved"
@@ -600,6 +600,8 @@ class AddMedicationScheduleFragment : Fragment() {
                 displayMessage("Failed to $action medication")
             }
         }
+        navigateToNextFragment()
+
     }
 
     private fun scheduleNotifications(medicationName: String, timeInMillisList: List<Long>) {

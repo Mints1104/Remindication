@@ -1,6 +1,7 @@
 package com.mints.mobilehealthapplication
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.MutableLiveData
 import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
 import com.mints.mobilehealthapplication.data.MedicationEvent
@@ -39,7 +40,7 @@ class MedicationHistoryViewModelTest {
     private val testUserId = "test-user-123"
     private val testMedication1 = mockk<Medication>()
     private val testMedication2 = mockk<Medication>()
-    private val testMedications = listOf(testMedication1, testMedication2)
+    private lateinit var testMedications: List<Medication>
     private val testHistory1 = mockk<MedicationHistory>()
     private val testHistory2 = mockk<MedicationHistory>()
 
@@ -48,20 +49,28 @@ class MedicationHistoryViewModelTest {
         Dispatchers.setMain(testDispatcher)
         mockkObject(FireStoreRepository)
 
-        // Setup mock medications
+        // Create mock medication events
+        val takenEvents1 = mutableListOf<MedicationEvent>(
+            mockk { every { type } returns MedicationEvent.EventType.TAKEN },
+            mockk { every { type } returns MedicationEvent.EventType.MISSED }
+        )
+
+        val takenEvents2 = mutableListOf<MedicationEvent>(
+            mockk { every { type } returns MedicationEvent.EventType.TAKEN },
+            mockk { every { type } returns MedicationEvent.EventType.TAKEN }
+        )
+
+        // Setup mock medications with the events
         every { testMedication1.id } returns "med-1"
-        every { testMedication1.medicationHistory } returns testHistory1
+        every { testMedication1.medicationHistory.getAllEvents() } returns takenEvents1
 
         every { testMedication2.id } returns "med-2"
-        every { testMedication2.medicationHistory } returns testHistory2
+        every { testMedication2.medicationHistory.getAllEvents() } returns takenEvents2
 
-        // Setup compliance rates for test calculations
-        every { testHistory1.getComplianceRate() } returns 50.0
-        every { testHistory2.getComplianceRate() } returns 100.0
+        testMedications = listOf(testMedication1, testMedication2)
 
         viewModel = MedicationHistoryViewModel()
     }
-
     @After
     fun tearDown() {
         Dispatchers.resetMain()
@@ -117,28 +126,16 @@ class MedicationHistoryViewModelTest {
 
     @Test
     fun `getComplianceRate should calculate correct compliance`() {
-        // Setup - Set the medications in the ViewModel
-        every {
-            FireStoreRepository.getMedicationsSnapshot(
-                any(),
-                captureLambda()
-            )
-        } answers {
-            lambda<(List<Medication>, Exception?) -> Unit>().invoke(testMedications, null)
-        }
+        // Use reflection to set the medications
+        val field = MedicationHistoryViewModel::class.java.getDeclaredField("_medications")
+        field.isAccessible = true
+        field.set(viewModel, MutableLiveData(testMedications))
 
-        viewModel.getMedications(testUserId)
-
-        // Test medication1 has 50% compliance
-        // Test medication2 has 100% compliance
-        // Average should be 75%
-        val expectedComplianceRate = 75.0
-
-        // Call the method
+        // Call the method under test
         val result = viewModel.getComplianceRate()
 
-        // Verify
-        assertEquals(expectedComplianceRate, result, 0.01)
+        // Calculate expected: 3 TAKEN out of 4 total = 75%
+        assertEquals(75.0, result, 0.01)
     }
 
     @Test

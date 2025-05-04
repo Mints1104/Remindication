@@ -335,7 +335,7 @@ import java.time.LocalTime
 
 
         fun testDateLogic() {
-            val testTime = LocalTime.of(20, 0) // 8:00 PM
+            val testTime = LocalTime.of(20, 0)
             val now = LocalDateTime.now()
 
             val isTomorrow = testTime.atDate(now.toLocalDate()).isBefore(now)
@@ -370,13 +370,12 @@ import java.time.LocalTime
 
 
         private fun createSchedule(): MedicationSchedule {
-            Log.d("DEBUG", "Selected Times: ${_selectedTimes.value}") // Debug output
             return when (_frequency.value) {
                 "Once Daily", "Twice Daily" ->
                     MedicationSchedule.Daily(
                         frequency = DailyFrequency.fromInt(_selectedTimes.value?.size ?: 1),
                         times = _selectedTimes.value ?: emptyList(),
-                        nextDueDates = calculateDueDates(_selectedTimes.value ?: emptyList()), // Already defined for daily
+                        nextDueDates = calculateDueDates(_selectedTimes.value ?: emptyList()),
                     )
                 "Weekly" -> MedicationSchedule.WeeklySchedule(
                     days = _selectedDays.value?.toList() ?: emptyList(),

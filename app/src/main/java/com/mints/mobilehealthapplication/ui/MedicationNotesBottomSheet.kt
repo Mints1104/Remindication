@@ -36,7 +36,7 @@ class MedicationNotesBottomSheet : BottomSheetDialogFragment() {
         Log.d("MedicationNotesBottomSheet", "Medication Name: $medicationName")
         Log.d("MedicationNotesBottomSheet", "Notes: $medicationNotes")
         if(medicationNotes?.isEmpty() == true) {
-            binding.notesTextView.text = "No notes available"
+            binding.notesTextView.text = getString(R.string.no_notes_available)
         } else {
             binding.notesTextView.text = medicationNotes
         }

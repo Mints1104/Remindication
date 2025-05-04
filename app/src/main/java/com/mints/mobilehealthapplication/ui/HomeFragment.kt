@@ -37,10 +37,7 @@ import java.time.LocalDateTime
     import java.time.format.DateTimeFormatter
 
 
-    /**
-     * HomeFragment displays the list of medications and serves as the main screen of the application.
-     * It uses a ViewModel to fetch and observe medication data and manages the UI using ViewBinding.
-     */
+
     class HomeFragment : Fragment() {
 
         private var _binding: FragmentHomeBinding? = null
@@ -62,9 +59,7 @@ import java.time.LocalDateTime
             requireActivity() as MainActivity
         }
 
-        /**
-         * Inflates the fragment layout using ViewBinding.
-         */
+
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -85,9 +80,6 @@ import java.time.LocalDateTime
             binding.nextMedicationCard.visibility = View.VISIBLE
         }
 
-        /**
-         * Initializes UI components, sets up RecyclerView, and fetches medication data after the view is created.
-         */
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
             notificationHelper = NotificationHelper(requireContext())

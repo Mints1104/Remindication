@@ -84,12 +84,10 @@ class MidnightWorker(
             val missedEvents = mutableListOf<MedicationEvent>()
             val cycleLength = schedule.intakeDays + schedule.pauseDays
 
-            // Use schedule's currentCycleStartDate to determine cycle position
             val cycleStartDate = schedule.currentCycleStartDate?.toLocalDateTime()?.toLocalDate()
                 ?: missedDueDates.minByOrNull { it }?.toLocalDate()
                 ?: now.toLocalDate()
 
-            // Track dates we've already processed to avoid duplicates
             val processedDates = mutableSetOf<LocalDate>()
 
             missedDueDates.forEach { missedDateTime ->
@@ -103,13 +101,10 @@ class MidnightWorker(
                         continue
                     }
 
-                    // Calculate day position in the cycle
                     val daysSinceCycleStart = java.time.temporal.ChronoUnit.DAYS.between(cycleStartDate, currentDate)
                     val dayInCycle = (daysSinceCycleStart % cycleLength).toInt()
 
-                    // Only mark as missed if:
-                    // 1. It's an intake day (day falls within intake period)
-                    // 2. No event exists for this specific day
+
                     if (dayInCycle < schedule.intakeDays && !medication.medicationHistory.hadEventOnSpecificDay(currentDate)) {
                         val eventDateTime = currentDate.atTime(missedDateTime.toLocalTime())
                         Log.d(TAG, "Marking ${medication.name} as missed at $eventDateTime")
@@ -165,7 +160,6 @@ class MidnightWorker(
         }
 
         medication.id?.let { medId ->
-            // Update both the due dates and cycle start date
             val success = FireStoreRepository.updateCyclicMedication(
                 userId = userId,
                 medicationId = medId,
@@ -176,7 +170,6 @@ class MidnightWorker(
             if (success) {
                 Log.d(TAG, "All new due dates: $newDueDates")
 
-                // Filter out due dates that are not after the current time
                 val upcomingDueDates = newDueDates.filter { it.isAfter(now) }
                 Log.d(TAG, "Upcoming due dates after filtering: $upcomingDueDates")
 

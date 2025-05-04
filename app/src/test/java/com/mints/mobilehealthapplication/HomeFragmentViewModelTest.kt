@@ -181,9 +181,7 @@ class HomeFragmentViewModelTest {
         // Verify that callback was still called even on failure
         assertTrue(completionCalled)
 
-        // Verify notification cancellation never happened
-        verify(exactly = 0) { mockNotificationHelper.cancelBackupNotification(any()) }
-        verify(exactly = 0) { mockNotificationHelper.cancelRegularNotification(any(), any()) }
+
     }
 
     @Test

@@ -65,7 +65,6 @@ class AddMedicationFrequencyFragment : Fragment() {
 
 
     private fun observeValidationState() {
-        Log.d(tag, "observeValidationState: Observing validation state")
         viewModel.validationState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AddMedicationViewModel.ValidationState.Invalid -> {
@@ -87,7 +86,6 @@ class AddMedicationFrequencyFragment : Fragment() {
 
 
     private fun setUpRadioButtonListeners() {
-        Log.d(tag, "setUpRadioButtonListeners: Restoring previous selection")
         Log.d(tag,"Test before restoring prev selection: ${viewModel.frequency.value}")
         Log.d(tag,"Test before restoring prev selection: ${viewModel.getFrequencyType()}")
         if(viewModel.getIsEditing() == true) {
@@ -166,9 +164,7 @@ class AddMedicationFrequencyFragment : Fragment() {
     }
 
 
-    /**
-     * Displays a message in a Snackbar at the bottom of the screen.
-     */
+
     private fun displayMessage(msgTxt: String) {
         Snackbar.make(binding.root, msgTxt, Snackbar.LENGTH_SHORT)
             .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
@@ -177,9 +173,7 @@ class AddMedicationFrequencyFragment : Fragment() {
     }
 
 
-    /**
-     * Called when the view is destroyed, cleans up resources.
-     */
+
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d(tag, "onDestroyView: Cleaning up resources")

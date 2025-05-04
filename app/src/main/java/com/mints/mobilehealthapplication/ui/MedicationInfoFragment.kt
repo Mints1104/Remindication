@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import com.google.android.material.card.MaterialCardView
 import com.mints.mobilehealthapplication.R
 import com.mints.mobilehealthapplication.data.MedicationResult
@@ -52,7 +51,7 @@ class MedicationInfoFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.uiState.observe(viewLifecycleOwner, Observer { state ->
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is MedicationInfoViewModel.UiState.Loading -> {
                     binding.loadingIndicator.visibility = View.VISIBLE
@@ -60,17 +59,19 @@ class MedicationInfoFragment : Fragment() {
                     binding.errorMessage.visibility = View.GONE
                     binding.medicationHeaderCard.visibility = View.GONE
                 }
+
                 is MedicationInfoViewModel.UiState.Success -> {
                     binding.loadingIndicator.visibility = View.GONE
                     binding.infoContainer.visibility = View.VISIBLE
                     binding.medicationHeaderCard.visibility = View.VISIBLE
                     displayMedicationInfo(state.medicationResult)
                 }
+
                 is MedicationInfoViewModel.UiState.Error -> {
                     showError(state.message)
                 }
             }
-        })
+        }
     }
 
     private fun showError(message: String) {

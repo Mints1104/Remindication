@@ -26,10 +26,7 @@ class InternetConnectionChecker(private val context: Context) {
         registerNetworkCallback()
     }
 
-    /**
-     * Checks if the device has an active internet connection
-     * @return Boolean indicating if internet is available
-     */
+
     fun checkInternetConnection(): Boolean {
         val network: Network? = connectivityManager.activeNetwork
         if (network == null) {
@@ -70,18 +67,13 @@ class InternetConnectionChecker(private val context: Context) {
         return hasInternet
     }
 
-    /**
-     * Updates the connection state and LiveData
-     */
+
     private fun updateConnectionState(connected: Boolean) {
         isConnected = connected
         _connectionState.postValue(connected)
     }
 
-    /**
-     * Sets up a network callback to monitor network changes
-     * This should be called only once, preferably when the app starts
-     */
+
     fun registerNetworkCallback() {
         if (networkCallback != null) return
 
@@ -111,10 +103,7 @@ class InternetConnectionChecker(private val context: Context) {
         connectivityManager.registerNetworkCallback(request, networkCallback!!)
     }
 
-    /**
-     * Unregisters the network callback to prevent memory leaks
-     * This should be called when the app is being destroyed
-     */
+
     fun unregisterNetworkCallback() {
         networkCallback?.let {
             connectivityManager.unregisterNetworkCallback(it)

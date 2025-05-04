@@ -26,8 +26,6 @@ class StreakBottomSheetFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = BottomsheetStreaksBinding.inflate(inflater, container, false)
-        Log.d("StreakView", "We are in adherence streak view.")
-
         db = Firebase.firestore
         auth = Firebase.auth
 

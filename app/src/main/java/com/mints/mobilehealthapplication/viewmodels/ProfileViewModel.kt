@@ -129,8 +129,6 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun getMedications(uid: String, onComplete: () -> Unit = {}) {
-        Log.d("HomeFragmentViewModel", "Starting real-time medication listener for user: $uid")
-
         FireStoreRepository.getMedicationsSnapshot(uid) { meds, error ->
             if (error != null) {
                 Log.e("HomeFragmentVM", "Failed to get medications: ${error.message}")

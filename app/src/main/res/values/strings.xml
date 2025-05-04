@@ -253,6 +253,7 @@
     <string name="second_intake">Second intake</string>
     <string name="first_intake">First intake</string>
     <string name="swipe_to_mark_medication_as_taken_or_skipped">Swipe to mark medication as taken or skipped!</string>
+    <string name="no_notes_available">No notes available</string>
 
 
 </resources>

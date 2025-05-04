@@ -1,8 +1,10 @@
 package com.mints.mobilehealthapplication
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.mints.mobilehealthapplication.data.DailyFrequency
 import com.mints.mobilehealthapplication.data.FireStoreRepository
 import com.mints.mobilehealthapplication.data.Medication
+import com.mints.mobilehealthapplication.data.MedicationSchedule
 import com.mints.mobilehealthapplication.viewmodels.AddMedicationViewModel
 import io.mockk.coEvery
 import io.mockk.every
@@ -21,6 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 @ExperimentalCoroutinesApi
@@ -253,10 +256,11 @@ class AddMedicationViewModelIntegrationTest {
             every { name } returns "Aspirin"
             every { dosage } returns "10mg"
             every { notes } returns "Take with food"
-            every { schedule } returns mockk {
-                every { formattedFrequency } returns "Once Daily"
-                every { frequencyType } returns "Daily"
-            }
+            every { schedule } returns MedicationSchedule.Daily(
+                frequency = DailyFrequency.ONCE,
+                times = listOf(LocalTime.of(8, 0)),
+                nextDueDates = listOf(LocalDateTime.now())
+            )
         }
 
         coEvery {
@@ -272,7 +276,7 @@ class AddMedicationViewModelIntegrationTest {
         assertEquals("10mg", viewModel.dosage.value)
         assertEquals("Take with food", viewModel.notes.value)
         assertEquals("Once Daily", viewModel.frequency.value)
-        assertEquals("Daily", viewModel.frequencyType.value)
+        assertEquals("Once Daily", viewModel.frequencyType.value)
         assertEquals(medicationId, viewModel.medicationId.value)
     }
 
