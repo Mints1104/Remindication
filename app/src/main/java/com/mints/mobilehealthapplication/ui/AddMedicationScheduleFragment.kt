@@ -599,8 +599,9 @@ class AddMedicationScheduleFragment : Fragment() {
                 Log.d(tag, "Failed to $action medication")
                 displayMessage("Failed to $action medication")
             }
+            navigateToNextFragment()
+
         }
-        navigateToNextFragment()
 
     }
 
