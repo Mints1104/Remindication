@@ -14,6 +14,8 @@
         app:cardCornerRadius="16dp"
         app:cardBackgroundColor="?attr/colorPrimaryContainer"
         app:strokeWidth="0dp"
+        android:contentDescription="@string/manage_medications_swipe_entries_to_edit_or_delete"
+
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -25,7 +27,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Manage medications"
+                android:text="@string/manage_medications"
                 android:textColor="?attr/colorOnPrimaryContainer"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -35,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Swipe to edit or delete medication!"
+                android:text="@string/swipe_to_edit_or_delete_medication"
                 android:textColor="?attr/colorOnPrimaryContainer"
                 android:textSize="16sp" />
 

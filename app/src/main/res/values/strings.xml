@@ -254,6 +254,15 @@
     <string name="first_intake">First intake</string>
     <string name="swipe_to_mark_medication_as_taken_or_skipped">Swipe to mark medication as taken or skipped!</string>
     <string name="no_notes_available">No notes available</string>
+    <string name="your_scheduled_medication_list">Your scheduled medication list</string>
+    <string name="daily_adherence_rate_chart_desc">Daily adherence chart\n</string>
+    <string name="weekly_adherence_rate_chart_desc">Weekly adherence chart\n</string>
+    <string name="time_of_day_adherence_rate_chart_desc">Time-of-day adherence chart\n</string>
+    <string name="visualise_adherence_desc">Show charts of your adherence\n</string>
+    <string name="medications_list_desc">List of your past medication events\n</string>
+    <string name="manage_medications_swipe_entries_to_edit_or_delete">Manage medications: swipe entries to edit or delete.</string>
+    <string name="manage_medications">Manage medications</string>
+    <string name="swipe_to_edit_or_delete_medication">Swipe to edit or delete medication!</string>
 
 
 </resources>
